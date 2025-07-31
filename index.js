@@ -4,6 +4,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const User = require("./models/User");
+const loginRoutes = require("./route/login");
+
 
 dotenv.config();
 const app = express();
@@ -16,5 +18,17 @@ app.use(express.json());
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}).then(() => console.log("MongoDB connected"))
-  .catch(err => console.error("MongoDB error:", err));
+})
+.then(() => {
+  console.log("MongoDB connected");
+
+  // Start server only after DB connected
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+})
+.catch(err => {
+  console.error("MongoDB connection error:", err);
+});
+app.use("/", loginRoutes); 
+
