@@ -4,7 +4,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const User = require("./models/User");
-const loginRoutes = require("./route/login");
+const loginRoutes = require("./route/loginRoute");
+const uploadRoute = require("./route/uploadRoute");
+const path = require("path");
 
 
 dotenv.config();
@@ -31,4 +33,6 @@ mongoose.connect(process.env.MONGO_URI, {
   console.error("MongoDB connection error:", err);
 });
 app.use("/", loginRoutes); 
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // to access uploaded files
+app.use("/api", uploadRoute);
 
