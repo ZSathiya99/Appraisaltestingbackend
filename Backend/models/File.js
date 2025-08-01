@@ -1,14 +1,14 @@
 const mongoose = require("mongoose");
 
-const fileSchema = new mongoose.Schema({
+const uploadSchema = new mongoose.Schema({
   filename: String,
   filepath: String,
   mimetype: String,
   size: Number,
-  uploadDate: {
+  uploadedAt: {
     type: Date,
-    default: Date.now,
-  },
+    default: Date.now
+  }
 });
 
-module.exports = mongoose.model("File", fileSchema);
+module.exports = mongoose.model("Upload", uploadSchema);
