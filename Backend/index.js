@@ -2,8 +2,11 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 
-const uploadRoute = require("./route/uploadRoute");
+const uploadRoute = require("./route/uploadfileRoute");
 const loginRoute = require("./route/loginRoute");
+const combinedRoute = require("./route/combinedRoute");
+const uploadEmployeesRoute = require("./route/uploadEmployees");
+
 
 dotenv.config();
 const app = express();
@@ -11,6 +14,8 @@ app.use(express.json());
 
 app.use("/api", uploadRoute);
 app.use("/api", loginRoute);
+app.use("/api", combinedRoute);
+app.use("/api", uploadEmployeesRoute);
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,

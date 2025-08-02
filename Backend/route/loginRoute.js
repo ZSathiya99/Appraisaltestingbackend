@@ -1,35 +1,64 @@
-require('dotenv').config();
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const User = require("../models/User");
-const { configDotenv } = require("dotenv");
+const jwt = require("jsonwebtoken");
+const Employee = require("../models/Employee");
+
 const router = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET || "appraisal_backend";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-// const JWT_SECRET = "appraisal_backend";
-
-router.post("/login", async (req, res) => {
-  console.log(JWT_SECRET)
+// POST /api/employee-login
+router.post("/employee-login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
-    if (!user)
-      return res.status(404).json({ message: "User not found" });
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
 
-    const match = await bcrypt.compare(password, user.password);
-    if (!match)
+    const employee = await Employee.findOne({ email: email.trim() });
+
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    if (!employee.password) {
+      return res.status(400).json({ message: "Password not set for this employee" });
+    }
+
+    const isMatch = await bcrypt.compare(password, employee.password);
+
+    if (!isMatch) {
       return res.status(401).json({ message: "Invalid password" });
+    }
 
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, {
+    const token = jwt.sign({ id: employee._id, email: employee.email }, JWT_SECRET, {
       expiresIn: "1h",
     });
 
-    res.json({ message: "Login successful", token });
+res.status(200).json({
+  message: "Login successful",
+  token,
+  employee: {
+    id: employee._id,
+    email: employee.email,
+    fullName: employee.fullName,
+    department: employee.department,
+    designation: employee.designation,
+    phone: employee.phone,
+    address: employee.address,
+    joiningDate: employee.joiningDate,
+    salary: employee.salary,
+    managerEmail: employee.managerEmail,
+    createdAt: employee.createdAt,
+    updatedAt: employee.updatedAt,
+  },
+});
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("❌ Login error:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 module.exports = router;
