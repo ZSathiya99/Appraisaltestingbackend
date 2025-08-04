@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/uploadMiddleware");
+
 const {
   calculateTeachingMarks,
   calculatePassPercentageMarks,
@@ -11,9 +12,11 @@ const {
   calculateHighlevelCompetionMarks,
   calculateFdpProgramMarks,
   calculateIndustryInvolvementMarks,
-  calculateTutorWardMarks
+  calculateTutorWardMarks,
+  getPointsByDesignation
 } = require("../controllers/teachingController");
 
+router.get('/points/:designation', getPointsByDesignation);
 router.post("/teaching", upload.array("Teachingfiles"), calculateTeachingMarks);
 router.post("/passPercentage", calculatePassPercentageMarks);
 router.post("/feedback", calculateStudentFeedbackMarks);

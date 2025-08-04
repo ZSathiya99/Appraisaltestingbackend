@@ -2,6 +2,17 @@ const teaching = require('../models/TeachingRecord');
 const Subject = require('../models/Subject');
 
 
+exports.getPointsByDesignation = (req, res) => {
+  const { designation } = req.params;
+  const points = pointsDistribution[designation];
+
+  if (!points) {
+    return res.status(404).json({ message: 'Designation not found' });
+  }
+
+  res.json({ designation, points });
+};
+
 // Q1: TEACHING ASSIGNMENT
 exports.calculateTeachingMarks = async (req, res) => {
   try {
