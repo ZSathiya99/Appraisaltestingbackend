@@ -5,6 +5,7 @@ const cors = require('cors');
 const loginRoute = require("./routes/loginRoute");
 const uploadEmployeesRoute = require("./routes/uploadEmployees");
 const teachingRoutes = require("./routes/teachingRoutes");
+const subjectRoutes = require("./routes/subjectRoutes")
 
 
 dotenv.config();
@@ -21,6 +22,7 @@ app.use(cors({
 app.use("/api", loginRoute);
 app.use("/api", uploadEmployeesRoute);
 app.use('/api', teachingRoutes);
+app.use('/api', subjectRoutes);
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
