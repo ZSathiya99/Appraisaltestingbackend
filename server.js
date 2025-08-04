@@ -5,7 +5,7 @@ const cors = require('cors');
 const loginRoute = require("./routes/loginRoute");
 const uploadEmployeesRoute = require("./routes/uploadEmployees");
 const teachingRoutes = require("./routes/teachingRoutes");
-const subjectRoutes = require("./routes/subjectRoutes")
+const subjectRoutes = require("./routes/subjectRoutes");
 
 
 dotenv.config();

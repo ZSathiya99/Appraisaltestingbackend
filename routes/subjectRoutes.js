@@ -4,3 +4,5 @@ const {getAllSubjects}  = require("../controllers/subjectController");
 
 
 router.get('/Subjects', getAllSubjects);
+
+module.exports = router;
