@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 
 const loginRoute = require("./routes/loginRoute");
 const uploadEmployeesRoute = require("./routes/uploadEmployees");
+const teachingRoutes = require("./routes/teachingRoutes");
 
 
 dotenv.config();
