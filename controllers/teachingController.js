@@ -23,6 +23,9 @@ exports.getPointsByDesignation = (req, res) => {
 exports.calculateTeachingMarks = async (req, res) => {
   try {
     const { teachingAssignment } = req.body;
+    const designation = req.user?.designation;
+    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+
     const Teachingfiles = req.files ?. req.Teachingfiles.map(file => file.path) || [];
 
     const parsedSubjects = JSON.parse(teachingAssignment);
@@ -46,9 +49,12 @@ exports.calculateTeachingMarks = async (req, res) => {
 
     const uniqueFiles = [...new Set(Teachingfiles)];
 
+    const maxTeaching = pointsDistribution[designation]?.teaching?.teachingAssignment ?? 0;
+    const finalMarks = Math.min(teachingMarks, maxTeaching);
+
     return res.status(200).json({
       message: "Teaching marks calculated successfully",
-      teachingMarks,
+      finalMarks,
       subjects: formattedSubjects,
       files: uniqueFiles
     });
@@ -63,16 +69,19 @@ exports.calculateTeachingMarks = async (req, res) => {
 exports.calculatePassPercentageMarks = (req, res) => {
   try {
     const { passPercentage } = req.body;
-
+    const designation = req.user?.designation;
+    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
     let marks = 0;
     if (passPercentage === "100%") marks = 3;
     else if (passPercentage === "90 to 99%") marks = 2;
     else if (passPercentage === "80 to 89%") marks = 1;
     
+    const maxPass = pointsDistribution[designation]?.teaching?.passPercentage ?? 0;
+    const finalMarks = Math.min(marks, maxPass);
 
     return res.status(200).json({
       section: "Pass Percentage",
-      marks,
+      finalMarks,
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -83,15 +92,20 @@ exports.calculatePassPercentageMarks = (req, res) => {
 exports.calculateStudentFeedbackMarks = (req, res) => {
   try {
     const { feedback } = req.body;
+    const designation = req.user?.designation;
+    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
     let marks = 0;
     if (feedback === "100 to 91") marks = 3;
     else if (feedback === "90 to 81") marks = 2;
     else if (feedback === "Less than or equal to 80") marks = 1;
+    
+    const maxmark = pointsDistribution[designation]?.teaching?.studentFeedback ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
 
     return res.status(200).json({
       section: "Student Feedback",
-      marks,
+      finalMarks,
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -102,6 +116,8 @@ exports.calculateStudentFeedbackMarks = (req, res) => {
 exports.calculateInnovativeApporachMarks = (req, res) => {
   try {
     const { InnovativeApproach } = req.body;
+    const designation = req.user?.designation;
+    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
     const Innovativefiles = req.files ?. req.Innovativefiles.map(file => file.path) || [];
 
 
@@ -112,9 +128,12 @@ exports.calculateInnovativeApporachMarks = (req, res) => {
 
     const uniqueFiles = [...new Set(Innovativefiles)];
 
+    const maxmark = pointsDistribution[designation]?.teaching?.innovativeApproach ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
+
     return res.status(200).json({
       section: "Innovative Approach",
-      marks,
+      finalMarks,
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -125,6 +144,8 @@ exports.calculateInnovativeApporachMarks = (req, res) => {
 exports.calculateGuestlectureMarks = (req, res) => {
   try {
     const { GuestLecture } = req.body;
+    const designation = req.user?.designation;
+    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
     const GuestLectureFiles = req.files ?. req.GuestLectureFiles.map(file => file.path) || [];
 
 
@@ -134,9 +155,12 @@ exports.calculateGuestlectureMarks = (req, res) => {
 
     const uniqueFiles = [...new Set(GuestLectureFiles)];
 
+    const maxmark = pointsDistribution[designation]?.teaching?.guest ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
+
     return res.status(200).json({
       section: "Guest Lectures",
-      marks,
+      finalMarks,
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -147,6 +171,9 @@ exports.calculateGuestlectureMarks = (req, res) => {
 exports.calculateFdpfundingMarks = (req, res) => {
   try {
     const { FdpFunding } = req.body;
+    const designation = req.user?.designation;
+    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+
     const FdpFundingFiles = req.files ?. req.FdpFundingFiles.map(file => file.path) || [];
 
 
@@ -157,9 +184,12 @@ exports.calculateFdpfundingMarks = (req, res) => {
 
     const uniqueFiles = [...new Set(FdpFundingFiles)];
 
+    const maxmark = pointsDistribution[designation]?.teaching?.fdpFunding ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
+
     return res.status(200).json({
       section: "FDP Funding",
-      marks,
+      finalMarks,
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -170,6 +200,9 @@ exports.calculateFdpfundingMarks = (req, res) => {
 exports.calculateHighlevelCompetionMarks = (req, res) => {
   try {
     const { highlevelCompetition } = req.body;
+    const designation = req.user?.designation;
+    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+
     const HighlevelCompetitionFiles = req.files ?. req.HighlevelCompetitionFiles.map(file => file.path) || [];
 
 
@@ -181,9 +214,12 @@ exports.calculateHighlevelCompetionMarks = (req, res) => {
 
     const uniqueFiles = [...new Set(HighlevelCompetitionFiles)];
 
+    const maxmark = pointsDistribution[designation]?.teaching?.innovativeProjects ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
+
     return res.status(200).json({
       section: "HighLevel Competion",
-      marks,
+      finalMarks,
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -195,6 +231,9 @@ exports.calculateFdpProgramMarks = (req, res) => {
   try {
 
     const semesterData = JSON.parse(req.body.semesterData);
+
+    const designation = req.user?.designation;
+    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
     const FdpprogramFiles = req.files?.FdpprogramFiles?.map(file => file.path) || [];
 
@@ -215,8 +254,11 @@ exports.calculateFdpProgramMarks = (req, res) => {
 
     const uniqueFiles = [...new Set(FdpprogramFiles)];
 
+    const maxmark = pointsDistribution[designation]?.teaching?.fdpProgramme ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
+
     return res.status(200).json({
-      totalMarks,
+      finalMarks,
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -227,12 +269,19 @@ exports.calculateFdpProgramMarks = (req, res) => {
 exports.calculateIndustryInvolvementMarks = (req, res) => {
   try {
     const input = req.body.industryInvolvement;
+    const designation = req.user?.designation;
+    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+
     const IndustryFiles = req.files?.IndustryFiles?.map(file => file.path) || [];
     const isYes = input?.toLowerCase() === 'yes';
     const marks = isYes ? 2 : 0;
     const uniqueFiles = [...new Set(IndustryFiles)];
+
+    const maxmark = pointsDistribution[designation]?.teaching?.industryInvolvement ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
+
     return res.status(200).json({
-      marks,
+      finalMarks,
       message: isYes ? "Eligible for 2 marks" : "No marks awarded",
       files: uniqueFiles
     });
@@ -247,12 +296,18 @@ exports.calculateTutorWardMarks = (req, res) => {
     const meetings = req.body.tutorWardMeetings?.toLowerCase() === 'yes' ? 3 : 0;
     const valueAdd = req.body.valueAdditionInStudentLife?.toLowerCase() === 'yes' ? 2 : 0;
 
+    const designation = req.user?.designation;
+    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+
     const totalMarks = meetings + valueAdd;
 
     const valueAdditionFiles = req.files?.ValueAdditionFiles?.map(file => file.path) || [];
 
+    const maxmark = pointsDistribution[designation]?.teaching?.tutorMeeting ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
+
     return res.status(200).json({
-      totalMarks,
+      finalMarks,
       files: valueAdditionFiles,
     });
   } catch (err) {
@@ -264,6 +319,9 @@ exports.calculateTutorWardMarks = (req, res) => {
 exports.calculateRoleMarks = (req, res) => {
   try {
     const roles = req.body.roles; 
+    const designation = req.user?.designation;
+    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+
     const files = req.files?.RoleFiles?.map(file => file.path) || [];
 
     const academicRoles = ['Academic Coordinator', 'Class Advisor'];
@@ -291,8 +349,11 @@ exports.calculateRoleMarks = (req, res) => {
 
     const uniqueFiles = [...new Set(files)];
 
+    const maxmark = pointsDistribution[designation]?.teaching?.academicRoles ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
+
     return res.status(200).json({
-      marks,
+      finalMarks,
       files: uniqueFiles,
     });
   } catch (err) {

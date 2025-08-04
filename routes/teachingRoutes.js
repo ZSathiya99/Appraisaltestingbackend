@@ -13,7 +13,8 @@ const {
   calculateFdpProgramMarks,
   calculateIndustryInvolvementMarks,
   calculateTutorWardMarks,
-  getPointsByDesignation
+  getPointsByDesignation,
+  calculateRoleMarks
 } = require("../controllers/teachingController");
 
 router.get('/points/:designation', getPointsByDesignation);
@@ -57,4 +58,9 @@ router.post(
   calculateTutorWardMarks
 );
 
+router.post(
+  "/academicRoles",
+  upload.array("files"),
+  calculateRoleMarks
+);
 module.exports = router;
