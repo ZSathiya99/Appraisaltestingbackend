@@ -2,9 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 
-const uploadRoute = require("./routes/uploadfileRoute");
 const loginRoute = require("./routes/loginRoute");
-const combinedRoute = require("./routes/combinedRoute");
 const uploadEmployeesRoute = require("./routes/uploadEmployees");
 
 
@@ -14,9 +12,7 @@ app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
 
-app.use("/api", uploadRoute);
 app.use("/api", loginRoute);
-app.use("/api", combinedRoute);
 app.use("/api", uploadEmployeesRoute);
 app.use('/api', teachingRoutes);
 
