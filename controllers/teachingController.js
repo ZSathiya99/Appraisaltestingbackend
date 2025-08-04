@@ -1,9 +1,10 @@
 const teaching = require('../models/TeachingRecord');
 const Subject = require('../models/Subject');
-
+const pointsDistribution = require("../utils/prePoints")
 
 exports.getPointsByDesignation = (req, res) => {
   const { designation } = req.params;
+  console.log(designation)
   const points = pointsDistribution[designation];
 
   if (!points) {
