@@ -10,9 +10,14 @@ exports.getPointsByDesignation = (req, res) => {
   if (!points) {
     return res.status(404).json({ message: 'Designation not found' });
   }
+  const formatted = Object.entries(points).map(([category, pointObj]) => ({
+    category,
+    points: pointObj 
+  }));
 
-  res.json({ designation, points });
+  res.json(formatted);
 };
+
 
 // Q1: TEACHING ASSIGNMENT
 exports.calculateTeachingMarks = async (req, res) => {
