@@ -6,7 +6,7 @@ const Employee = require("../models/Employee");
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "appraisal_backend";
 
-// POST /api/employee-login
+//login Employee
 router.post("/employee-login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -56,6 +56,22 @@ res.status(200).json({
 
   } catch (err) {
     console.error("❌ Login error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+//Fetch employee details
+router.get("/employee/:id", async (req, res) => {
+  try {
+    const employee = await Employee.findById(req.params.id, '-password'); 
+
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    res.status(200).json(employee);
+  } catch (err) {
+    console.error("Fetch employee by ID error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
