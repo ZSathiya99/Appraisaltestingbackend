@@ -20,47 +20,47 @@ const {
 
 router.get('/points/:designation', getPointsByDesignation);
 router.post("/teaching/:designation", upload.array("Teachingfiles"), calculateTeachingMarks);
-router.post("/passPercentage", calculatePassPercentageMarks);
-router.post("/feedback", calculateStudentFeedbackMarks);
+router.post("/passPercentage/:designation", calculatePassPercentageMarks);
+router.post("/feedback/:designation", calculateStudentFeedbackMarks);
 router.post(
-  "/innovativeApproach",
+  "/innovativeApproach/:designation",
   upload.array("innovativeFiles"),
   calculateInnovativeApporachMarks
 );
 router.post(
-  "/guestLecture",
+  "/guestLecture/:designation",
   upload.array("guestLecturefiles"),
   calculateGuestlectureMarks
 );
 router.post(
-  "/fdpFunding",
+  "/fdpFunding/:designation",
   upload.array("fdpfundingfiles"),
   calculateFdpfundingMarks
 );
 router.post(
-  "/highlevelCompetition",
+  "/highlevelCompetition/:designation",
   upload.array("highlevelCompetitionFiles"),
   calculateHighlevelCompetionMarks
 );
 router.post(
-  "/fdpPrograms",
+  "/fdpPrograms/:designation",
   upload.array("FdpprogramFiles"),
   calculateFdpProgramMarks
 );
 
 router.post(
-  "/industryInvolvement",
+  "/industryInvolvement/:designation",
   upload.array("IndustryFiles"),
   calculateIndustryInvolvementMarks
 );
 router.post(
-  "/tutorwardMeeting",
+  "/tutorwardMeeting/:designation",
   upload.array("ValueAdditionFiles"),
   calculateTutorWardMarks
 );
 
 router.post(
-  "/academicRoles",
+  "/academicRoles/:designation",
   upload.array("files"),
   calculateRoleMarks
 );
