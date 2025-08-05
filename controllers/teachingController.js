@@ -33,7 +33,7 @@ exports.calculateTeachingMarks = async (req, res) => {
     }
 
     const Teachingfiles = req.files?.Teachingfiles?.map(file => file.path) || [];
-
+    console.log(uniqueFiles);
     let parsedSubjects;
     try {
       parsedSubjects = Array.isArray(teachingAssignment)
@@ -56,7 +56,6 @@ exports.calculateTeachingMarks = async (req, res) => {
         { upsert: true }
       );
 
-      console.log(`Subject ${subjectCode} upsert result:`, result);
 
       if (Number(credits) === 3 && teachingMarks < 3) {
         teachingMarks += 1;
@@ -64,6 +63,7 @@ exports.calculateTeachingMarks = async (req, res) => {
     }
 
     const uniqueFiles = [...new Set(Teachingfiles)];
+    console.log(uniqueFiles);
     const maxTeaching = pointsDistribution[designation]?.teaching?.teachingAssignment ?? 0;
     const finalMarks = Math.min(teachingMarks, maxTeaching);
 
