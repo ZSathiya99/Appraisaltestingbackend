@@ -23,9 +23,8 @@ exports.getPointsByDesignation = (req, res) => {
 exports.calculateTeachingMarks = async (req, res) => {
   try {
     const { teachingAssignment } = req.body;
-    console.log('Token payload:', req.user);
-    console.log(req.user?.designation);
-    const designation = req.user?.designation;
+    const { designation } = req.params;
+    console.log(designation);
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
     const Teachingfiles = req.files ?. req.Teachingfiles.map(file => file.path) || [];

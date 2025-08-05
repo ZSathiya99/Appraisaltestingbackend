@@ -19,7 +19,7 @@ const {
 } = require("../controllers/teachingController");
 
 router.get('/points/:designation', getPointsByDesignation);
-router.post("/teaching", upload.array("Teachingfiles"), authenticate, calculateTeachingMarks);
+router.post("/teaching/:designation", upload.array("Teachingfiles"), calculateTeachingMarks);
 router.post("/passPercentage", calculatePassPercentageMarks);
 router.post("/feedback", calculateStudentFeedbackMarks);
 router.post(
