@@ -23,6 +23,8 @@ exports.getPointsByDesignation = (req, res) => {
 exports.calculateTeachingMarks = async (req, res) => {
   try {
     const { teachingAssignment } = req.body;
+    console.log(req.user);
+    console.log(req.user?.designation);
     const designation = req.user?.designation;
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
