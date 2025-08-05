@@ -50,11 +50,13 @@ exports.calculateTeachingMarks = async (req, res) => {
       const { subjectCode, subjectName, credits } = subj;
       formattedSubjects[subjectCode] = subjectName;
 
-      await Subject.updateOne(
+      const result = await Subject.updateOne(
         { subjectCode },
-        { $setOnInsert: { subjectName, credits } },
+        { $set: { subjectName, credits: Number(credits) } },
         { upsert: true }
       );
+
+      console.log(`Subject ${subjectCode} upsert result:`, result);
 
       if (Number(credits) === 3 && teachingMarks < 3) {
         teachingMarks += 1;
