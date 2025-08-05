@@ -24,12 +24,25 @@ exports.calculateTeachingMarks = async (req, res) => {
   try {
     const { teachingAssignment } = req.body;
     const { designation } = req.params;
-    console.log(designation);
-    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
-    const Teachingfiles = req.files ?. req.Teachingfiles.map(file => file.path) || [];
+    console.log('Designation:', designation);
+    console.log('TeachingAssignment:', teachingAssignment);
 
-    const parsedSubjects = JSON.parse(teachingAssignment);
+    if (!designation) {
+      return res.status(400).json({ message: 'Designation missing in token' });
+    }
+
+    const Teachingfiles = req.files?.Teachingfiles?.map(file => file.path) || [];
+
+    let parsedSubjects;
+    try {
+      parsedSubjects = Array.isArray(teachingAssignment)
+        ? teachingAssignment
+        : JSON.parse(teachingAssignment);
+    } catch (e) {
+      return res.status(400).json({ message: 'Invalid JSON in teachingAssignment' });
+    }
+
     const formattedSubjects = {};
     let teachingMarks = 0;
 
@@ -49,7 +62,6 @@ exports.calculateTeachingMarks = async (req, res) => {
     }
 
     const uniqueFiles = [...new Set(Teachingfiles)];
-
     const maxTeaching = pointsDistribution[designation]?.teaching?.teachingAssignment ?? 0;
     const finalMarks = Math.min(teachingMarks, maxTeaching);
 
@@ -65,6 +77,7 @@ exports.calculateTeachingMarks = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
 
 // Q2: PASS PERCENTAGE
 exports.calculatePassPercentageMarks = (req, res) => {
