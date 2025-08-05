@@ -33,7 +33,7 @@ exports.calculateTeachingMarks = async (req, res) => {
     }
 
     const Teachingfiles = req.files?.Teachingfiles?.map(file => file.path) || [];
-    console.log(uniqueFiles);
+    console.log(Teachingfiles);
     let parsedSubjects;
     try {
       parsedSubjects = Array.isArray(teachingAssignment)
