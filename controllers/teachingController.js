@@ -56,7 +56,7 @@ exports.calculateTeachingMarks = async (req, res) => {
         { upsert: true }
       );
 
-      if (credits === 3 && teachingMarks < 3) {
+      if (Number(credits) === 3 && teachingMarks < 3) {
         teachingMarks += 1;
       }
     }
