@@ -67,7 +67,7 @@ exports.calculateTeachingMarks = async (req, res) => {
     return res.status(200).json({
       message: "Teaching marks calculated successfully",
       finalMarks,
-      subjects: formattedSubjects,
+      // subjects: formattedSubjects,
       files: uniqueFiles
     });
 
@@ -374,6 +374,62 @@ exports.calculateRoleMarks = (req, res) => {
       files: uniqueFiles,
     });
   } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+
+
+exports.saveTeachingRecord = async (req, res) => {
+  try {
+    const {
+      facultyName,
+      designation,
+      teachingAssignment,
+      passPercentage,
+      feedback,
+      innovativeApproach,
+      visitingFaculty,
+      fdpFunding,
+      innovationProject,
+      fdp,
+      industry,
+      tutorMeeting,
+      academicPosition
+    } = req.body;
+
+    if (!facultyName || !designation) {
+      return res.status(400).json({ message: 'Faculty name and designation are required' });
+    }
+
+    // Check if record exists
+    let record = await teaching.findOne({ facultyName, designation });
+
+    if (!record) {
+      record = new TeachingRecord({ facultyName, designation });
+    }
+
+    if (teachingAssignment) record.teachingAssignment = teachingAssignment;
+    if (passPercentage) record.passPercentage = passPercentage;
+    if (feedback) record.feedback = feedback;
+    if (innovativeApproach) record.innovativeApproach = innovativeApproach;
+    if (visitingFaculty) record.visitingFaculty = visitingFaculty;
+    if (fdpFunding) record.fdpFunding = fdpFunding;
+    if (innovationProject) record.innovationProject = innovationProject;
+    if (fdp) record.fdp = fdp;
+    if (industry) record.industry = industry;
+    if (tutorMeeting) record.tutorMeeting = tutorMeeting;
+    if (academicPosition) record.academicPosition = academicPosition;
+
+    await record.save();
+
+    return res.status(200).json({
+      message: "Teaching record saved successfully",
+      record
+    });
+
+  } catch (err) {
+    console.error("Failed to save teaching record:", err.message);
     return res.status(500).json({ error: err.message });
   }
 };
