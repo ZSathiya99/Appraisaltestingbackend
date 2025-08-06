@@ -66,6 +66,21 @@ router.post(
   calculateRoleMarks
 );
 
-router.post("/teachingrecord/save", saveTeachingRecord);
+router.post(
+  '/teachingrecord/save',
+  upload.fields([
+    { name: 'teachingFiles' },
+    { name: 'feedbackFiles' },
+    { name: 'innovativeApproachFiles' },
+    { name: 'visitingFacultyFiles' },
+    { name: 'fdpFundingFiles' },
+    { name: 'innovationProjectFiles' },
+    { name: 'fdpFiles' },
+    { name: 'industryFiles' },
+    { name: 'tutorMeetingFiles' },
+    { name: 'academicPositionFiles' },
+  ]),
+  saveTeachingRecord
+);
 
 module.exports = router;

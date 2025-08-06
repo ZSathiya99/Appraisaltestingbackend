@@ -384,42 +384,83 @@ exports.saveTeachingRecord = async (req, res) => {
   try {
     const {
       facultyName,
-      designation,
-      teachingAssignment,
-      passPercentage,
-      feedback,
-      innovativeApproach,
-      visitingFaculty,
-      fdpFunding,
-      innovationProject,
-      fdp,
-      industry,
-      tutorMeeting,
-      academicPosition
+      designation
     } = req.body;
+
+    // Parse nested JSON fields from FormData
+    const teachingAssignment = JSON.parse(req.body.teachingAssignment || '{}');
+    const passPercentage = JSON.parse(req.body.passPercentage || '{}');
+    const feedback = JSON.parse(req.body.feedback || '{}');
+    const innovativeApproach = JSON.parse(req.body.innovativeApproach || '{}');
+    const visitingFaculty = JSON.parse(req.body.visitingFaculty || '{}');
+    const fdpFunding = JSON.parse(req.body.fdpFunding || '{}');
+    const innovationProject = JSON.parse(req.body.innovationProject || '{}');
+    const fdp = JSON.parse(req.body.fdp || '{}');
+    const industry = JSON.parse(req.body.industry || '{}');
+    const tutorMeeting = JSON.parse(req.body.tutorMeeting || '{}');
+    const academicPosition = JSON.parse(req.body.academicPosition || '{}');
 
     if (!facultyName || !designation) {
       return res.status(400).json({ message: 'Faculty name and designation are required' });
     }
 
-    // Check if record exists
-    let record = await teaching.findOne({ facultyName, designation });
-
+    let record = await TeachingRecord.findOne({ facultyName, designation });
     if (!record) {
       record = new TeachingRecord({ facultyName, designation });
     }
 
-    if (teachingAssignment) record.teachingAssignment = teachingAssignment;
+    // Assign parsed fields
+    if (teachingAssignment) {
+      teachingAssignment.teachingFiles = req.files?.teachingFiles?.map(f => f.path) || [];
+      record.teachingAssignment = teachingAssignment;
+    }
+
     if (passPercentage) record.passPercentage = passPercentage;
-    if (feedback) record.feedback = feedback;
-    if (innovativeApproach) record.innovativeApproach = innovativeApproach;
-    if (visitingFaculty) record.visitingFaculty = visitingFaculty;
-    if (fdpFunding) record.fdpFunding = fdpFunding;
-    if (innovationProject) record.innovationProject = innovationProject;
-    if (fdp) record.fdp = fdp;
-    if (industry) record.industry = industry;
-    if (tutorMeeting) record.tutorMeeting = tutorMeeting;
-    if (academicPosition) record.academicPosition = academicPosition;
+
+    if (feedback) {
+      feedback.feedbackFiles = req.files?.feedbackFiles?.map(f => f.path) || [];
+      record.feedback = feedback;
+    }
+
+    if (innovativeApproach) {
+      innovativeApproach.innovativeApproachFiles = req.files?.innovativeApproachFiles?.map(f => f.path) || [];
+      record.innovativeApproach = innovativeApproach;
+    }
+
+    if (visitingFaculty) {
+      visitingFaculty.visitingFacultyFiles = req.files?.visitingFacultyFiles?.map(f => f.path) || [];
+      record.visitingFaculty = visitingFaculty;
+    }
+
+    if (fdpFunding) {
+      fdpFunding.fdpFundingFiles = req.files?.fdpFundingFiles?.map(f => f.path) || [];
+      record.fdpFunding = fdpFunding;
+    }
+
+    if (innovationProject) {
+      innovationProject.innovationProjectFiles = req.files?.innovationProjectFiles?.map(f => f.path) || [];
+      record.innovationProject = innovationProject;
+    }
+
+    if (fdp) {
+      fdp.fdpFiles = req.files?.fdpFiles?.map(f => f.path) || [];
+      record.fdp = fdp;
+    }
+
+    if (industry) {
+      industry.industryFiles = req.files?.industryFiles?.map(f => f.path) || [];
+      record.industry = industry;
+    }
+
+    if (tutorMeeting) {
+      tutorMeeting.tutorMeetingFiles = req.files?.tutorMeetingFiles?.map(f => f.path) || [];
+      record.tutorMeeting = tutorMeeting;
+    }
+
+    if (academicPosition) {
+      academicPosition.academicPositionFiles = req.files?.academicPositionFiles?.map(f => f.path) || [];
+      record.academicPosition = academicPosition;
+    }
 
     await record.save();
 
