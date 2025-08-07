@@ -282,6 +282,10 @@ exports.calculateFdpProgramMarks = (req, res) => {
 //Q9: Industry Involvement
 exports.calculateIndustryInvolvementMarks = (req, res) => {
   try {
+    console.log("==== Incoming Request ====");
+    console.log("Body:", req.body);
+    console.log("Params:", req.params);
+    console.log("Files:", req.files);
     const input = req.body.industryInvolvement;
     const { designation } = req.params;
 
