@@ -280,41 +280,43 @@ exports.calculateFdpProgramMarks = (req, res) => {
 };
 
 //Q9: Industry Involvement
-exports.calculateIndustryInvolvementMarks = (req, res) => {
+exports.calculateIndustryInvolvementMarks = async (req, res) => {
   try {
-    console.log("==== Incoming Request ====");
-    console.log("Body:", req.body);
-    console.log("Params:", req.params);
-    console.log("Files:", req.files);
 
     const input = req.body.industryInvolvement;
     const { designation } = req.params;
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
-    const groupedFiles = {};
-      if (req.files?.length > 0) {
-        for (const file of req.files) {
-          const field = file.fieldname; 
-          if (!groupedFiles[field]) {
-            groupedFiles[field] = [];
-          }
-          groupedFiles[field].push(file.path);
-        }
-      }
-    // const IndustryFiles = req.files?.map((file) => file.path) || [];
-    // console.log(IndustryFiles);
+    
+    const IndustryFiles = req.files?.map((file) => file.path) || [];
+    console.log(IndustryFiles);
     const isYes = input?.toLowerCase() === 'yes';
     const marks = isYes ? 2 : 0;
-    // const uniqueFiles = [...new Set(IndustryFiles)];
+    const uniqueFiles = [...new Set(IndustryFiles)];
 
     const maxmark = pointsDistribution[designation]?.teaching?.industryInvolvement ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
+    let record = await teaching.findOne({ facultyName, designation });
+
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    // Set industry involvement data
+    record.industry = {
+      value: input,
+      marks: finalMarks,
+      industryFiles: uniqueFiles,
+    };
+
+    await record.save();
+
     return res.status(200).json({
       finalMarks,
       message: isYes ? "Eligible for 2 marks" : "No marks awarded",
-      files: groupedFiles
+      files: uniqueFiles
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
