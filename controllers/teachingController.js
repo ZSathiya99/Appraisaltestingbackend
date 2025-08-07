@@ -242,12 +242,12 @@ exports.calculateHighlevelCompetionMarks = (req, res) => {
 //Q8: FdpProgram
 exports.calculateFdpProgramMarks = (req, res) => {
   try {
-
     const semesterData = JSON.parse(req.body.semesterData);
-
     const { designation } = req.params;
 
-    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+    if (!designation) {
+      return res.status(400).json({ message: 'Designation missing in token' });
+    }
 
     const FdpprogramFiles = req.files?.FdpprogramFiles?.map(file => file.path) || [];
 
@@ -269,7 +269,7 @@ exports.calculateFdpProgramMarks = (req, res) => {
     const uniqueFiles = [...new Set(FdpprogramFiles)];
 
     const maxmark = pointsDistribution[designation]?.teaching?.fdpProgramme ?? 0;
-    const finalMarks = Math.min(marks, maxmark);
+    const finalMarks = Math.min(totalMarks, maxmark); 
 
     return res.status(200).json({
       finalMarks,
