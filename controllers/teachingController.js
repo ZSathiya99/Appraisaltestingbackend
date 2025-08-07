@@ -291,7 +291,7 @@ exports.calculateIndustryInvolvementMarks = (req, res) => {
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
-    const IndustryFiles = req.files?.IndustryFiles?.map(file => file.path) || [];
+    const IndustryFiles = req.files?.map((file) => file.path) || [];
     console.log(IndustryFiles);
     const isYes = input?.toLowerCase() === 'yes';
     const marks = isYes ? 2 : 0;
