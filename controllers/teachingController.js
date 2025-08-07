@@ -304,7 +304,7 @@ exports.calculateIndustryInvolvementMarks = (req, res) => {
 
     });
     // const IndustryFiles = req.files?.map((file) => file.path) || [];
-    console.log(IndustryFiles);
+    // console.log(IndustryFiles);
     const isYes = input?.toLowerCase() === 'yes';
     const marks = isYes ? 2 : 0;
     // const uniqueFiles = [...new Set(IndustryFiles)];
