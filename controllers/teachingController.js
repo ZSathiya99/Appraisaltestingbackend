@@ -292,17 +292,16 @@ exports.calculateIndustryInvolvementMarks = (req, res) => {
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
-    const groupedFile = {};
-
-    req.files.forEach((file) => {
-      const category = file.fieldname;
-      if(!groupedFile[category]){
-        groupedFile[category] = [];
+    const groupedFiles = {};
+      if (req.files?.length > 0) {
+        for (const file of req.files) {
+          const field = file.fieldname; 
+          if (!groupedFiles[field]) {
+            groupedFiles[field] = [];
+          }
+          groupedFiles[field].push(file.path);
+        }
       }
-      groupedFile[category].push(file.path);
-      console.log(groupedFile)
-
-    });
     // const IndustryFiles = req.files?.map((file) => file.path) || [];
     // console.log(IndustryFiles);
     const isYes = input?.toLowerCase() === 'yes';
@@ -315,7 +314,7 @@ exports.calculateIndustryInvolvementMarks = (req, res) => {
     return res.status(200).json({
       finalMarks,
       message: isYes ? "Eligible for 2 marks" : "No marks awarded",
-      files: groupedFile
+      files: groupedFiles
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
