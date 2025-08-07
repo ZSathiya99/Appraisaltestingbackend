@@ -285,6 +285,7 @@ exports.calculateIndustryInvolvementMarks = async (req, res) => {
 
     const input = req.body.industryInvolvement;
     const { designation } = req.params;
+    const {facultyName} = req.body.facultyName
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
