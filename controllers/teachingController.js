@@ -286,16 +286,28 @@ exports.calculateIndustryInvolvementMarks = (req, res) => {
     console.log("Body:", req.body);
     console.log("Params:", req.params);
     console.log("Files:", req.files);
+
     const input = req.body.industryInvolvement;
     const { designation } = req.params;
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
-    const IndustryFiles = req.files?.map((file) => file.path) || [];
+    const groupedFile = {};
+
+    req.files.forEach((file) => {
+      const category = file.fieldname;
+      if(!groupedFile[category]){
+        groupedFile[category] = [];
+      }
+      groupedFile[category].push(file.path);
+      console.log(groupedFile)
+
+    });
+    // const IndustryFiles = req.files?.map((file) => file.path) || [];
     console.log(IndustryFiles);
     const isYes = input?.toLowerCase() === 'yes';
     const marks = isYes ? 2 : 0;
-    const uniqueFiles = [...new Set(IndustryFiles)];
+    // const uniqueFiles = [...new Set(IndustryFiles)];
 
     const maxmark = pointsDistribution[designation]?.teaching?.industryInvolvement ?? 0;
     const finalMarks = Math.min(marks, maxmark);
@@ -303,7 +315,7 @@ exports.calculateIndustryInvolvementMarks = (req, res) => {
     return res.status(200).json({
       finalMarks,
       message: isYes ? "Eligible for 2 marks" : "No marks awarded",
-      files: uniqueFiles
+      files: groupedFile
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });

@@ -51,7 +51,7 @@ router.post(
 
 router.post(
   "/industryInvolvement/:designation",
-  upload.array("IndustryFiles"),
+  upload.any(),
   calculateIndustryInvolvementMarks
 );
 router.post(
