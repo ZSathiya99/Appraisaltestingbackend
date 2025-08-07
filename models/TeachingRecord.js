@@ -3,17 +3,17 @@ const mongoose = require('mongoose');
 const TechingSchema = new mongoose.Schema({
   facultyName: {
     type: String,
-    required: true,
+    // required: true,
   },
   designation: {
     type: String,
-    required: true,
+    // required: true,
   },
 
   teachingAssignment: {
     subjects: {
       type: Object,
-      required : true
+      // required : true
     },
     teachingFiles: [String],
     marks: Number,
