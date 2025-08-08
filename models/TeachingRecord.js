@@ -25,7 +25,6 @@ const TechingSchema = new mongoose.Schema({
   feedback :{
     value: String,   
     marks: Number,
-    feedbackFiles: [String],
   },
   innovativeApproach : {
     value: String,   

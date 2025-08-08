@@ -29,7 +29,7 @@ exports.calculateTeachingMarks = async (req, res) => {
       return res.status(400).json({ message: 'Designation missing in token' });
     }
 
-    const Teachingfiles = req.files?.Teachingfiles?.map(file => file.path) || [];
+    const Teachingfiles = req.files?.map((file) => file.path) || [];
     console.log(Teachingfiles);
     let parsedSubjects;
     try {
@@ -79,7 +79,7 @@ exports.calculateTeachingMarks = async (req, res) => {
 
 
 // Q2: PASS PERCENTAGE
-exports.calculatePassPercentageMarks = (req, res) => {
+exports.calculatePassPercentageMarks = async (req, res) => {
   try {
     const { passPercentage } = req.body;
     const { designation } = req.params;
@@ -92,6 +92,17 @@ exports.calculatePassPercentageMarks = (req, res) => {
     const maxPass = pointsDistribution[designation]?.teaching?.passPercentage ?? 0;
     const finalMarks = Math.min(marks, maxPass);
 
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.passPercentage = {
+      value: passPercentage,
+      marks: finalMarks
+    };
+
+    await record.save();
     return res.status(200).json({
       section: "Pass Percentage",
       finalMarks,
@@ -102,7 +113,7 @@ exports.calculatePassPercentageMarks = (req, res) => {
 };
 
 //Q3: STUDENT FEEDBACK
-exports.calculateStudentFeedbackMarks = (req, res) => {
+exports.calculateStudentFeedbackMarks = async (req, res) => {
   try {
     const { feedback } = req.body;
     const { designation } = req.params;
@@ -115,6 +126,18 @@ exports.calculateStudentFeedbackMarks = (req, res) => {
     
     const maxmark = pointsDistribution[designation]?.teaching?.studentFeedback ?? 0;
     const finalMarks = Math.min(marks, maxmark);
+    
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.feedback = {
+      value: feedback,
+      marks: finalMarks
+    };
+
+    await record.save();
 
     return res.status(200).json({
       section: "Student Feedback",
@@ -126,12 +149,13 @@ exports.calculateStudentFeedbackMarks = (req, res) => {
 };
 
 //Q4: Innovative Approach
-exports.calculateInnovativeApporachMarks = (req, res) => {
+exports.calculateInnovativeApporachMarks = async (req, res) => {
   try {
     const { InnovativeApproach } = req.body;
     const { designation } = req.params;
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
-    const Innovativefiles = req.files ?. req.Innovativefiles.map(file => file.path) || [];
+    
+    const Innovativefiles = req.files?.map((file) => file.path) || [];
 
 
     let marks = 0;
@@ -144,9 +168,23 @@ exports.calculateInnovativeApporachMarks = (req, res) => {
     const maxmark = pointsDistribution[designation]?.teaching?.innovativeApproach ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.innovativeApproach = {
+      value: InnovativeApproach,
+      marks: finalMarks,
+      innovativeApproachFiles: uniqueFiles,
+    };
+
+    await record.save();
+
     return res.status(200).json({
       section: "Innovative Approach",
       finalMarks,
+      files : uniqueFiles
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -154,13 +192,12 @@ exports.calculateInnovativeApporachMarks = (req, res) => {
 };
 
 //Q5: Guest lecture
-exports.calculateGuestlectureMarks = (req, res) => {
+exports.calculateGuestlectureMarks = async (req, res) => {
   try {
     const { GuestLecture } = req.body;
     const { designation } = req.params;
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
-    const GuestLectureFiles = req.files ?. req.GuestLectureFiles.map(file => file.path) || [];
-
+    const GuestLectureFiles = req.files?.map((file) => file.path) || [];
 
     let marks = 0;
     if (GuestLecture === "National Experts") marks = 1;
@@ -171,9 +208,23 @@ exports.calculateGuestlectureMarks = (req, res) => {
     const maxmark = pointsDistribution[designation]?.teaching?.guest ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.visitingFaculty = {
+      value: GuestLecture,
+      marks: finalMarks,
+      visitingFacultyFiles : uniqueFiles
+    };
+
+    await record.save();
+
     return res.status(200).json({
       section: "Guest Lectures",
       finalMarks,
+      files : uniqueFiles
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -181,14 +232,13 @@ exports.calculateGuestlectureMarks = (req, res) => {
 };
 
 //Q6: FDP Funding
-exports.calculateFdpfundingMarks = (req, res) => {
+exports.calculateFdpfundingMarks = async (req, res) => {
   try {
     const { FdpFunding } = req.body;
     const { designation } = req.params;
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
-    const FdpFundingFiles = req.files ?. req.FdpFundingFiles.map(file => file.path) || [];
-
+    const FdpFundingFiles = req.files?.map((file) => file.path) || [];
 
     let marks = 0;
     if (FdpFunding === "less than 1 lakh") marks = 1;
@@ -200,9 +250,21 @@ exports.calculateFdpfundingMarks = (req, res) => {
     const maxmark = pointsDistribution[designation]?.teaching?.fdpFunding ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.fdpFunding = {
+      value: FdpFunding,
+      marks: finalMarks,
+      fdpFundingFiles : uniqueFiles
+    };
+
     return res.status(200).json({
       section: "FDP Funding",
       finalMarks,
+      files : uniqueFiles
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -210,14 +272,13 @@ exports.calculateFdpfundingMarks = (req, res) => {
 };
 
 //Q7: Highlevel Competion
-exports.calculateHighlevelCompetionMarks = (req, res) => {
+exports.calculateHighlevelCompetionMarks = async (req, res) => {
   try {
     const { highlevelCompetition } = req.body;
     const { designation } = req.params;
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
-    const HighlevelCompetitionFiles = req.files ?. req.HighlevelCompetitionFiles.map(file => file.path) || [];
-
+    const HighlevelCompetitionFiles = req.files?.map((file) => file.path) || [];
 
     let marks = 0;
     if (highlevelCompetition === "Participation") marks = 2;
@@ -230,6 +291,16 @@ exports.calculateHighlevelCompetionMarks = (req, res) => {
     const maxmark = pointsDistribution[designation]?.teaching?.innovativeProjects ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.innovationProject = {
+      value: highlevelCompetition,
+      marks: finalMarks,
+      innovationProjectFiles : uniqueFiles
+    };
     return res.status(200).json({
       section: "HighLevel Competion",
       finalMarks,
@@ -240,7 +311,7 @@ exports.calculateHighlevelCompetionMarks = (req, res) => {
 };
 
 //Q8: FdpProgram
-exports.calculateFdpProgramMarks = (req, res) => {
+exports.calculateFdpProgramMarks = async (req, res) => {
   try {
     const semesterData = JSON.parse(req.body.semesterData);
     const { designation } = req.params;
@@ -249,7 +320,8 @@ exports.calculateFdpProgramMarks = (req, res) => {
       return res.status(400).json({ message: 'Designation missing in token' });
     }
 
-    const FdpprogramFiles = req.files?.FdpprogramFiles?.map(file => file.path) || [];
+    const FdpprogramFiles = req.files?.map((file) => file.path) || [];
+
 
     const isTrue = (val) => val === true || val === 'true';
 
@@ -271,8 +343,21 @@ exports.calculateFdpProgramMarks = (req, res) => {
     const maxmark = pointsDistribution[designation]?.teaching?.fdpProgramme ?? 0;
     const finalMarks = Math.min(totalMarks, maxmark); 
 
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.fdp = {
+      value: FdpProgram,
+      marks: finalMarks,
+      fdpFiles : uniqueFiles
+    };
+
+   
     return res.status(200).json({
       finalMarks,
+      files : uniqueFiles
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -305,7 +390,6 @@ exports.calculateIndustryInvolvementMarks = async (req, res) => {
       record = new teaching({ facultyName, designation });
     }
 
-    // Set industry involvement data
     record.industry = {
       value: input,
       marks: finalMarks,
@@ -325,7 +409,7 @@ exports.calculateIndustryInvolvementMarks = async (req, res) => {
 };
 
 //Q10: TutorWard Meeting
-exports.calculateTutorWardMarks = (req, res) => {
+exports.calculateTutorWardMarks = async (req, res) => {
   try {
     const meetings = req.body.tutorWardMeetings?.toLowerCase() === 'yes' ? 3 : 0;
     const valueAdd = req.body.valueAdditionInStudentLife?.toLowerCase() === 'yes' ? 2 : 0;
@@ -336,10 +420,22 @@ exports.calculateTutorWardMarks = (req, res) => {
 
     const totalMarks = meetings + valueAdd;
 
-    const valueAdditionFiles = req.files?.ValueAdditionFiles?.map(file => file.path) || [];
-
+    const valueAdditionFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(valueAdditionFiles)];
     const maxmark = pointsDistribution[designation]?.teaching?.tutorMeeting ?? 0;
-    const finalMarks = Math.min(marks, maxmark);
+    const finalMarks = Math.min(totalMarks, maxmark);
+
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.tutorMeeting = {
+      value: tutorMeeting,
+      marks: finalMarks,
+      tutorMeetingFiles : uniqueFiles
+    };
+
 
     return res.status(200).json({
       finalMarks,
@@ -351,14 +447,14 @@ exports.calculateTutorWardMarks = (req, res) => {
 };
 
 //Q11: Roles in Academic
-exports.calculateRoleMarks = (req, res) => {
+exports.calculateRoleMarks = async  (req, res) => {
   try {
     const roles = req.body.roles; 
     const { designation } = req.params;
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
-    const files = req.files?.RoleFiles?.map(file => file.path) || [];
+    const files = req.files?.map((file) => file.path) || [];
 
     const academicRoles = ['Academic Coordinator', 'Class Advisor'];
     const otherRoles = [
@@ -388,6 +484,18 @@ exports.calculateRoleMarks = (req, res) => {
     const maxmark = pointsDistribution[designation]?.teaching?.academicRoles ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.academicPosition = {
+      value: academicRoles,
+      marks: finalMarks,
+      academicPositionFiles : uniqueFiles
+    };
+
+
     return res.status(200).json({
       finalMarks,
       files: uniqueFiles,
@@ -399,97 +507,3 @@ exports.calculateRoleMarks = (req, res) => {
 
 
 
-exports.saveTeachingRecord = async (req, res) => {
-  try {
-    const {
-      facultyName,
-      designation
-    } = req.body;
-
-    // Parse nested JSON fields from FormData
-    const teachingAssignment = JSON.parse(req.body.teachingAssignment || '{}');
-    const passPercentage = JSON.parse(req.body.passPercentage || '{}');
-    const feedback = JSON.parse(req.body.feedback || '{}');
-    const innovativeApproach = JSON.parse(req.body.innovativeApproach || '{}');
-    const visitingFaculty = JSON.parse(req.body.visitingFaculty || '{}');
-    const fdpFunding = JSON.parse(req.body.fdpFunding || '{}');
-    const innovationProject = JSON.parse(req.body.innovationProject || '{}');
-    const fdp = JSON.parse(req.body.fdp || '{}');
-    const industry = JSON.parse(req.body.industry || '{}');
-    const tutorMeeting = JSON.parse(req.body.tutorMeeting || '{}');
-    const academicPosition = JSON.parse(req.body.academicPosition || '{}');
-
-    if (!facultyName || !designation) {
-      return res.status(400).json({ message: 'Faculty name and designation are required' });
-    }
-
-    let record = await TeachingRecord.findOne({ facultyName, designation });
-    if (!record) {
-      record = new TeachingRecord({ facultyName, designation });
-    }
-
-    // Assign parsed fields
-    if (teachingAssignment) {
-      teachingAssignment.teachingFiles = req.files?.teachingFiles?.map(f => f.path) || [];
-      record.teachingAssignment = teachingAssignment;
-    }
-
-    if (passPercentage) record.passPercentage = passPercentage;
-
-    if (feedback) {
-      feedback.feedbackFiles = req.files?.feedbackFiles?.map(f => f.path) || [];
-      record.feedback = feedback;
-    }
-
-    if (innovativeApproach) {
-      innovativeApproach.innovativeApproachFiles = req.files?.innovativeApproachFiles?.map(f => f.path) || [];
-      record.innovativeApproach = innovativeApproach;
-    }
-
-    if (visitingFaculty) {
-      visitingFaculty.visitingFacultyFiles = req.files?.visitingFacultyFiles?.map(f => f.path) || [];
-      record.visitingFaculty = visitingFaculty;
-    }
-
-    if (fdpFunding) {
-      fdpFunding.fdpFundingFiles = req.files?.fdpFundingFiles?.map(f => f.path) || [];
-      record.fdpFunding = fdpFunding;
-    }
-
-    if (innovationProject) {
-      innovationProject.innovationProjectFiles = req.files?.innovationProjectFiles?.map(f => f.path) || [];
-      record.innovationProject = innovationProject;
-    }
-
-    if (fdp) {
-      fdp.fdpFiles = req.files?.fdpFiles?.map(f => f.path) || [];
-      record.fdp = fdp;
-    }
-
-    if (industry) {
-      industry.industryFiles = req.files?.industryFiles?.map(f => f.path) || [];
-      record.industry = industry;
-    }
-
-    if (tutorMeeting) {
-      tutorMeeting.tutorMeetingFiles = req.files?.tutorMeetingFiles?.map(f => f.path) || [];
-      record.tutorMeeting = tutorMeeting;
-    }
-
-    if (academicPosition) {
-      academicPosition.academicPositionFiles = req.files?.academicPositionFiles?.map(f => f.path) || [];
-      record.academicPosition = academicPosition;
-    }
-
-    await record.save();
-
-    return res.status(200).json({
-      message: "Teaching record saved successfully",
-      record
-    });
-
-  } catch (err) {
-    console.error("Failed to save teaching record:", err.message);
-    return res.status(500).json({ error: err.message });
-  }
-};
