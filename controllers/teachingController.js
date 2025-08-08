@@ -155,15 +155,18 @@ exports.calculateStudentFeedbackMarks = async (req, res) => {
 //Q4: Innovative Approach
 exports.calculateInnovativeApporachMarks = async (req, res) => {
   try {
-    const { InnovativeApproach } = req.body;
+    const { InnovativeApproach, facultyName } = req.body;
     const { designation } = req.params;
-    const {facultyName} = req.body;
+    console.log("==== Incoming Request ====");
+    console.log("Body:", req.body);
+    console.log("Params:", req.params);
+    console.log("Files:", req.files);
+
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
     
     const Innovativefiles = req.files?.map((file) => file.path) || [];
-
-
+    console(Innovativefiles);
     let marks = 0;
     if (InnovativeApproach === "Classroom Teaching") marks = 1;
     else if (InnovativeApproach === "Lab") marks = 2;
