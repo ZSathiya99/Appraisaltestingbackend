@@ -16,7 +16,7 @@ const {
   calculateTutorWardMarks,
   getPointsByDesignation,
   calculateRoleMarks,
-  saveTeachingRecord
+  getTeachingRecord
 } = require("../controllers/teachingController");
 
 router.get('/points/:designation', getPointsByDesignation);
@@ -64,6 +64,11 @@ router.post(
   "/academicRoles/:designation",
   upload.any(),
   calculateRoleMarks
+);
+
+router.post(
+  "/teachingrecord",
+  getTeachingRecord
 );
 
 

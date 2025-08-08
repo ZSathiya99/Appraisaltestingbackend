@@ -157,10 +157,6 @@ exports.calculateInnovativeApporachMarks = async (req, res) => {
   try {
     const { InnovativeApproach, facultyName } = req.body;
     const { designation } = req.params;
-    console.log("==== Incoming Request ====");
-    console.log("Body:", req.body);
-    console.log("Params:", req.params);
-    console.log("Files:", req.files);
 
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
@@ -366,7 +362,7 @@ exports.calculateFdpProgramMarks = async (req, res) => {
     }
 
     record.fdp = {
-      value: FdpProgram,
+      value: semesterData,
       marks: finalMarks,
       fdpFiles : uniqueFiles
     };
@@ -528,3 +524,31 @@ exports.calculateRoleMarks = async  (req, res) => {
 
 
 
+// Get a teaching record 
+exports.getTeachingRecord = async (req, res) => {
+  try {
+    const { facultyName, designation } = req.body;
+
+    if (!facultyName) {
+      return res.status(400).json({ message: "Faculty name is required" });
+    }
+
+    const filter = { facultyName };
+    if (designation) filter.designation = designation;
+
+    const record = await teaching.findOne(filter);
+
+    if (!record) {
+      return res.status(404).json({ message: "No teaching record found" });
+    }
+
+    return res.status(200).json({
+      message: "Teaching record fetched successfully",
+      record
+    });
+
+  } catch (err) {
+    console.error("Error fetching teaching record:", err.message);
+    return res.status(500).json({ error: err.message });
+  }
+};
