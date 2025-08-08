@@ -22,7 +22,7 @@ exports.getPointsByDesignation = (req, res) => {
 // Q1: TEACHING ASSIGNMENT
 exports.calculateTeachingMarks = async (req, res) => {
   try {
-    const { teachingAssignment } = req.body;
+    const { teachingAssignment, facultyName } = req.body;
     const { designation } = req.params;
 
     if (!designation) {
@@ -64,10 +64,20 @@ exports.calculateTeachingMarks = async (req, res) => {
     const maxTeaching = pointsDistribution[designation]?.teaching?.teachingAssignment ?? 0;
     const finalMarks = Math.min(teachingMarks, maxTeaching);
 
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.teachingAssignment = {
+      value: parsedSubjects,
+      marks: finalMarks,
+      teachingFiles: uniqueFiles
+    };
+
     return res.status(200).json({
       message: "Teaching marks calculated successfully",
       finalMarks,
-      // subjects: formattedSubjects,
       files: uniqueFiles
     });
 
