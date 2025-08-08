@@ -166,7 +166,7 @@ exports.calculateInnovativeApporachMarks = async (req, res) => {
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
     
     const Innovativefiles = req.files?.map((file) => file.path) || [];
-    console(Innovativefiles);
+    console.log(Innovativefiles);
     let marks = 0;
     if (InnovativeApproach === "Classroom Teaching") marks = 1;
     else if (InnovativeApproach === "Lab") marks = 2;
