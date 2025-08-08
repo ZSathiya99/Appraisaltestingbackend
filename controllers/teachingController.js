@@ -305,7 +305,7 @@ exports.calculateHighlevelCompetionMarks = async (req, res) => {
     if (highlevelCompetition === "Participation") marks = 2;
     else if (highlevelCompetition === "Participation Greater than 1") marks = 3;
     else if (highlevelCompetition === "Participation & Prize") marks = 3;
-    else if (highlevelCompetition === "Participation Greater than 1 & Prize ") marks = 4;
+    else if (highlevelCompetition === "Participation Greater than 1 & Prize") marks = 4;
 
     const uniqueFiles = [...new Set(HighlevelCompetitionFiles)];
 
