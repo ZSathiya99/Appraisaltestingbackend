@@ -83,6 +83,8 @@ exports.calculatePassPercentageMarks = async (req, res) => {
   try {
     const { passPercentage } = req.body;
     const { designation } = req.params;
+    const {facultyName} = req.body;
+
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
     let marks = 0;
     if (passPercentage === "100%") marks = 3;
@@ -117,6 +119,8 @@ exports.calculateStudentFeedbackMarks = async (req, res) => {
   try {
     const { feedback } = req.body;
     const { designation } = req.params;
+    const {facultyName} = req.body;
+
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
     let marks = 0;
@@ -153,6 +157,8 @@ exports.calculateInnovativeApporachMarks = async (req, res) => {
   try {
     const { InnovativeApproach } = req.body;
     const { designation } = req.params;
+    const {facultyName} = req.body;
+
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
     
     const Innovativefiles = req.files?.map((file) => file.path) || [];
@@ -196,6 +202,8 @@ exports.calculateGuestlectureMarks = async (req, res) => {
   try {
     const { GuestLecture } = req.body;
     const { designation } = req.params;
+    const {facultyName} = req.body;
+
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
     const GuestLectureFiles = req.files?.map((file) => file.path) || [];
 
@@ -236,6 +244,8 @@ exports.calculateFdpfundingMarks = async (req, res) => {
   try {
     const { FdpFunding } = req.body;
     const { designation } = req.params;
+    const {facultyName} = req.body;
+
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
     const FdpFundingFiles = req.files?.map((file) => file.path) || [];
@@ -276,6 +286,8 @@ exports.calculateHighlevelCompetionMarks = async (req, res) => {
   try {
     const { highlevelCompetition } = req.body;
     const { designation } = req.params;
+    const {facultyName} = req.body;
+
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
     const HighlevelCompetitionFiles = req.files?.map((file) => file.path) || [];
@@ -315,6 +327,8 @@ exports.calculateFdpProgramMarks = async (req, res) => {
   try {
     const semesterData = JSON.parse(req.body.semesterData);
     const { designation } = req.params;
+    const {facultyName} = req.body;
+
 
     if (!designation) {
       return res.status(400).json({ message: 'Designation missing in token' });
@@ -415,6 +429,8 @@ exports.calculateTutorWardMarks = async (req, res) => {
     const valueAdd = req.body.valueAdditionInStudentLife?.toLowerCase() === 'yes' ? 2 : 0;
 
     const { designation } = req.params;
+    const {facultyName} = req.body;
+
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
@@ -451,6 +467,8 @@ exports.calculateRoleMarks = async  (req, res) => {
   try {
     const roles = req.body.roles; 
     const { designation } = req.params;
+    const {facultyName} = req.body;
+
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
