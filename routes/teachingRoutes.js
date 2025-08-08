@@ -20,7 +20,7 @@ const {
 } = require("../controllers/teachingController");
 
 router.get('/points/:designation', getPointsByDesignation);
-router.post("/teaching/:designation", upload.array("Teachingfiles"), calculateTeachingMarks);
+router.post("/teaching/:designation", upload.any(), calculateTeachingMarks);
 router.post("/passPercentage/:designation", calculatePassPercentageMarks);
 router.post("/feedback/:designation", calculateStudentFeedbackMarks);
 router.post(
@@ -40,7 +40,7 @@ router.post(
 );
 router.post(
   "/highlevelCompetition/:designation",
-  upload.array("highlevelCompetitionFiles"),
+  upload.any(),
   calculateHighlevelCompetionMarks
 );
 router.post(
