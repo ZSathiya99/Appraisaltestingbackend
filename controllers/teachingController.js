@@ -325,6 +325,7 @@ exports.calculateHighlevelCompetionMarks = async (req, res) => {
     return res.status(200).json({
       section: "HighLevel Competion",
       finalMarks,
+      file : uniqueFiles
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
