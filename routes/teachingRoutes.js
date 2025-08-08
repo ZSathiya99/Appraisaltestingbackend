@@ -25,17 +25,17 @@ router.post("/passPercentage/:designation", calculatePassPercentageMarks);
 router.post("/feedback/:designation", calculateStudentFeedbackMarks);
 router.post(
   "/innovativeApproach/:designation",
-  upload.array("innovativeFiles"),
+  upload.any(),
   calculateInnovativeApporachMarks
 );
 router.post(
   "/guestLecture/:designation",
-  upload.array("guestLecturefiles"),
+  upload.any(),
   calculateGuestlectureMarks
 );
 router.post(
   "/fdpFunding/:designation",
-  upload.array("fdpfundingfiles"),
+  upload.any(),
   calculateFdpfundingMarks
 );
 router.post(
@@ -45,7 +45,7 @@ router.post(
 );
 router.post(
   "/fdpPrograms/:designation",
-  upload.array("FdpprogramFiles"),
+  upload.any(),
   calculateFdpProgramMarks
 );
 
@@ -56,13 +56,13 @@ router.post(
 );
 router.post(
   "/tutorwardMeeting/:designation",
-  upload.array("ValueAdditionFiles"),
+  upload.any(),
   calculateTutorWardMarks
 );
 
 router.post(
   "/academicRoles/:designation",
-  upload.array("files"),
+  upload.any(),
   calculateRoleMarks
 );
 
