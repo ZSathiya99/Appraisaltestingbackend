@@ -576,6 +576,8 @@ exports.getTeachingRecord = async (req, res) => {
 exports.deleteImage = async (req, res) => {
   const { filename } = req.params;
   
+  filename = filename.replace(/^uploads[\\/]/, "");
+  
   const filePath = path.join(__dirname, "../uploads", filename);
 
   if (fs.existsSync(filePath)) {
