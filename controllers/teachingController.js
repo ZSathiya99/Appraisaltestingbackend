@@ -1,6 +1,8 @@
 const teaching = require('../models/TeachingRecord');
 const Subject = require('../models/Subject');
-const pointsDistribution = require("../utils/prePoints")
+const pointsDistribution = require("../utils/prePoints");
+const fs = require("fs");
+const path = require("path");
 
 exports.getPointsByDesignation = (req, res) => {
   const { designation } = req.params;
@@ -565,5 +567,26 @@ exports.getTeachingRecord = async (req, res) => {
   } catch (err) {
     console.error("Error fetching teaching record:", err.message);
     return res.status(500).json({ error: err.message });
+  }
+};
+
+
+
+
+exports.deleteImage = async (req, res) => {
+  const { filename } = req.params;
+  
+  const filePath = path.join(__dirname, "../uploads", filename);
+
+  if (fs.existsSync(filePath)) {
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        console.error("Error deleting file:", err);
+        return res.status(500).json({ message: "Failed to delete file" });
+      }
+      return res.json({ message: "File deleted successfully" });
+    });
+  } else {
+    return res.status(404).json({ message: "File not found" });
   }
 };
