@@ -574,18 +574,11 @@ exports.getTeachingRecord = async (req, res) => {
 
 
 exports.deleteImage = async (req, res) => {
-  const fs = require("fs");
-  const path = require("path");
 
-  let { filename } = req.body; 
+  let filename = req.params.filename;
 
-  if (Array.isArray(filename)) {
-    filename = filename[0];
-  }
-
-  if (!filename) {
-    return res.status(400).json({ message: "Filename is required" });
-  }
+  // Decode URL encoding (spaces etc.)
+  filename = decodeURIComponent(filename);
 
   // Remove 'uploads/' prefix if included
   filename = filename.replace(/^uploads[\\/]/, "");
