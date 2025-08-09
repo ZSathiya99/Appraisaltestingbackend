@@ -575,10 +575,13 @@ exports.getTeachingRecord = async (req, res) => {
 
 exports.deleteImage = async (req, res) => {
 
-  let filename = req.params.filename;
+  console.log("req.params.filename:", req.params.filename);
 
-  // Decode URL encoding (spaces etc.)
-  filename = decodeURIComponent(filename);
+  let filename = req.params.filename;
+  if (!filename) {
+    console.error("Filename is missing in params.");
+    return res.status(400).json({ message: "Filename is required in URL" });
+  }
 
   // Remove 'uploads/' prefix if included
   filename = filename.replace(/^uploads[\\/]/, "");
