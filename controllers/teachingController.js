@@ -381,7 +381,7 @@ exports.calculateFdpProgramMarks = async (req, res) => {
     }
 
     record.fdp = {
-      value: JSON.stringify(semesterData),,
+      value: JSON.stringify(semesterData),
       marks: finalMarks,
       fdpFiles : uniqueFiles
     };
