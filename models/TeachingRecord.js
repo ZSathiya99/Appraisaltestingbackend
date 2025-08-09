@@ -47,7 +47,7 @@ const TechingSchema = new mongoose.Schema({
     innovationProjectFiles: [String],
   },
   fdp : {
-    value: String,   
+    value:  { type: Map, of: Object },   
     marks: Number,
     fdpFiles: [String],
   },
