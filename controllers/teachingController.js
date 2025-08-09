@@ -380,8 +380,14 @@ exports.calculateFdpProgramMarks = async (req, res) => {
       record = new teaching({ facultyName, designation });
     }
 
+    const semesterDataRaw = typeof req.body.semesterData === "string"
+      ? JSON.parse(req.body.semesterData)
+      : req.body.semesterData;
+
+    console.log("Before save typeof semesterDataRaw:", typeof semesterDataRaw);
+    
     record.fdp = {
-      value: JSON.stringify(semesterData),
+      value: JSON.stringify(semesterDataRaw),
       marks: finalMarks,
       fdpFiles : uniqueFiles
     };
