@@ -76,6 +76,7 @@ exports.calculateTeachingMarks = async (req, res) => {
       marks: finalMarks,
       teachingFiles: uniqueFiles
     };
+    await record.save();
 
     return res.status(200).json({
       message: "Teaching marks calculated successfully",
@@ -281,7 +282,7 @@ exports.calculateFdpfundingMarks = async (req, res) => {
       marks: finalMarks,
       fdpFundingFiles : uniqueFiles
     };
-
+    await record.save();
     return res.status(200).json({
       section: "FDP Funding",
       finalMarks,
@@ -324,6 +325,7 @@ exports.calculateHighlevelCompetionMarks = async (req, res) => {
       marks: finalMarks,
       innovationProjectFiles : uniqueFiles
     };
+    await record.save();
     return res.status(200).json({
       section: "HighLevel Competion",
       finalMarks,
@@ -384,7 +386,7 @@ exports.calculateFdpProgramMarks = async (req, res) => {
       fdpFiles : uniqueFiles
     };
 
-   
+    await record.save();
     return res.status(200).json({
       finalMarks,
       files : uniqueFiles
@@ -468,7 +470,7 @@ exports.calculateTutorWardMarks = async (req, res) => {
       tutorMeetingFiles : uniqueFiles
     };
 
-
+    await record.save();
     return res.status(200).json({
       finalMarks,
       files: valueAdditionFiles,
@@ -528,7 +530,7 @@ exports.calculateRoleMarks = async  (req, res) => {
       marks: finalMarks,
       academicPositionFiles : uniqueFiles
     };
-
+    await record.save();
 
     return res.status(200).json({
       finalMarks,
