@@ -74,7 +74,7 @@ router.post(
 
 
 router.delete(
-  "/deleteImage",
+  "/deleteImage/:filename",
   deleteImage
 );
 
