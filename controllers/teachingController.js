@@ -567,10 +567,25 @@ exports.getTeachingRecord = async (req, res) => {
       return res.status(404).json({ message: "No teaching record found" });
     }
 
+    let totalMarks = 0;
+    const recordObj = record.toObject(); 
+
+    for (const key in recordObj) {
+      if (
+        recordObj[key] &&
+        typeof recordObj[key] === "object" &&
+        recordObj[key].marks !== undefined
+      ) {
+        totalMarks += Number(recordObj[key].marks) || 0;
+      }
+    }
+
     return res.status(200).json({
       message: "Teaching record fetched successfully",
-      record
+      record,
+      totalMarks
     });
+    
 
   } catch (err) {
     console.error("Error fetching teaching record:", err.message);

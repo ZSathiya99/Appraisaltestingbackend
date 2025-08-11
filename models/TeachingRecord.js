@@ -66,7 +66,67 @@ const TechingSchema = new mongoose.Schema({
     marks: Number,
     academicPositionFiles: [String],
   },
+  academicPosition : {
+    value: String,   
+    marks: Number,
+    academicPositionFiles: [String],
+  },
+  sciePaper :{
+    value: String,   
+    marks: Number,
+    sciePaperFiles: [String],
+  },
+  scopusPaper :{
+    value: String,   
+    marks: Number,
+    scopusPaperFiles: [String],
+  },
+  aictePaper :{
+    value: String,   
+    marks: Number,
+    aictePaperFiles: [String],
+  },
+  scopusBook :{
+    value: String,   
+    marks: Number,
+    scopusBookFiles: [String],
+  },
+  indexBook :{
+    value: String,   
+    marks: Number,
+    indexBookFiles: [String],
+  },
+  hIndex :{
+    value: String,   
+    marks: Number,
+    hIndexFiles: [String],
+  },
+  iIndex :{
+    value: String,   
+    marks: Number,
+    iIndexFiles: [String],
+  },
+  citation :{
+    value: String,   
+    marks: Number,
+    citationFiles: [String],
+  },
+  consultancy :{
+    value: String,   
+    marks: Number,
+    consultancyFiles: [String],
+  },
+  collabrative :{
+    value: String,   
+    marks: Number,
+    collabrativeFiles: [String],
+  },
 
+  seedFund :{
+    value: String,   
+    marks: Number,
+    seedFundFiles: [String],
+  },
   createdAt: {
     type: Date,
     default: Date.now,

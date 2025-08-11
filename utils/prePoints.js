@@ -14,20 +14,19 @@ const pointsDistribution = {
       tutorMeeting: 0,
       academicRoles: 0,
     },
-    // research: {
-    //   scie: 8,
-    //   scopus: 6,
-    //   aicte: 0,
-    //   book_scopus: 2,
-    //   indexbook: 2,
-    //   projectPublication: 2,
-    //   fdpFunding: 3,
-    //   innovativeProjects: 2,
-    //   fdpProgramme: 4,
-    //   industryInvolvement: 2,
-    //   tutorMeeting: 0,
-    //   academicRoles: 0,
-    // }
+    research: {
+      scie: 8,
+      scopus: 6,
+      aicte: 0,
+      book_scopus: 2,
+      indexbook: 2,
+      hindex: 3,
+      i10index: 2,
+      citation: 3,
+      consultancy: 4,
+      collabrative: 2,
+      seedfund: 2,
+    }
 
   },
   'Associate Professor': {
@@ -44,7 +43,21 @@ const pointsDistribution = {
       industryInvolvement: 2,
       tutorMeeting: 2,
       academicRoles: 2
+    },
+    research: {
+      scie: 8,
+      scopus: 6,
+      aicte: 0,
+      book_scopus: 2,
+      indexbook: 2,
+      hindex: 3,
+      i10index: 1,
+      citation: 2,
+      consultancy: 3,
+      collabrative: 2,
+      seedfund: 2,
     }
+
   },
   'Assistant Professor': {
     teaching: {
@@ -60,6 +73,19 @@ const pointsDistribution = {
       industryInvolvement: 3,
       tutorMeeting: 5,
       academicRoles: 3,
+    },
+    research: {
+      scie: 4,
+      scopus: 6,
+      aicte: 3,
+      book_scopus: 2,
+      indexbook: 2,
+      hindex: 1,
+      i10index: 1,
+      citation: 1,
+      consultancy: 2,
+      collabrative: 2,
+      seedfund: 1,
     }
   }
 };
