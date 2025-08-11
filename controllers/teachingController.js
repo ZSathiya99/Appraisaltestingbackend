@@ -591,7 +591,6 @@ exports.deleteImage = async (req, res) => {
     return res.status(400).json({ message: "Filename is required in URL" });
   }
 
-  // Remove 'uploads/' prefix if included
   filename = filename.replace(/^uploads[\\/]/, "");
   
   const filePath = path.join(__dirname, "../uploads", filename);
@@ -602,7 +601,7 @@ exports.deleteImage = async (req, res) => {
         console.error("Error deleting file:", err);
         return res.status(500).json({ message: "Failed to delete file" });
       }
-      return res.json({ message: "File deleted successfully" });
+      return res.status(200).json({ message: "File deleted successfully" });
     });
   } else {
     return res.status(404).json({ message: "File not found" });

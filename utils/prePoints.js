@@ -13,7 +13,21 @@ const pointsDistribution = {
       industryInvolvement: 2,
       tutorMeeting: 0,
       academicRoles: 0,
-    }
+    },
+    // research: {
+    //   scie: 8,
+    //   scopus: 6,
+    //   aicte: 0,
+    //   book_scopus: 2,
+    //   indexbook: 2,
+    //   projectPublication: 2,
+    //   fdpFunding: 3,
+    //   innovativeProjects: 2,
+    //   fdpProgramme: 4,
+    //   industryInvolvement: 2,
+    //   tutorMeeting: 0,
+    //   academicRoles: 0,
+    // }
 
   },
   'Associate Professor': {
