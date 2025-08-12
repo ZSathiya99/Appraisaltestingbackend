@@ -96,6 +96,7 @@ const TechingSchema = new mongoose.Schema({
     marks: Number,
     indexBookFiles: [String],
   },
+
   hIndex :{
     value: String,   
     marks: Number,
@@ -127,6 +128,22 @@ const TechingSchema = new mongoose.Schema({
     marks: Number,
     seedFundFiles: [String],
   },
+  patent :{
+    value: String,   
+    marks: Number,
+    patentFiles: [String],
+  },
+  fundedProject :{
+    value: String,   
+    marks: Number,
+    fundedProjectFiles: [String],
+  },
+  researchScholars:{
+    value: String,   
+    marks: Number,
+    researchScholarsFiles: [String],
+  },
+  
   createdAt: {
     type: Date,
     default: Date.now,

@@ -471,7 +471,7 @@ exports.calculateTutorWardMarks = async (req, res) => {
     }
 
     record.tutorMeeting = {
-      value: tutorMeeting,
+      value: "tutorMeeting",
       marks: finalMarks,
       tutorMeetingFiles : uniqueFiles
     };

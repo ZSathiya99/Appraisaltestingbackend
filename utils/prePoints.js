@@ -20,6 +20,7 @@ const pointsDistribution = {
       aicte: 0,
       book_scopus: 2,
       indexbook: 2,
+      patent : 3,
       hindex: 3,
       i10index: 2,
       citation: 3,
