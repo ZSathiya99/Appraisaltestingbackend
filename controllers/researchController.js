@@ -493,7 +493,7 @@ exports.calculateSeedFund = async (req, res) => {
 
     const seedFundFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(seedFundFiles)];
-    
+
     let marks = 0;
     if (seedFund === "upto one lakh") marks = 1;
     else if (seedFund === "greater than two lakh") marks = 2;
@@ -570,4 +570,61 @@ exports.calculateFundedProjectMarks = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+
+// Q14: Research Scholars 
+exports.calculateResearchScholarMarks = async (req, res) => {
+  try {
+    const { facultyName, guidingCount, newlyRegisteredCount, completedCount } = req.body;
+    const { designation } = req.params;
+
+    if (!designation) {
+      return res.status(400).json({ message: 'Designation missing in token' });
+    }
+
+    const scholarFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(scholarFiles)];
+
+    let marks = 0;
+
+    if (Number(guidingCount) > 5) {
+      marks += 3;
+    }
+
+    if (Number(newlyRegisteredCount) > 0) {
+      const newRegMarks = Math.min(Number(newlyRegisteredCount) * 1, 2); // max 2 points
+      marks += newRegMarks;
+    }
+
+    if (Number(completedCount) > 0) {
+      marks += Number(completedCount) * 3;
+    }
+
+    const maxPass = pointsDistribution[designation]?.research?.researchScholars ?? marks;
+    const finalMarks = Math.min(marks, maxPass);
+
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.researchScholars = {
+      value: "ResearchScholars",
+      marks: finalMarks,
+      researchScholarFiles: uniqueFiles
+    };
+
+    await record.save();
+
+    return res.status(200).json({
+      section: "ResearchScholars",
+      finalMarks,
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error calculating Research Scholar marks" });
+  }
+};
+
+
 

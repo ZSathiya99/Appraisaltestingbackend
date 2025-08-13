@@ -36,6 +36,11 @@ const TechingSchema = new mongoose.Schema({
     marks: Number,
     visitingFacultyFiles: [String],
   },
+  studentProject : {
+    value: String,   
+    marks: Number,
+    studentProjectFiles: [String],
+  },
   fdpFunding : {
     value: String,   
     marks: Number,

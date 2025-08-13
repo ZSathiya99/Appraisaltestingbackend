@@ -622,3 +622,53 @@ exports.deleteImage = async (req, res) => {
     return res.status(404).json({ message: "File not found" });
   }
 };
+
+
+// Student Project and Publications
+exports.calculateStudentProjectMarks = async (req, res) => {
+  try {
+    const { facultyName, projectCount, publications } = req.body;
+    const { designation } = req.params;
+
+    if (!designation) {
+      return res.status(400).json({ message: "Designation missing in token" });
+    }
+
+    const studentCount = Number(projectCount) || 0;
+    const publicationCount = Number(publications) || 0;
+
+    const uploadedFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(uploadedFiles)];
+
+    const projectGuidanceMarks = Math.min(studentCount, 2) * 1;
+
+    const publicationMarks = publicationCount * 2;
+
+    const totalMarks = projectGuidanceMarks + publicationMarks;
+
+    const maxAllowed = pointsDistribution[designation]?.research?.projectPublication ?? totalMarks;
+    const finalMarks = Math.min(totalMarks, maxAllowed);
+
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.studentProjectsAndPublications = {
+      value: "StudentsProject",
+      marks: finalMarks,
+      studentProjectFiles: uniqueFiles
+    };
+
+    await record.save();
+
+    return res.status(200).json({
+      section: "StudentsProject",
+      finalMarks,
+    });
+
+  } catch (error) {
+    console.error("Error in calculateStudentProjectAndPublicationsMarks:", error);
+    return res.status(500).json({ message: "Internal server error", error });
+  }
+};
