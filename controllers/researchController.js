@@ -5,24 +5,23 @@ const pointsDistribution = require("../utils/prePoints");
 // Q1: SCIE
 exports.calculateSciePaper = async (req, res) => {
   try {
-    const { scie, facultyName, numPapers } = req.body;
+    const { facultyName, scie } = req.body; 
     const { designation } = req.params;
 
-    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
-    
-    const ScieFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(ScieFiles)];
+    if (!designation) {
+      return res.status(400).json({ message: 'Designation missing in token' });
+    }
 
-    const paperCount = Number(numPapers) || 1;
+    const sciePaperFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(sciePaperFiles)];
 
-    let marks = 0;
-    if (scie === "Firstauthor") marks = 4;
-    else if (scie === "secondauthor") marks = 2;
-    else if (scie === "thirdauthor") marks = 1;
-    
-    const totalMarks = paperCount * marks;
-
-    const maxPass = pointsDistribution[designation]?.research?.scie ?? 0;
+    let totalMarks = 0;
+    scie.forEach(paper => {
+      if (paper.typeOfAuthor === "Firstauthor") totalMarks += 4;
+      else if (paper.typeOfAuthor === "secondauthor") totalMarks += 2;
+      else if (paper.typeOfAuthor === "thirdauthor") totalMarks += 1;
+    });
+    const maxPass = pointsDistribution[designation]?.research?.scie ?? totalMarks;
     const finalMarks = Math.min(totalMarks, maxPass);
 
     let record = await teaching.findOne({ facultyName, designation });
@@ -30,26 +29,29 @@ exports.calculateSciePaper = async (req, res) => {
       record = new teaching({ facultyName, designation });
     }
 
-    record.sciePaper = {
+    record.passPercentage = {
       value: "SCIE",
       marks: finalMarks,
-      sciePaperFiles : uniqueFiles
+      sciePaperFiles:  uniqueFiles
     };
 
     await record.save();
+
     return res.status(200).json({
       section: "SCIE",
       finalMarks,
     });
+
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
 
+
 // Q2: Scopus
 exports.calculateScopusPaper = async (req, res) => {
   try {
-    const { scopus, facultyName, numPapers } = req.body;
+    const { scopus, facultyName} = req.body;
     const { designation } = req.params;
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
@@ -57,14 +59,14 @@ exports.calculateScopusPaper = async (req, res) => {
     const scopusPaperFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(scopusPaperFiles)];
 
-    const paperCount = Number(numPapers) || 1;
 
-    let marks = 0;
-    if (scopus === "Firstauthor") marks = 4;
-    else if (scopus === "secondauthor") marks = 2;
-    else if (scopus === "thirdauthor") marks = 1;
+    let totalMarks = 0;
+    scopus.forEach(paper => {
+      if (paper.typeOfAuthor === "Firstauthor") totalMarks += 4;
+      else if (paper.typeOfAuthor === "secondauthor") totalMarks += 2;
+      else if (paper.typeOfAuthor === "thirdauthor") totalMarks += 1;
+    });
     
-    const totalMarks = paperCount * marks;
     
     const maxPass = pointsDistribution[designation]?.research?.scopus ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
@@ -93,7 +95,7 @@ exports.calculateScopusPaper = async (req, res) => {
 // Q3: Aicte
 exports.calculateAictePaper = async (req, res) => {
   try {
-    const { aicte, facultyName, numPapers } = req.body;
+    const { aicte, facultyName} = req.body;
     const { designation } = req.params;
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
@@ -101,14 +103,14 @@ exports.calculateAictePaper = async (req, res) => {
     const AicteFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(AicteFiles)];
     
-    const paperCount = Number(numPapers) || 1;
 
-    let marks = 0;
-    if (aicte === "Firstauthor") marks = 4;
-    else if (aicte === "secondauthor") marks = 2;
-    else if (aicte === "thirdauthor") marks = 1;
+    let totalMarks = 0;
+    aicte.forEach(paper => {
+      if (paper.typeOfAuthor === "Firstauthor") totalMarks += 4;
+      else if (paper.typeOfAuthor === "secondauthor") totalMarks += 2;
+      else if (paper.typeOfAuthor === "thirdauthor") totalMarks += 1;
+    });
     
-    const totalMarks = paperCount * marks;
     
     const maxPass = pointsDistribution[designation]?.research?.aicte ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
@@ -491,6 +493,7 @@ exports.calculateSeedFund = async (req, res) => {
 
     const seedFundFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(seedFundFiles)];
+    
     let marks = 0;
     if (seedFund === "upto one lakh") marks = 1;
     else if (seedFund === "greater than two lakh") marks = 2;
