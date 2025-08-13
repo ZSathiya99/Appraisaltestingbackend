@@ -10,6 +10,9 @@ exports.calculateSciePaper = async (req, res) => {
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
     
+    const ScieFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(ScieFiles)];
+
     const paperCount = Number(numPapers) || 1;
 
     let marks = 0;
@@ -29,7 +32,8 @@ exports.calculateSciePaper = async (req, res) => {
 
     record.sciePaper = {
       value: "SCIE",
-      marks: finalMarks
+      marks: finalMarks,
+      sciePaperFiles : uniqueFiles
     };
 
     await record.save();
@@ -50,6 +54,9 @@ exports.calculateScopusPaper = async (req, res) => {
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
     
+    const scopusPaperFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(scopusPaperFiles)];
+
     const paperCount = Number(numPapers) || 1;
 
     let marks = 0;
@@ -69,7 +76,8 @@ exports.calculateScopusPaper = async (req, res) => {
 
     record.scopusPaper = {
       value: "Scopus",
-      marks: finalMarks
+      marks: finalMarks,
+      scopusPaperFiles : uniqueFiles
     };
 
     await record.save();
@@ -83,12 +91,15 @@ exports.calculateScopusPaper = async (req, res) => {
 };
 
 // Q3: Aicte
-exports.calculateScopusPaper = async (req, res) => {
+exports.calculateAictePaper = async (req, res) => {
   try {
     const { aicte, facultyName, numPapers } = req.body;
     const { designation } = req.params;
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+    
+    const AicteFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(AicteFiles)];
     
     const paperCount = Number(numPapers) || 1;
 
@@ -109,7 +120,8 @@ exports.calculateScopusPaper = async (req, res) => {
 
     record.aictePaper = {
       value: "Aicte",
-      marks: finalMarks
+      marks: finalMarks,
+      aictePaperFiles : uniqueFiles
     };
 
     await record.save();
@@ -159,6 +171,7 @@ exports.calculateScopusBook = async (req, res) => {
   }
 };
 
+
 // Q5: IndexedBook
 exports.calculateIndexedBook = async (req, res) => {
   try {
@@ -166,44 +179,10 @@ exports.calculateIndexedBook = async (req, res) => {
     const { designation } = req.params;
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
-  
-    const paperCount = Number(numPaper) || 0;
-
-    let marks = 1;
-  
-    const totalMarks = paperCount * marks;
     
-    const maxPass = pointsDistribution[designation]?.research?.indexbook ?? 0;
-    const finalMarks = Math.min(totalMarks, maxPass);
+    const IndexFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(IndexFiles)];
 
-    let record = await teaching.findOne({ facultyName, designation });
-    if (!record) {
-      record = new teaching({ facultyName, designation });
-    }
-
-    record.indexBook = {
-      value: "IndexBook",
-      marks: finalMarks
-    };
-
-    await record.save();
-    return res.status(200).json({
-      section: "IndexBook",
-      finalMarks,
-    });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-};
-
-// Q5: IndexedBook
-exports.calculateIndexedBook = async (req, res) => {
-  try {
-    const { facultyName, numPaper } = req.body;
-    const { designation } = req.params;
-
-    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
-  
     const paperCount = Number(numPaper) || 0;
 
     let marks = 1;
@@ -220,7 +199,8 @@ exports.calculateIndexedBook = async (req, res) => {
 
     record.indexBook = { 
       value: "IndexBook",
-      marks: finalMarks
+      marks: finalMarks,
+      indexBookFiles : uniqueFiles
     };
 
     await record.save();
@@ -243,6 +223,9 @@ exports.calculatePatentMarks = async (req, res) => {
       return res.status(400).json({ message: 'Designation missing in token' });
     }
 
+    const PatentFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(PatentFiles)];
+
     const patentCount = Number(numPatent) || 0;
     let marks = 0;
 
@@ -263,6 +246,7 @@ exports.calculatePatentMarks = async (req, res) => {
     record.patent = {
       value: "Patent",
       marks: finalMarks,
+      patentFiles : uniqueFiles
     };
 
     await record.save();
@@ -277,7 +261,8 @@ exports.calculatePatentMarks = async (req, res) => {
   }
 };
 
-// Q6: hindex
+
+// Q7: hindex
 exports.calculatehIndex = async (req, res) => {
   try {
     const { facultyName, hindex } = req.body;
@@ -292,6 +277,9 @@ exports.calculatehIndex = async (req, res) => {
     else if (hindex >= 3) hMarks = 2;
     else if (hindex >= 2) hMarks = 1;
 
+    const hindexFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(hindexFiles)];
+
     const maxPass = pointsDistribution[designation]?.research?.hindex ?? 0;
     const finalMarks = Math.min(hMarks, maxPass);
 
@@ -303,13 +291,13 @@ exports.calculatehIndex = async (req, res) => {
     record.hIndex = {
       value: "hindex",
       marks: finalMarks,
+      hIndexFiles : uniqueFiles
     };
 
     await record.save();
 
     return res.status(200).json({
       section: "hindex",
-      type: patentType,
       finalMarks,
     });
   } catch (err) {
@@ -317,39 +305,215 @@ exports.calculatehIndex = async (req, res) => {
   }
 };
 
-// Q6: h index
-exports.calculatehIndex = async (req, res) => {
+// Q8: 10index
+exports.calculateIIndex = async (req, res) => {
   try {
-    const { facultyName, hindex } = req.body;
+    const { facultyName, Iindex } = req.body;
     const { designation } = req.params;
 
     if (!designation) {
       return res.status(400).json({ message: 'Designation missing in token' });
     }
+    const IindexFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(IindexFiles)];
+    let marks = 0;
+    if (Iindex >= 5) marks = 3;
+    else if (Iindex >= 3) marks = 2;
+    else if (Iindex >= 2) marks = 1;
 
-    let hMarks = 0;
-    if (hindex >= 5) hMarks = 3;
-    else if (hindex >= 3) hMarks = 2;
-    else if (hindex >= 2) hMarks = 1;
-
-    const maxPass = pointsDistribution[designation]?.research?.hindex ?? 0;
-    const finalMarks = Math.min(hMarks, maxPass);
+    const maxPass = pointsDistribution[designation]?.research?.i10index ?? 0;
+    const finalMarks = Math.min(marks, maxPass);
 
     let record = await teaching.findOne({ facultyName, designation });
     if (!record) {
       record = new teaching({ facultyName, designation });
     }
 
-    record.hIndex = {
-      value: "hindex",
+    record.iIndex = {
+      value: "Iindex",
       marks: finalMarks,
+      iIndexFiles : uniqueFiles
+
     };
 
     await record.save();
 
     return res.status(200).json({
-      section: "hindex",
-      type: patentType,
+      section: "Iindex",
+      finalMarks,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+
+
+// Q9: Citation
+exports.calculateCitation = async (req, res) => {
+  try {
+    const { facultyName, citation } = req.body;
+    const { designation } = req.params;
+
+    if (!designation) {
+      return res.status(400).json({ message: 'Designation missing in token' });
+    }
+
+    const citationFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(citationFiles)];
+
+    let marks = 0;
+    if (citation >= 100) marks = 3;
+    else if (citation >= 50) marks = 2;
+    else if (citation >= 25) marks = 1;
+
+    const maxPass = pointsDistribution[designation]?.research?.citation ?? 0;
+    const finalMarks = Math.min(marks, maxPass);
+
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.citation = {
+      value: "citation",
+      marks: finalMarks,
+      citationFiles: uniqueFiles,
+
+    };
+
+    await record.save();
+
+    return res.status(200).json({
+      section: "citation",
+      finalMarks,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+
+
+// Q10: Consultancy
+exports.calculateConsultancy = async (req, res) => {
+  try {
+    const { facultyName, consultancy } = req.body;
+    const { designation } = req.params;
+
+    if (!designation) {
+      return res.status(400).json({ message: 'Designation missing in token' });
+    }
+    const consultancyFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(consultancyFiles)];
+
+    let marks = 0;
+    if (consultancy === "upto one lakh") marks = 2;
+    else if (consultancy === "two lakh") marks = 3;
+    else if (consultancy === "greater than five") marks = 4;
+
+    const maxPass = pointsDistribution[designation]?.research?.citation ?? 0;
+    const finalMarks = Math.min(marks, maxPass);
+
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.consultancy = {
+      value: "Consultancy",
+      marks: finalMarks,
+      consultancyFiles: uniqueFiles,
+    };
+
+    await record.save();
+
+    return res.status(200).json({
+      section: "Consultancy",
+      finalMarks,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+//Q9: foreign 
+exports.calculateForeignMarks = async (req, res) => {
+  try {
+
+    const input = req.body.foreignWork;
+    const { designation } = req.params;
+    const {facultyName} = req.body;
+
+    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+
+    
+    const foreignFiles = req.files?.map((file) => file.path) || [];
+    const isYes = input?.toLowerCase() === 'yes';
+    const marks = isYes ? 2 : 0;
+    const uniqueFiles = [...new Set(foreignFiles)];
+
+    const maxmark = pointsDistribution[designation]?.research?.collabrative ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
+
+    let record = await teaching.findOne({ facultyName, designation });
+
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.collabrative = {
+      value: input,
+      marks: finalMarks,
+      collabrativeFiles: uniqueFiles,
+    };
+
+    await record.save();
+
+    return res.status(200).json({
+      finalMarks,
+      files: uniqueFiles
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// Q10: SeedFund
+exports.calculateSeedFund = async (req, res) => {
+  try {
+    const { facultyName, seedFund } = req.body;
+    const { designation } = req.params;
+
+    if (!designation) {
+      return res.status(400).json({ message: 'Designation missing in token' });
+    }
+
+    const seedFundFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(seedFundFiles)];
+    let marks = 0;
+    if (seedFund === "upto one lakh") marks = 1;
+    else if (seedFund === "greater than two lakh") marks = 2;
+    else if (seedFund === " Research Publications ") marks = 1;
+
+    const maxPass = pointsDistribution[designation]?.research?.seedfund ?? 0;
+    const finalMarks = Math.min(marks, maxPass);
+
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.seedFund = {
+      value: "seedFund",
+      marks: finalMarks,
+      seedFundFiles: uniqueFiles,
+    };
+
+    await record.save();
+
+    return res.status(200).json({
+      section: "seedFund",
       finalMarks,
     });
   } catch (err) {
