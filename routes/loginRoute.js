@@ -31,7 +31,7 @@ router.post("/employee-login", async (req, res) => {
       return res.status(401).json({ message: "Invalid password" });
     }
 
-    const token = jwt.sign({ id: employee._id, email: employee.email, designation: employee.designation,
+    const token = jwt.sign({ id: employee._id, email: employee.email, designation: employee.designation, department: employee.department,
       facultyName : employee.fullName
      }, JWT_SECRET, {
       expiresIn: "1h",

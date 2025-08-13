@@ -14,7 +14,8 @@ const {
   calculateCitation,
   calculateConsultancy,
   calculateForeignMarks,
-  calculateSeedFund
+  calculateSeedFund,
+  calculateFundedProjectMarks
 
 
 } = require("../controllers/researchController");
@@ -31,6 +32,6 @@ router.post("/Citation/:designation",upload.any(),calculateCitation);
 router.post("/consultancy/:designation",upload.any(),calculateConsultancy);
 router.post("/Collabrative/:designation",upload.any(),calculateForeignMarks);
 router.post("/SeedFund/:designation",upload.any(),calculateSeedFund);
-
+router.post("/Fund/:designation",upload.any(),calculateFundedProjectMarks);
 
 module.exports = router;

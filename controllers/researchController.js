@@ -437,7 +437,7 @@ exports.calculateConsultancy = async (req, res) => {
   }
 };
 
-//Q9: foreign 
+//Q11: foreign 
 exports.calculateForeignMarks = async (req, res) => {
   try {
 
@@ -479,7 +479,7 @@ exports.calculateForeignMarks = async (req, res) => {
   }
 };
 
-// Q10: SeedFund
+// Q12: SeedFund
 exports.calculateSeedFund = async (req, res) => {
   try {
     const { facultyName, seedFund } = req.body;
@@ -520,3 +520,51 @@ exports.calculateSeedFund = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+
+// Q13: Funded
+exports.calculateFundedProjectMarks = async (req, res) => {
+  try {
+    const { facultyName, role, count } = req.body; 
+    const { designation } = req.params;
+
+    if (!designation) {
+      return res.status(400).json({ message: 'Designation missing in token' });
+    }
+
+    const projectCount = Number(count) || 0;
+
+    const FundFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(FundFiles)];
+    
+    let marksPerProject = 0;
+    if (role === "PI") marksPerProject = 5;
+    else if (role === "COPI") marksPerProject = 2;
+
+    const totalMarks = projectCount * marksPerProject;
+
+    const maxPass = pointsDistribution[designation]?.research?.fund ?? totalMarks;
+    const finalMarks = Math.min(totalMarks, maxPass);
+
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.passPercentage = {
+      value: "FundedProject",
+      marks: finalMarks,
+      fundedProjectFiles: uniqueFiles
+    };
+
+    await record.save();
+
+    return res.status(200).json({
+      section: "FundedProject",
+      finalMarks,
+    });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
