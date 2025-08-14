@@ -7,9 +7,8 @@ exports.calculateSciePaper = async (req, res) => {
   try {
     const { facultyName} = req.body; 
     const { designation } = req.params;
-
     let { scie } = req.body;
-    console.log(scie);
+
     if (!designation) {
       return res.status(400).json({ message: 'Designation missing in token' });
     }
@@ -66,30 +65,30 @@ exports.calculateSciePaper = async (req, res) => {
 // Q2: Scopus
 exports.calculateScopusPaper = async (req, res) => {
   try {
-    const { scopus, facultyName} = req.body;
+    const { facultyName} = req.body;
     const { designation } = req.params;
+    let { scopus } = req.body;
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
     
     const scopusPaperFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(scopusPaperFiles)];
 
-    let scopusData = scopus;
-
-    if (typeof scopusData === "string") {
+    if (typeof scopus === "string") {
       try {
-        scopusData = JSON.parse(scopusData);
-      } catch (err) {
-        return res.status(400).json({ error: "Invalid Scopus data format" });
+        scopus = JSON.parse(scopus);
+      } catch {
+        return res.status(400).json({ error: "Invalid scopus data format" });
       }
     }
 
-    if (!Array.isArray(scopusData)) {
-      return res.status(400).json({ error: "Scopus must be an array" });
+    if (!Array.isArray(scopus) || scopus.length === 0) {
+      return res.status(400).json({ error: "scopus must be a non-empty array" });
     }
 
+
     let totalMarks = 0;
-    scopusData.forEach(paper => {
+    scopus.forEach(paper => {
       if (paper.typeOfAuthor === "Firstauthor") totalMarks += 4;
       else if (paper.typeOfAuthor === "secondauthor") totalMarks += 2;
       else if (paper.typeOfAuthor === "thirdauthor") totalMarks += 1;
@@ -123,30 +122,30 @@ exports.calculateScopusPaper = async (req, res) => {
 // Q3: Aicte
 exports.calculateAictePaper = async (req, res) => {
   try {
-    const { aicte, facultyName} = req.body;
+    const {facultyName} = req.body;
     const { designation } = req.params;
+    let { aicte } = req.body;
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
     
     const AicteFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(AicteFiles)];
     
-    let aicteData = aicte;
-
-    if (typeof aicteData === "string") {
+    if (typeof aicte === "string") {
       try {
-        aicteData = JSON.parse(aicteData);
-      } catch (err) {
-        return res.status(400).json({ error: "Invalid Scopus data format" });
+        aicte = JSON.parse(aicte);
+      } catch {
+        return res.status(400).json({ error: "Invalid aicte data format" });
       }
     }
 
-    if (!Array.isArray(aicteData)) {
-      return res.status(400).json({ error: "Scopus must be an array" });
+    if (!Array.isArray(aicte) || aicte.length === 0) {
+      return res.status(400).json({ error: "aicte must be a non-empty array" });
     }
 
+
     let totalMarks = 0;
-    aicteData.forEach(paper => {
+    aicte.forEach(paper => {
       if (paper.typeOfAuthor === "Firstauthor") totalMarks += 4;
       else if (paper.typeOfAuthor === "secondauthor") totalMarks += 2;
       else if (paper.typeOfAuthor === "thirdauthor") totalMarks += 1;
