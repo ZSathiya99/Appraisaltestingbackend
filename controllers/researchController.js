@@ -15,8 +15,23 @@ exports.calculateSciePaper = async (req, res) => {
     const sciePaperFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(sciePaperFiles)];
 
+    let scieData = scie;
+
+    if (typeof scieData === "string") {
+      try {
+        scieData = JSON.parse(scieData);
+      } catch (err) {
+        return res.status(400).json({ error: "Invalid SCIE data format" });
+      }
+    }
+
+    if (!Array.isArray(scieData)) {
+      return res.status(400).json({ error: "SCIE must be an array" });
+    }
+
+
     let totalMarks = 0;
-    scie.forEach(paper => {
+    scieData.forEach(paper => {
       if (paper.typeOfAuthor === "Firstauthor") totalMarks += 4;
       else if (paper.typeOfAuthor === "secondauthor") totalMarks += 2;
       else if (paper.typeOfAuthor === "thirdauthor") totalMarks += 1;
@@ -29,7 +44,7 @@ exports.calculateSciePaper = async (req, res) => {
       record = new teaching({ facultyName, designation });
     }
 
-    record.passPercentage = {
+    record.sciePaper = {
       value: "SCIE",
       marks: finalMarks,
       sciePaperFiles:  uniqueFiles
@@ -59,9 +74,22 @@ exports.calculateScopusPaper = async (req, res) => {
     const scopusPaperFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(scopusPaperFiles)];
 
+    let scopusData = scopus;
+
+    if (typeof scopusData === "string") {
+      try {
+        scopusData = JSON.parse(scopusData);
+      } catch (err) {
+        return res.status(400).json({ error: "Invalid Scopus data format" });
+      }
+    }
+
+    if (!Array.isArray(scopusData)) {
+      return res.status(400).json({ error: "Scopus must be an array" });
+    }
 
     let totalMarks = 0;
-    scopus.forEach(paper => {
+    scopusData.forEach(paper => {
       if (paper.typeOfAuthor === "Firstauthor") totalMarks += 4;
       else if (paper.typeOfAuthor === "secondauthor") totalMarks += 2;
       else if (paper.typeOfAuthor === "thirdauthor") totalMarks += 1;
@@ -103,9 +131,22 @@ exports.calculateAictePaper = async (req, res) => {
     const AicteFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(AicteFiles)];
     
+    let aicteData = aicte;
+
+    if (typeof aicteData === "string") {
+      try {
+        aicteData = JSON.parse(aicteData);
+      } catch (err) {
+        return res.status(400).json({ error: "Invalid Scopus data format" });
+      }
+    }
+
+    if (!Array.isArray(aicteData)) {
+      return res.status(400).json({ error: "Scopus must be an array" });
+    }
 
     let totalMarks = 0;
-    aicte.forEach(paper => {
+    aicteData.forEach(paper => {
       if (paper.typeOfAuthor === "Firstauthor") totalMarks += 4;
       else if (paper.typeOfAuthor === "secondauthor") totalMarks += 2;
       else if (paper.typeOfAuthor === "thirdauthor") totalMarks += 1;
