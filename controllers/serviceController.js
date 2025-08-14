@@ -56,32 +56,112 @@ exports.calculateActivitiesMarks = async (req, res) => {
 
 
 // Q2: Branding
-exports.calculateActivitiesMarks = async (req, res) => {
+exports.calculateBrandingMarks = async (req, res) => {
   try {
-    const { facultyName, roles } = req.body; 
+
+    const input = req.body.branding;
+    const { designation } = req.params;
+    const {facultyName} = req.body;
+
+    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+
+    
+    const BrandingFiles = req.files?.map((file) => file.path) || [];
+    const isYes = input?.toLowerCase() === 'yes';
+    const marks = isYes ? 5 : 0;
+    const uniqueFiles = [...new Set(BrandingFiles)];
+
+    const maxmark = pointsDistribution[designation]?.service?.Branding ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
+
+    let record = await teaching.findOne({ facultyName, designation });
+
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.branding = {
+      value: input,
+      marks: finalMarks,
+      brandingFiles: uniqueFiles,
+    };
+
+    await record.save();
+
+    return res.status(200).json({
+      finalMarks,
+      files: uniqueFiles
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// Q3: Memebership
+exports.calculateMembershipMarks = async (req, res) => {
+  try {
+
+    const input = req.body.membership;
+    const { designation } = req.params;
+    const {facultyName} = req.body;
+
+    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+
+    
+    const MembershipFiles = req.files?.map((file) => file.path) || [];
+    const isYes = input?.toLowerCase() === 'yes';
+    const marks = isYes ? 4 : 1;
+    const uniqueFiles = [...new Set(MembershipFiles)];
+
+    const maxmark = pointsDistribution[designation]?.service?.Membership ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
+
+    let record = await teaching.findOne({ facultyName, designation });
+
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.membership = {
+      value: input,
+      marks: finalMarks,
+      membershipFiles: uniqueFiles,
+    };
+
+    await record.save();
+
+    return res.status(200).json({
+      finalMarks,
+      files: uniqueFiles
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+
+// Q4: Co-curricular
+exports.calculateCocurricularMarks = async (req, res) => {
+  try {
+    const { facultyName, role, count } = req.body; 
     const { designation } = req.params;
 
     if (!designation) {
       return res.status(400).json({ message: 'Designation missing in token' });
     }
 
-    const accFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(accFiles)];
+    const projectCount = Number(count) || 0;
 
-    const pointsMap = {
-      InstitutionalCoordinator: 5,
-      DepartmentCoordinator: 3,
-      FileIncharge: 2
-    };
+    const FundFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(FundFiles)];
+    
+    let marksPerProject = 0;
+    if (role === "ResourcePerson") marksPerProject = 2;
+    else if (role === "Events") marksPerProject = 1;
 
-    let totalMarks = 0;
-    roles?.forEach(role => {
-      if (pointsMap[role]) {
-        totalMarks += pointsMap[role];
-      }
-    });
+    const totalMarks = projectCount * marksPerProject;
 
-    const maxPass = pointsDistribution[designation]?.research?.accreditation ?? totalMarks;
+    const maxPass = pointsDistribution[designation]?.service?.External ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
 
     let record = await teaching.findOne({ facultyName, designation });
@@ -89,21 +169,20 @@ exports.calculateActivitiesMarks = async (req, res) => {
       record = new teaching({ facultyName, designation });
     }
 
-    record.activities = {
-      value: "activities",
+    record.external = {
+      value: "Co-curricular",
       marks: finalMarks,
-      accreditationFiles: uniqueFiles
+      externalFiles: uniqueFiles
     };
 
     await record.save();
 
     return res.status(200).json({
-      section: "AccreditationActivities",
-      finalMarks
+      section: "Co-curricular",
+      finalMarks,
     });
 
-  } catch (error) {
-    console.error("Error calculating accreditation activities marks:", error);
-    return res.status(500).json({ message: "Server error" });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 };
