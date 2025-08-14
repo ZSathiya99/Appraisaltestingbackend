@@ -8,8 +8,8 @@ exports.calculateSciePaper = async (req, res) => {
     const { facultyName} = req.body; 
     const { designation } = req.params;
 
-    let { scie } = req.body;
-    console.log(scie);
+    // let { scie } = req.body;
+    console.log(req.body);
     if (!designation) {
       return res.status(400).json({ message: 'Designation missing in token' });
     }
