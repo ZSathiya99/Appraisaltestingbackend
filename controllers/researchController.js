@@ -5,9 +5,11 @@ const pointsDistribution = require("../utils/prePoints");
 // Q1: SCIE
 exports.calculateSciePaper = async (req, res) => {
   try {
-    const { facultyName, scie } = req.body; 
+    const { facultyName} = req.body; 
     const { designation } = req.params;
 
+    let { scie } = req.body;
+    console.log(scie);
     if (!designation) {
       return res.status(400).json({ message: 'Designation missing in token' });
     }
@@ -15,23 +17,21 @@ exports.calculateSciePaper = async (req, res) => {
     const sciePaperFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(sciePaperFiles)];
 
-    let scieData = scie;
-
-    if (typeof scieData === "string") {
+    if (typeof scie === "string") {
       try {
-        scieData = JSON.parse(scieData);
-      } catch (err) {
+        scie = JSON.parse(scie);
+      } catch {
         return res.status(400).json({ error: "Invalid SCIE data format" });
       }
     }
 
-    if (!Array.isArray(scieData)) {
-      return res.status(400).json({ error: "SCIE must be an array" });
+    if (!Array.isArray(scie) || scie.length === 0) {
+      return res.status(400).json({ error: "SCIE must be a non-empty array" });
     }
 
 
     let totalMarks = 0;
-    scieData.forEach(paper => {
+    scie.forEach(paper => {
       if (paper.typeOfAuthor === "Firstauthor") totalMarks += 4;
       else if (paper.typeOfAuthor === "secondauthor") totalMarks += 2;
       else if (paper.typeOfAuthor === "thirdauthor") totalMarks += 1;
