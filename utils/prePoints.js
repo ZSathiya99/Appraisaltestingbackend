@@ -29,6 +29,14 @@ const pointsDistribution = {
       researchScholars: 8,
       collabrative: 2,
       seedfund: 2,
+    },
+    service: {
+      activities : 5,
+      Branding : 5,
+      Membership : 4,
+      External : 6,
+      Administration : 5,
+      Training : 0
     }
 
   },
@@ -62,6 +70,14 @@ const pointsDistribution = {
       researchScholars:3,
       collabrative: 2,
       seedfund: 2,
+    },
+    service: {
+      activities : 5,
+      Branding : 5,
+      Membership : 4,
+      External : 6,
+      Administration : 5,
+      Training : 0
     }
 
   },
@@ -95,6 +111,14 @@ const pointsDistribution = {
       researchScholars : 0,
       collabrative: 2,
       seedfund: 1,
+    },
+    service: {
+      activities : 3,
+      Branding : 5,
+      Membership : 4,
+      External : 3,
+      Administration : 5,
+      Training : 5
     }
   }
 };

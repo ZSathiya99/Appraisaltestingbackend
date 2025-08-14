@@ -17,7 +17,8 @@ const {
   getPointsByDesignation,
   calculateRoleMarks,
   deleteImage,
-  getTeachingRecord
+  getTeachingRecord,
+  calculateStudentProjectMarks
 } = require("../controllers/teachingController");
 
 router.get('/points/:designation', getPointsByDesignation);
@@ -68,9 +69,16 @@ router.post(
 );
 
 router.post(
+  "/project/:designation",
+  upload.any(),
+  calculateStudentProjectMarks
+);
+
+router.post(
   "/teachingrecord",
   getTeachingRecord
 );
+
 
 
 router.delete(

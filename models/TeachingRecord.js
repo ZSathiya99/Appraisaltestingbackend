@@ -148,6 +148,43 @@ const TechingSchema = new mongoose.Schema({
     marks: Number,
     researchScholarsFiles: [String],
   },
+
+  activities:{
+    value: String,   
+    marks: Number,
+    activitiesFiles: [String],
+  },
+
+  branding:{
+    value: String,   
+    marks: Number,
+    brandingFiles: [String],
+  },
+  
+  membership:{
+    value: String,   
+    marks: Number,
+    membershipFiles: [String],
+  },
+  
+  external:{
+    value: String,   
+    marks: Number,
+    externalFiles: [String],
+  },
+  
+  administration:{
+    value: String,   
+    marks: Number,
+    administrationFiles: [String],
+  },
+  
+  training:{
+    value: String,   
+    marks: Number,
+    trainingFiles: [String],
+  },
+  
   
   createdAt: {
     type: Date,
