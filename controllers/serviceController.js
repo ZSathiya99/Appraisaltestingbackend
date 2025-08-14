@@ -186,3 +186,88 @@ exports.calculateCocurricularMarks = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+
+//Q5: Assistance
+exports.calculateAssistanceMarks = async (req, res) => {
+  try {
+
+    const input = req.body.assistance;
+    const { designation } = req.params;
+    const {facultyName} = req.body;
+
+    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+
+    
+    const AssistanceFiles = req.files?.map((file) => file.path) || [];
+    const isYes = input?.toLowerCase() === 'yes';
+    const marks = isYes ? 5 : 0;
+    const uniqueFiles = [...new Set(AssistanceFiles)];
+
+    const maxmark = pointsDistribution[designation]?.service?.Administration ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
+
+    let record = await teaching.findOne({ facultyName, designation });
+
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.administration = {
+      value: "Assistance",
+      marks: finalMarks,
+      administrationFiles: uniqueFiles,
+    };
+
+    await record.save();
+
+    return res.status(200).json({
+      finalMarks,
+      files: uniqueFiles
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+
+//Q6: Training
+exports.calculateTrainingMarks = async (req, res) => {
+  try {
+
+    const { designation } = req.params;
+    const {facultyName, training } = req.body;
+
+    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+
+    const trainingFiles = req.files?.map((file) => file.path) || [];
+
+    let marks = 0;
+    if (training === "3 days & above") marks = 5;
+    else if (training === "2 days") marks = 3;
+    else if (training === "1 day") marks = 1;
+
+    const uniqueFiles = [...new Set(trainingFiles)];
+
+    const maxmark = pointsDistribution[designation]?.service?.Training ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
+
+    let record = await teaching.findOne({ facultyName, designation });
+    if (!record) {
+      record = new teaching({ facultyName, designation });
+    }
+
+    record.training = {
+      value: "training",
+      marks: finalMarks,
+      trainingFiles : uniqueFiles
+    };
+    await record.save();
+    return res.status(200).json({
+      section: "training",
+      finalMarks,
+      file : uniqueFiles
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};

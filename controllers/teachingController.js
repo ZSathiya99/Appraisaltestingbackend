@@ -343,10 +343,6 @@ exports.calculateFdpProgramMarks = async (req, res) => {
     const { designation } = req.params;
     const {facultyName} = req.body;
 
-    console.log("==== Incoming Request ====");
-    console.log("Body:", req.body);
-    console.log("Params:", req.params);
-    console.log("Files:", req.files);
 
     if (!designation) {
       return res.status(400).json({ message: 'Designation missing in token' });
