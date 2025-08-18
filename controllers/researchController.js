@@ -359,8 +359,8 @@ exports.calculateIIndex = async (req, res) => {
     const IindexFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(IindexFiles)];
     let marks = 0;
-    if (Iindex === "2 and above") marks = 3;
-    else if (Iindex === 1) marks = 2;
+    if (Iindex === "2 and above") marks = 2;
+    else if (Iindex === 1) marks = 1;
 
     const maxPass = pointsDistribution[designation]?.research?.i10index ?? 0;
     const finalMarks = Math.min(marks, maxPass);
@@ -453,7 +453,7 @@ exports.calculateConsultancy = async (req, res) => {
     else if (consultancy === "two lakh") marks = 3;
     else if (consultancy === "greater than five") marks = 4;
 
-    const maxPass = pointsDistribution[designation]?.research?.citation ?? 0;
+    const maxPass = pointsDistribution[designation]?.research?.consultancy ?? 0;
     const finalMarks = Math.min(marks, maxPass);
 
     let record = await teaching.findOne({ facultyName, designation });
