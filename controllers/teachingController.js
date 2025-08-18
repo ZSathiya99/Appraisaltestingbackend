@@ -546,7 +546,7 @@ exports.calculateRoleMarks = async  (req, res) => {
 
 
 // Get total marks
-exports.getFacultyRecord = async (req, res) => {
+exports.getTeachingRecord = async (req, res) => {
   try {
     const { facultyName, designation } = req.body;
 
