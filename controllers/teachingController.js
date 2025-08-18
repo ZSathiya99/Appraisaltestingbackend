@@ -545,8 +545,8 @@ exports.calculateRoleMarks = async  (req, res) => {
 
 
 
-// Get a teaching record 
-exports.getTeachingRecord = async (req, res) => {
+// Get total marks
+exports.getFacultyRecord = async (req, res) => {
   try {
     const { facultyName, designation } = req.body;
 
@@ -560,31 +560,80 @@ exports.getTeachingRecord = async (req, res) => {
     const record = await teaching.findOne(filter);
 
     if (!record) {
-      return res.status(404).json({ message: "No teaching record found" });
+      return res.status(404).json({ message: "No record found" });
     }
 
-    let totalMarks = 0;
-    const recordObj = record.toObject(); 
+    const recordObj = record.toObject();
 
-    for (const key in recordObj) {
-      if (
-        recordObj[key] &&
-        typeof recordObj[key] === "object" &&
-        recordObj[key].marks !== undefined
-      ) {
-        totalMarks += Number(recordObj[key].marks) || 0;
+    // Group fields by category
+    const teachingFields = [
+      "teachingAssignment",
+      "passPercentage",
+      "feedback",
+      "innovativeApproach",
+      "visitingFaculty",
+      "studentProject",
+      "fdpFunding",
+      "innovationProject",
+      "fdp",
+      "industry",
+      "tutorMeeting",
+      "academicPosition",
+    ];
+
+    const researchFields = [
+      "sciePaper",
+      "scopusPaper",
+      "aictePaper",
+      "scopusBook",
+      "indexBook",
+      "hIndex",
+      "iIndex",
+      "citation",
+      "consultancy",
+      "collabrative",
+      "seedFund",
+      "patent",
+      "fundedProject",
+      "researchScholars",
+    ];
+
+    const serviceFields = [
+      "activities",
+      "branding",
+      "membership",
+      "external",
+      "administration",
+      "training",
+    ];
+
+    const sumMarks = (fields) => {
+      let total = 0;
+      for (const field of fields) {
+        if (recordObj[field] && recordObj[field].marks !== undefined) {
+          total += Number(recordObj[field].marks) || 0;
+        }
       }
-    }
+      return total;
+    };
+
+    const teachingMarks = sumMarks(teachingFields);
+    const researchMarks = sumMarks(researchFields);
+    const serviceMarks = sumMarks(serviceFields);
+
+    const totalMarks = teachingMarks + researchMarks + serviceMarks;
 
     return res.status(200).json({
-      message: "Teaching record fetched successfully",
+      message: "total marks fetched successfully",
       record,
-      totalMarks
+      teachingMarks,
+      researchMarks,
+      serviceMarks,
+      totalMarks,
     });
-    
 
   } catch (err) {
-    console.error("Error fetching teaching record:", err.message);
+    console.error("Error fetching faculty record:", err.message);
     return res.status(500).json({ error: err.message });
   }
 };
