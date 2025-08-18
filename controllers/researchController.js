@@ -315,9 +315,9 @@ exports.calculatehIndex = async (req, res) => {
     }
 
     let hMarks = 0;
-    if (hindex >= 5) hMarks = 3;
-    else if (hindex >= 3) hMarks = 2;
-    else if (hindex >= 2) hMarks = 1;
+    if (hindex === "5 and above") hMarks = 3;
+    else if (hindex === 3) hMarks = 2;
+    else if (hindex === 2) hMarks = 1;
 
     const hindexFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(hindexFiles)];
@@ -359,9 +359,8 @@ exports.calculateIIndex = async (req, res) => {
     const IindexFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(IindexFiles)];
     let marks = 0;
-    if (Iindex >= 5) marks = 3;
-    else if (Iindex >= 3) marks = 2;
-    else if (Iindex >= 2) marks = 1;
+    if (Iindex === "2 and above") marks = 3;
+    else if (Iindex === 1) marks = 2;
 
     const maxPass = pointsDistribution[designation]?.research?.i10index ?? 0;
     const finalMarks = Math.min(marks, maxPass);
@@ -405,9 +404,9 @@ exports.calculateCitation = async (req, res) => {
     const uniqueFiles = [...new Set(citationFiles)];
 
     let marks = 0;
-    if (citation >= 100) marks = 3;
-    else if (citation >= 50) marks = 2;
-    else if (citation >= 25) marks = 1;
+    if (citation === "100 and above") marks = 3;
+    else if (citation === 50) marks = 2;
+    else if (citation === 25) marks = 1;
 
     const maxPass = pointsDistribution[designation]?.research?.citation ?? 0;
     const finalMarks = Math.min(marks, maxPass);
