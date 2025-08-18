@@ -536,7 +536,7 @@ exports.calculateSeedFund = async (req, res) => {
     let marks = 0;
     if (seedFund === "upto one lakh") marks = 1;
     else if (seedFund === "greater than two lakh") marks = 2;
-    else if (seedFund === " Research Publications ") marks = 1;
+    else if (seedFund === "Research Publications") marks = 1;
 
     const maxPass = pointsDistribution[designation]?.research?.seedfund ?? 0;
     const finalMarks = Math.min(marks, maxPass);
