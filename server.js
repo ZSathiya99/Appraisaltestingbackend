@@ -7,7 +7,7 @@ const uploadEmployeesRoute = require("./routes/uploadEmployees");
 const teachingRoutes = require("./routes/teachingRoutes");
 const subjectRoutes = require("./routes/subjectRoutes");
 const researchRoutes = require("./routes/researchRoutes");
-// const researchRoutes = require("./routes/");
+const serviceRoutes = require("./routes/serviceRoutes");
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -24,6 +24,8 @@ app.use("/api", uploadEmployeesRoute);
 app.use('/api', teachingRoutes);
 app.use('/api', subjectRoutes);
 app.use('/api', researchRoutes);
+app.use('/api', serviceRoutes);
+
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
