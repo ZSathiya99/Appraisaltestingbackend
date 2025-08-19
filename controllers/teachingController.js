@@ -650,10 +650,13 @@ exports.deleteImage = async (req, res) => {
     console.error("Filename is missing in params.");
     return res.status(400).json({ message: "Filename is required in URL" });
   }
+  filename = decodeURIComponent(filename);
 
   filename = filename.replace(/^uploads[\\/]/, "");
   
   const filePath = path.join(__dirname, "../uploads", filename);
+
+  console.log("Resolved filePath:", filePath);
 
   if (fs.existsSync(filePath)) {
     fs.unlink(filePath, (err) => {
