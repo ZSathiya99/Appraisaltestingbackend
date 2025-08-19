@@ -27,7 +27,7 @@ exports.calculateActivitiesMarks = async (req, res) => {
       }
     });
 
-    const maxPass = pointsDistribution[designation]?.research?.accreditation ?? totalMarks;
+    const maxPass = pointsDistribution[designation]?.service?.activities ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
 
     let record = await teaching.findOne({ facultyName, designation });

@@ -563,6 +563,7 @@ exports.calculateSeedFund = async (req, res) => {
   }
 };
 
+
 // Q13: Funded
 exports.calculateFundedProjectMarks = async (req, res) => {
   try {
