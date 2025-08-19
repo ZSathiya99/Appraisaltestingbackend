@@ -14,9 +14,11 @@ exports.calculateActivitiesMarks = async (req, res) => {
 
     if (typeof roles === "string") {
       try {
-        roles = JSON.parse(roles); 
+        roles = JSON.parse(roles); // handles '[ "InstitutionalCoordinator", "FileIncharge" ]'
       } catch {
-        roles = [roles];
+        roles = roles.includes(",")
+          ? roles.split(",").map(r => r.trim()) // handles "InstitutionalCoordinator,DepartmentCoordinator"
+          : [roles]; // handles "InstitutionalCoordinator"
       }
     }
     if (!Array.isArray(roles)) roles = [];
