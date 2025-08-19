@@ -592,7 +592,7 @@ exports.calculateFundedProjectMarks = async (req, res) => {
       record = new teaching({ facultyName, designation });
     }
 
-    record.passPercentage = {
+    record.fundedProject = {
       value: "FundedProject",
       marks: finalMarks,
       fundedProjectFiles: uniqueFiles
@@ -609,6 +609,7 @@ exports.calculateFundedProjectMarks = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+
 
 // Q14: Research Scholars 
 exports.calculateResearchScholarMarks = async (req, res) => {
