@@ -4,12 +4,22 @@ const pointsDistribution = require("../utils/prePoints");
 // Q1: Accreditation Activities
 exports.calculateActivitiesMarks = async (req, res) => {
   try {
-    const { facultyName, roles } = req.body; 
+    const { facultyName } = req.body; 
+    let { roles } = req.body;
     const { designation } = req.params;
 
     if (!designation) {
-      return res.status(400).json({ message: 'Designation missing in token' });
+      return res.status(400).json({ message: "Designation missing in token" });
     }
+
+    if (typeof roles === "string") {
+      try {
+        roles = JSON.parse(roles); 
+      } catch {
+        roles = [roles];
+      }
+    }
+    if (!Array.isArray(roles)) roles = [];
 
     const accFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(accFiles)];
@@ -17,11 +27,11 @@ exports.calculateActivitiesMarks = async (req, res) => {
     const pointsMap = {
       InstitutionalCoordinator: 5,
       DepartmentCoordinator: 3,
-      FileIncharge: 2
+      FileIncharge: 2,
     };
 
     let totalMarks = 0;
-    roles?.forEach(role => {
+    roles.forEach((role) => {
       if (pointsMap[role]) {
         totalMarks += pointsMap[role];
       }
@@ -38,21 +48,22 @@ exports.calculateActivitiesMarks = async (req, res) => {
     record.activities = {
       value: "activities",
       marks: finalMarks,
-      accreditationFiles: uniqueFiles
+      accreditationFiles: uniqueFiles,
     };
 
     await record.save();
 
     return res.status(200).json({
       section: "AccreditationActivities",
-      finalMarks
+      roles,
+      finalMarks,
     });
-
   } catch (error) {
     console.error("Error calculating accreditation activities marks:", error);
-    return res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 
 
 // Q2: Branding
