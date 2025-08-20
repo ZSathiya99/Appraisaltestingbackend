@@ -67,15 +67,11 @@ const TechingSchema = new mongoose.Schema({
     tutorMeetingFiles: [String],
   },
   academicPosition : {
-    value: String,   
+    value: { type: Object },   
     marks: Number,
     academicPositionFiles: [String],
   },
-  academicPosition : {
-    value: String,   
-    marks: Number,
-    academicPositionFiles: [String],
-  },
+  
   sciePaper :{
     value: String,   
     marks: Number,

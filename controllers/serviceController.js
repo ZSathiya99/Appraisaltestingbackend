@@ -14,17 +14,14 @@ exports.calculateActivitiesMarks = async (req, res) => {
 
     if (typeof roles === "string") {
       try {
-        roles = JSON.parse(roles); // handles '[ "InstitutionalCoordinator", "FileIncharge" ]'
+        roles = JSON.parse(roles); 
       } catch {
         roles = roles.includes(",")
-          ? roles.split(",").map(r => r.trim()) // handles "InstitutionalCoordinator,DepartmentCoordinator"
-          : [roles]; // handles "InstitutionalCoordinator"
+          ? roles.split(",").map(r => r.trim()) 
+          : [roles]; 
       }
     }
     if (!Array.isArray(roles)) roles = [];
-
-    console.log("Raw roles from body:", req.body.roles);
-    console.log("Parsed roles:", roles);
 
     const accFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(accFiles)];
@@ -42,12 +39,9 @@ exports.calculateActivitiesMarks = async (req, res) => {
       }
     });
 
-    console.log("TotalMarks:", totalMarks);
 
     const maxPass = pointsDistribution[designation]?.service?.activities ?? 0;
-    console.log("MaxPass allowed:", maxPass);
     const finalMarks = Math.min(totalMarks, maxPass);
-    console.log("Final Marks:", finalMarks);
 
     let record = await teaching.findOne({ facultyName, designation });
     if (!record) {
