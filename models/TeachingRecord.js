@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const TechingSchema = new mongoose.Schema({
+  employee: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Employee', 
+    required: true
+  },
+
   facultyName: {
     type: String,
     // required: true,
@@ -181,6 +187,11 @@ const TechingSchema = new mongoose.Schema({
     trainingFiles: [String],
   },
   
+  approvalStatus: {
+    type: String,
+    enum: ['Pending', 'Approved', 'Rejected'],
+    default: 'Pending'
+  },
   
   createdAt: {
     type: Date,

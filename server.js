@@ -8,6 +8,8 @@ const teachingRoutes = require("./routes/teachingRoutes");
 const subjectRoutes = require("./routes/subjectRoutes");
 const researchRoutes = require("./routes/researchRoutes");
 const serviceRoutes = require("./routes/serviceRoutes");
+const dashboadRoutes = require("./routes/dashboadRoutes")
+
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -25,6 +27,8 @@ app.use('/api', teachingRoutes);
 app.use('/api', subjectRoutes);
 app.use('/api', researchRoutes);
 app.use('/api', serviceRoutes);
+app.use('/api', dashboadRoutes);
+
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,

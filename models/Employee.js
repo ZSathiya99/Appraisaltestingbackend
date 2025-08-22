@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const employeeSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }, // ✅ Add this
+  password: { type: String, required: true }, 
   fullName: String,
   department: String,
   designation: String,
@@ -11,6 +11,7 @@ const employeeSchema = new mongoose.Schema({
   joiningDate: Date,
   salary: Number,
   managerEmail: String,
+  status: { type: String, enum: ['Active', 'Inactive'], default: 'Active' }
 });
 
 module.exports = mongoose.model("Employee", employeeSchema);
