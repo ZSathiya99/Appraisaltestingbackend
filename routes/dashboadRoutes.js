@@ -1,8 +1,8 @@
 
 const express = require("express");
 const router = express.Router();
-const { getTotalEmployees } = require("../controllers/dashboardController");
+const { getEmployeeStats } = require("../controllers/dashboardController");
 
-router.get("/total_employees", getTotalEmployees);
+router.get("/total_employees", getEmployeeStats);
 
 module.exports = router;
