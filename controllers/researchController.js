@@ -567,23 +567,23 @@ exports.calculateSeedFund = async (req, res) => {
 // Q13: Funded
 exports.calculateFundedProjectMarks = async (req, res) => {
   try {
-    const { facultyName, role, count } = req.body; 
+    const { facultyName } = req.body; 
     const { designation } = req.params;
 
     if (!designation) {
       return res.status(400).json({ message: 'Designation missing in token' });
     }
 
-    const projectCount = Number(count) || 0;
-
     const FundFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(FundFiles)];
-    
-    let marksPerProject = 0;
-    if (role === "PI") marksPerProject = 5;
-    else if (role === "COPI") marksPerProject = 2;
 
-    const totalMarks = projectCount * marksPerProject;
+    const piCount = Number(req.body.PI) || 0;
+    const copiCount = Number(req.body.CoPI) || 0;
+
+    const piMarks = 5;    
+    const copiMarks = 2;  
+
+    const totalMarks = (piCount * piMarks) + (copiCount * copiMarks);
 
     const maxPass = pointsDistribution[designation]?.research?.fund ?? totalMarks;
     const finalMarks = Math.min(totalMarks, maxPass);
@@ -606,10 +606,12 @@ exports.calculateFundedProjectMarks = async (req, res) => {
       finalMarks,
     });
 
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 
 // Q14: Research Scholars 
