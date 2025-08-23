@@ -13,14 +13,6 @@ exports.generateTeachingReportPDF = async (req, res) => {
     const record = await TeachingRecord.findOne({ facultyName, designation }).populate('employee');
     if (!record) return res.status(404).json({ message: 'No record found for this faculty' });
 
-    // Mark the teaching record as submitted
-    record.isSubmitted = true;
-    await record.save();
-
-    // Update the employee formStatus
-    if (record.employee) {
-      await Employee.findByIdAndUpdate(record.employee._id, { formStatus: 'Submitted' });
-    }
 
     // Create a PDF document
     const doc = new PDFDocument({ margin: 50 });
