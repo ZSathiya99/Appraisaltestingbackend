@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/uploadMiddleware");
+const { generateFacultyReportPDF } = require('../controllers/pdfController');
 
 
 const {
@@ -18,7 +19,8 @@ const {
   calculateRoleMarks,
   deleteImage,
   getTeachingRecord,
-  calculateStudentProjectMarks
+  calculateStudentProjectMarks,
+  generateFacultyReportPDF
 } = require("../controllers/teachingController");
 
 router.get('/points/:designation', getPointsByDesignation);
@@ -85,5 +87,9 @@ router.delete(
   "/deleteImage/:filename",
   deleteImage
 );
+
+
+router.post('/report_pdf', generateFacultyReportPDF);
+
 
 module.exports = router;

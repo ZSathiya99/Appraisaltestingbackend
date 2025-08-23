@@ -186,6 +186,10 @@ const TechingSchema = new mongoose.Schema({
     marks: Number,
     trainingFiles: [String],
   },
+  isSubmitted: {
+    type: Boolean,
+    default: false
+  },
   
   approvalStatus: {
     type: String,

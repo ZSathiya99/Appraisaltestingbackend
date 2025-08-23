@@ -19,11 +19,19 @@ exports.getEmployeeStats = async (req, res) => {
       status: "Active"
     });
 
+     const submittedForms = await TeachingRecord.countDocuments({
+      isFormSubmitted: true
+    });
+
+    const formSubmissionPercentage =
+      totalEmployees > 0 ? ((submittedForms / totalEmployees) * 100).toFixed(2) : 0;
+
     res.json({
       totalEmployees,
       professorCount,
       associateProfessorCount,
-      assistantProfessorCount
+      assistantProfessorCount,
+      formSubmissionPercentage: `${formSubmissionPercentage}%`
     });
   } catch (error) {
     console.error("Error fetching employee stats:", error);
@@ -55,5 +63,29 @@ exports.getEmployees = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error fetching employees" });
+  }
+};
+
+exports.markFormSubmitted = async (req, res) => {
+  try {
+    const { employeeId } = req.params;
+
+    const updatedEmployee = await Employee.findByIdAndUpdate(
+      employeeId,
+      { isSubmitted: true },
+      { new: true }
+    );
+
+    if (!updatedEmployee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    res.json({
+      message: "Form marked as submitted successfully",
+      employee: updatedEmployee
+    });
+  } catch (error) {
+    console.error("Error updating submission status:", error);
+    res.status(500).json({ message: "Error marking form as submitted" });
   }
 };
