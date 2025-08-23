@@ -73,7 +73,7 @@ exports.markFormSubmitted = async (req, res) => {
 
     const updatedEmployee = await Employee.findByIdAndUpdate(
       employeeId,
-      { isSubmitted: true },
+      { formStatus: 'Submitted' },
       { new: true }
     );
 

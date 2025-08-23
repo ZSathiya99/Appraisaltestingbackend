@@ -11,7 +11,12 @@ const employeeSchema = new mongoose.Schema({
   joiningDate: Date,
   salary: Number,
   managerEmail: String,
-  status: { type: String, enum: ['Active', 'Inactive'], default: 'Active' }
+  status: { type: String, enum: ['Active', 'Inactive'], default: 'Active' },
+  formStatus: {
+    type: String,
+    enum: ['Pending', 'Submitted'],
+    default: 'Pending' 
+  },
 });
 
 module.exports = mongoose.model("Employee", employeeSchema);
