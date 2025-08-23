@@ -1,100 +1,69 @@
-const PDFDocument = require('pdfkit');
+const puppeteer = require('puppeteer');
 
-exports.generateFacultyReportPDF = async (req, res) => {
+exports.generateTeachingReportPDF = async (req, res) => {
   try {
     const { facultyName, designation } = req.body;
-
-    if (!facultyName) {
-      return res.status(400).json({ message: "Faculty name is required" });
+    if (!facultyName || !designation) {
+      return res.status(400).json({ message: 'facultyName and designation are required' });
     }
 
+    // Fetch the record using existing logic
     const record = await teaching.findOne({ facultyName, designation });
-
     if (!record) {
-      return res.status(404).json({ message: "No record found" });
+      return res.status(404).json({ message: 'No record found for this faculty' });
     }
 
-    // Set PDF headers
-    res.setHeader('Content-Disposition', 'attachment; filename="faculty-report.pdf"');
-    res.setHeader('Content-Type', 'application/pdf');
+    const recordObj = record.toObject();
 
-    // Create PDF document
-    const doc = new PDFDocument({ margin: 50 });
-    doc.pipe(res);
-
-    // Header
-    doc.fontSize(24).text('Faculty Performance Report', { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(14).text(`Faculty Name: ${facultyName}`);
-    doc.text(`Designation: ${designation}`);
-    doc.moveDown();
-
-    // Sections
-    const addSection = (title, value, marks) => {
-      doc.fontSize(14).text(title, { underline: true });
-      doc.fontSize(12).text(`Value: ${value}`);
-      doc.text(`Marks: ${marks}`);
-      doc.moveDown();
-    };
-
+    // Extract sections dynamically
     const sections = [
-      { title: "Teaching Assignment", field: record.teachingAssignment },
-      { title: "Pass Percentage", field: record.passPercentage },
-      { title: "Student Feedback", field: record.feedback },
-      { title: "Innovative Approach", field: record.innovativeApproach },
-      { title: "Guest Lecture", field: record.visitingFaculty },
-      { title: "FDP Funding", field: record.fdpFunding },
-      { title: "High Level Competition", field: record.innovationProject },
-      { title: "FDP Program", field: record.fdp },
-      { title: "Industry Involvement", field: record.industry },
-      { title: "Tutor Ward Meeting", field: record.tutorMeeting },
-      { title: "Roles in Academic", field: record.academicPosition },
-      { title: "Student Projects & Publications", field: record.studentProjectsAndPublications },
+      { key: 'teachingAssignment', label: 'Teaching Assignment' },
+      { key: 'passPercentage', label: 'Pass Percentage' },
+      { key: 'feedback', label: 'Student Feedback' },
+      { key: 'innovativeApproach', label: 'Innovative Approach' },
+      { key: 'visitingFaculty', label: 'Guest Lectures' },
+      { key: 'fdpFunding', label: 'FDP Funding' },
+      { key: 'innovationProject', label: 'Innovation Project' },
+      { key: 'fdp', label: 'FDP Programme' },
+      { key: 'industry', label: 'Industry Involvement' },
+      { key: 'tutorMeeting', label: 'Tutor-Ward Meeting' },
+      { key: 'academicPosition', label: 'Academic Roles' }
     ];
 
-    sections.forEach(({ title, field }) => {
-      if (field) {
-        addSection(title, field.value || '-', field.marks || 0);
+    let rowsHTML = '';
+    let totalMarks = 0;
+
+    sections.forEach(section => {
+      const data = recordObj[section.key];
+      if (data && data.marks !== undefined) {
+        rowsHTML += `<tr><td>${section.label}</td><td>${data.marks}</td></tr>`;
+        totalMarks += Number(data.marks);
       }
     });
 
-    // Total Marks
-    const sumMarks = (fields) => fields.reduce((total, f) => total + (f && f.marks ? f.marks : 0), 0);
+    // Load HTML template
+    let html = fs.readFileSync('./templates/teaching-report.html', 'utf-8');
+    html = html.replace('{{facultyName}}', facultyName)
+               .replace('{{designation}}', designation)
+               .replace('{{date}}', new Date().toLocaleDateString())
+               .replace('{{rows}}', rowsHTML)
+               .replace('{{totalMarks}}', totalMarks);
 
-    const teachingFields = [
-      record.teachingAssignment, record.passPercentage, record.feedback, record.innovativeApproach,
-      record.visitingFaculty, record.studentProject, record.fdpFunding, record.innovationProject,
-      record.fdp, record.industry, record.tutorMeeting, record.academicPosition
-    ];
+    // Generate PDF using Puppeteer
+    const browser = await puppeteer.launch({ headless: 'new' });
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
+    await browser.close();
 
-    const researchFields = [
-      record.sciePaper, record.scopusPaper, record.aictePaper, record.scopusBook, record.indexBook,
-      record.hIndex, record.iIndex, record.citation, record.consultancy, record.collabrative,
-      record.seedFund, record.patent, record.fundedProject, record.researchScholars
-    ];
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${facultyName}-teaching-report.pdf"`
+    });
+    res.send(pdfBuffer);
 
-    const serviceFields = [
-      record.activities, record.branding, record.membership, record.external,
-      record.administration, record.training
-    ];
-
-    const teachingMarks = sumMarks(teachingFields);
-    const researchMarks = sumMarks(researchFields);
-    const serviceMarks = sumMarks(serviceFields);
-    const totalMarks = teachingMarks + researchMarks + serviceMarks;
-
-    doc.moveDown();
-    doc.fontSize(16).text('Summary', { underline: true });
-    doc.fontSize(12).text(`Teaching Marks: ${teachingMarks}`);
-    doc.text(`Research Marks: ${researchMarks}`);
-    doc.text(`Service Marks: ${serviceMarks}`);
-    doc.text(`Total Marks: ${totalMarks}`);
-
-    // Finalize PDF
-    doc.end();
-
-  } catch (error) {
-    console.error('Error generating PDF:', error.message);
-    return res.status(500).json({ error: error.message });
+  } catch (err) {
+    console.error('Error generating teaching report PDF:', err);
+    res.status(500).json({ error: err.message });
   }
 };

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/uploadMiddleware");
-const { generateFacultyReportPDF } = require('../controllers/pdfController');
+const { generateTeachingReportPDF } = require('../controllers/pdfController');
 
 
 const {
@@ -88,7 +88,7 @@ router.delete(
 );
 
 
-router.post('/report_pdf', generateFacultyReportPDF);
+router.post('/report_pdf', generateTeachingReportPDF);
 
 
 module.exports = router;
