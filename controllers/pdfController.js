@@ -52,7 +52,10 @@ exports.generateTeachingReportPDF = async (req, res) => {
                .replace('{{totalMarks}}', totalMarks);
 
     // Generate PDF using Puppeteer
-    const browser = await puppeteer.launch({ headless: 'new' });
+    const browser = await puppeteer.launch({
+      headless: true, // Fully headless
+      args: ['--no-sandbox', '--disable-setuid-sandbox'] // Important for server environments
+    });
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
     const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
