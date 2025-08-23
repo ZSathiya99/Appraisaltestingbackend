@@ -1,15 +1,18 @@
-const puppeteer = require('puppeteer');
+const chromium = require('chrome-aws-lambda');
+const puppeteer = require('puppeteer-core');
 const teaching = require('../models/TeachingRecord');
 const fs = require('fs');
+const path = require('path');
 
 exports.generateTeachingReportPDF = async (req, res) => {
   try {
     const { facultyName, designation } = req.body;
+
     if (!facultyName || !designation) {
       return res.status(400).json({ message: 'facultyName and designation are required' });
     }
 
-    // Fetch the record using existing logic
+    // ✅ Fetch record from DB
     const record = await teaching.findOne({ facultyName, designation });
     if (!record) {
       return res.status(404).json({ message: 'No record found for this faculty' });
@@ -17,7 +20,7 @@ exports.generateTeachingReportPDF = async (req, res) => {
 
     const recordObj = record.toObject();
 
-    // Extract sections dynamically
+    // ✅ Dynamic sections
     const sections = [
       { key: 'teachingAssignment', label: 'Teaching Assignment' },
       { key: 'passPercentage', label: 'Pass Percentage' },
@@ -32,6 +35,7 @@ exports.generateTeachingReportPDF = async (req, res) => {
       { key: 'academicPosition', label: 'Academic Roles' }
     ];
 
+    // ✅ Build table rows
     let rowsHTML = '';
     let totalMarks = 0;
 
@@ -43,24 +47,37 @@ exports.generateTeachingReportPDF = async (req, res) => {
       }
     });
 
-    // Load HTML template
-    let html = fs.readFileSync('./templates/teaching-report.html', 'utf-8');
-    html = html.replace('{{facultyName}}', facultyName)
-               .replace('{{designation}}', designation)
-               .replace('{{date}}', new Date().toLocaleDateString())
-               .replace('{{rows}}', rowsHTML)
-               .replace('{{totalMarks}}', totalMarks);
+    // ✅ Load HTML Template (ensure correct path)
+    const templatePath = path.join(__dirname, '../templates/teaching-report.html');
+    let html = fs.readFileSync(templatePath, 'utf-8');
 
-    // Generate PDF using Puppeteer
+    html = html
+      .replace('{{facultyName}}', facultyName)
+      .replace('{{designation}}', designation)
+      .replace('{{date}}', new Date().toLocaleDateString())
+      .replace('{{rows}}', rowsHTML)
+      .replace('{{totalMarks}}', totalMarks);
+
+    // ✅ Detect Local vs Render/AWS Lambda
+    const isLocal = !process.env.AWS_EXECUTION_ENV;
+
     const browser = await puppeteer.launch({
-      headless: true, // Fully headless
-      args: ['--no-sandbox', '--disable-setuid-sandbox'] // Important for server environments
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: isLocal
+        ? puppeteer.executablePath() // Local Chrome from puppeteer
+        : await chromium.executablePath, // Render/AWS Chrome
+      headless: chromium.headless,
     });
+
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
+
     const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
+
     await browser.close();
 
+    // ✅ Send PDF response
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="${facultyName}-teaching-report.pdf"`

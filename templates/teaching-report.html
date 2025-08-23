@@ -1,51 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
+  <title>Teaching Report</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f8f8f8; }
-    .report-container {
-      width: 800px;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h2 { color: #333; text-align: center; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: left;
-      font-size: 14px;
-    }
-    th { background: #f0f0f0; }
-    .total { font-weight: bold; font-size: 16px; margin-top: 20px; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h1, h2 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #f4f4f4; }
+    .total { font-weight: bold; }
   </style>
 </head>
 <body>
-  <div class="report-container">
-    <h2>Teaching Performance Report</h2>
-    <p><strong>Faculty Name:</strong> {{facultyName}}</p>
-    <p><strong>Designation:</strong> {{designation}}</p>
-    <p><strong>Date:</strong> {{date}}</p>
+  <h1>Teaching Report</h1>
+  <p><strong>Faculty:</strong> {{facultyName}}</p>
+  <p><strong>Designation:</strong> {{designation}}</p>
+  <p><strong>Date:</strong> {{date}}</p>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Category</th>
-          <th>Marks</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{rows}}
-      </tbody>
-    </table>
-    <p class="total">Total Marks: {{totalMarks}}</p>
-  </div>
+  <table>
+    <thead>
+      <tr><th>Section</th><th>Marks</th></tr>
+    </thead>
+    <tbody>
+      {{rows}}
+    </tbody>
+    <tfoot>
+      <tr class="total"><td>Total Marks</td><td>{{totalMarks}}</td></tr>
+    </tfoot>
+  </table>
 </body>
 </html>
