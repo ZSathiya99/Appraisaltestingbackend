@@ -6,15 +6,11 @@ const path = require('path');
 exports.generateTeachingReportPDF = async (req, res) => {
   try {
     const { facultyName, designation } = req.body;
-
-    if (!facultyName || !designation) {
+    if (!facultyName || !designation)
       return res.status(400).json({ message: 'facultyName and designation are required' });
-    }
 
     const record = await teaching.findOne({ facultyName, designation });
-    if (!record) {
-      return res.status(404).json({ message: 'No record found for this faculty' });
-    }
+    if (!record) return res.status(404).json({ message: 'No record found for this faculty' });
 
     const recordObj = record.toObject();
 
@@ -53,18 +49,11 @@ exports.generateTeachingReportPDF = async (req, res) => {
       .replace('{{rows}}', rowsHTML)
       .replace('{{totalMarks}}', totalMarks);
 
-    // Detect if running locally or on Render
-    const isLocal = process.env.NODE_ENV !== 'production';
-
-    // ✅ Important: Only use chrome-aws-lambda on Render/Lambda
-    const executablePath = isLocal
-      ? undefined // Puppeteer will use locally installed Chrome
-      : await chromium.executablePath;
-
+    // Always use chrome-aws-lambda on Render
     const browser = await chromium.puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath, // MUST use this
+      executablePath: await chromium.executablePath,
       headless: chromium.headless,
     });
 
