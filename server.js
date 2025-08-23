@@ -16,7 +16,7 @@ app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
 app.use(cors({
-  origin: 'http://localhost:5173', 
+  origin: ['http://localhost:5173','http://localhost:5173' ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));

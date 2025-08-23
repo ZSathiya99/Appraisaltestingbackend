@@ -12,7 +12,7 @@ exports.generateTeachingReportPDF = async (req, res) => {
       return res.status(400).json({ message: 'facultyName and designation are required' });
     }
 
-    // ✅ Fetch record from DB
+    // Fetch record
     const record = await teaching.findOne({ facultyName, designation });
     if (!record) {
       return res.status(404).json({ message: 'No record found for this faculty' });
@@ -20,7 +20,6 @@ exports.generateTeachingReportPDF = async (req, res) => {
 
     const recordObj = record.toObject();
 
-    // ✅ Dynamic sections
     const sections = [
       { key: 'teachingAssignment', label: 'Teaching Assignment' },
       { key: 'passPercentage', label: 'Pass Percentage' },
@@ -35,7 +34,6 @@ exports.generateTeachingReportPDF = async (req, res) => {
       { key: 'academicPosition', label: 'Academic Roles' }
     ];
 
-    // ✅ Build table rows
     let rowsHTML = '';
     let totalMarks = 0;
 
@@ -47,7 +45,6 @@ exports.generateTeachingReportPDF = async (req, res) => {
       }
     });
 
-    // ✅ Load HTML Template (ensure correct path)
     const templatePath = path.join(__dirname, '../templates/teaching-report.html');
     let html = fs.readFileSync(templatePath, 'utf-8');
 
@@ -58,15 +55,14 @@ exports.generateTeachingReportPDF = async (req, res) => {
       .replace('{{rows}}', rowsHTML)
       .replace('{{totalMarks}}', totalMarks);
 
-    // ✅ Detect Local vs Render/AWS Lambda
-    const isLocal = !process.env.AWS_EXECUTION_ENV;
+    const isLocal = process.env.NODE_ENV !== 'production';
 
     const browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
       executablePath: isLocal
-        ? puppeteer.executablePath() // Local Chrome from puppeteer
-        : await chromium.executablePath, // Render/AWS Chrome
+        ? (await import('puppeteer')).executablePath() // full Puppeteer locally
+        : await chromium.executablePath, // Render/AWS
       headless: chromium.headless,
     });
 
@@ -77,7 +73,6 @@ exports.generateTeachingReportPDF = async (req, res) => {
 
     await browser.close();
 
-    // ✅ Send PDF response
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="${facultyName}-teaching-report.pdf"`
