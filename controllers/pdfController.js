@@ -53,11 +53,18 @@ exports.generateTeachingReportPDF = async (req, res) => {
       .replace('{{rows}}', rowsHTML)
       .replace('{{totalMarks}}', totalMarks);
 
-    // Launch Puppeteer with chrome-aws-lambda
+    // Detect if running locally or on Render
+    const isLocal = process.env.NODE_ENV !== 'production';
+
+    // ✅ Important: Only use chrome-aws-lambda on Render/Lambda
+    const executablePath = isLocal
+      ? undefined // Puppeteer will use locally installed Chrome
+      : await chromium.executablePath;
+
     const browser = await chromium.puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath,
+      executablePath: executablePath,
       headless: chromium.headless,
     });
 
