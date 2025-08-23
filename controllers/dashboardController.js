@@ -1,4 +1,5 @@
 const  Employee = require("../models/Employee");
+const TeachingRecord = require("../models/TeachingRecord")
 
 exports.getEmployeeStats = async (req, res) => {
   try {
