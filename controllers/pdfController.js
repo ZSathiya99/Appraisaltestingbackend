@@ -1,5 +1,4 @@
 const chromium = require('chrome-aws-lambda');
-const puppeteer = require('puppeteer-core');
 const teaching = require('../models/TeachingRecord');
 const fs = require('fs');
 const path = require('path');
@@ -12,7 +11,6 @@ exports.generateTeachingReportPDF = async (req, res) => {
       return res.status(400).json({ message: 'facultyName and designation are required' });
     }
 
-    // Fetch record
     const record = await teaching.findOne({ facultyName, designation });
     if (!record) {
       return res.status(404).json({ message: 'No record found for this faculty' });
@@ -55,14 +53,11 @@ exports.generateTeachingReportPDF = async (req, res) => {
       .replace('{{rows}}', rowsHTML)
       .replace('{{totalMarks}}', totalMarks);
 
-    const isLocal = process.env.NODE_ENV !== 'production';
-
-    const browser = await puppeteer.launch({
+    // Launch Puppeteer with chrome-aws-lambda
+    const browser = await chromium.puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath: isLocal
-        ? (await import('puppeteer')).executablePath() // full Puppeteer locally
-        : await chromium.executablePath, // Render/AWS
+      executablePath: await chromium.executablePath,
       headless: chromium.headless,
     });
 
