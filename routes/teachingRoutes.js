@@ -88,7 +88,7 @@ router.delete(
 );
 
 
-// router.post('/report_pdf', generateTeachingReportPDF);
+router.post('/report_pdf', generateTeachingReportPDF);
 
 
 module.exports = router;
