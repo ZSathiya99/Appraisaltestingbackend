@@ -20,7 +20,6 @@ const {
   deleteImage,
   getTeachingRecord,
   calculateStudentProjectMarks,
-  generateFacultyReportPDF
 } = require("../controllers/teachingController");
 
 router.get('/points/:designation', getPointsByDesignation);
