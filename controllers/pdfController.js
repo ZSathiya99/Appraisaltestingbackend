@@ -64,7 +64,7 @@ exports.generateTeachingReportPDF = async (req, res) => {
     const browser = await chromium.puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath: executablePath,
+      executablePath: await chromium.executablePath, // MUST use this
       headless: chromium.headless,
     });
 
