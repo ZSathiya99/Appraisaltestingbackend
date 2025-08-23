@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const {teaching} = require('../models/TeachingRecord')
 
 exports.generateTeachingReportPDF = async (req, res) => {
   try {
