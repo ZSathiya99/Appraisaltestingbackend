@@ -11,6 +11,7 @@ const serviceRoutes = require("./routes/serviceRoutes");
 const dashboadRoutes = require("./routes/dashboadRoutes")
 
 dotenv.config();
+require('dotenv').config();
 const app = express();
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
