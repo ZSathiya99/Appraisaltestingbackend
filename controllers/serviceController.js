@@ -43,7 +43,7 @@ exports.calculateActivitiesMarks = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.service?.activities ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
         
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -90,7 +90,7 @@ exports.calculateBrandingMarks = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.service?.Branding ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
         
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -133,7 +133,7 @@ exports.calculateMembershipMarks = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.service?.Membership ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
         
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -182,7 +182,7 @@ exports.calculateCocurricularMarks = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.service?.External ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
         
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -226,7 +226,7 @@ exports.calculateAssistanceMarks = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.service?.Administration ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
         
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -272,7 +272,7 @@ exports.calculateTrainingMarks = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.service?.Training ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
         
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {

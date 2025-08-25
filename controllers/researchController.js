@@ -38,7 +38,7 @@ exports.calculateSciePaper = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.research?.scie ?? totalMarks;
     const finalMarks = Math.min(totalMarks, maxPass);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
     
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -100,7 +100,7 @@ exports.calculateScopusPaper = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.research?.scopus ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
     
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -159,7 +159,7 @@ exports.calculateAictePaper = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.research?.aicte ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
     
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -199,7 +199,7 @@ exports.calculateScopusBook = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.research?.book_scopus ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
     
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -242,7 +242,7 @@ exports.calculateIndexedBook = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.research?.indexbook ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
     
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -290,7 +290,7 @@ exports.calculatePatentMarks = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.research?.patent ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
     
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -337,7 +337,7 @@ exports.calculatehIndex = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.research?.hindex ?? 0;
     const finalMarks = Math.min(hMarks, maxPass);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
     
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -379,7 +379,7 @@ exports.calculateIIndex = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.research?.i10index ?? 0;
     const finalMarks = Math.min(marks, maxPass);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
     
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -472,7 +472,7 @@ exports.calculateConsultancy = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.research?.consultancy ?? 0;
     const finalMarks = Math.min(marks, maxPass);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
     
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -515,7 +515,7 @@ exports.calculateForeignMarks = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.research?.collabrative ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
     
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -560,7 +560,7 @@ exports.calculateSeedFund = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.research?.seedfund ?? 0;
     const finalMarks = Math.min(marks, maxPass);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
     
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -609,7 +609,7 @@ exports.calculateFundedProjectMarks = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.research?.fund ?? totalMarks;
     const finalMarks = Math.min(totalMarks, maxPass);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
     
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
@@ -668,7 +668,7 @@ exports.calculateResearchScholarMarks = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.research?.researchScholars ?? marks;
     const finalMarks = Math.min(marks, maxPass);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
     
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
