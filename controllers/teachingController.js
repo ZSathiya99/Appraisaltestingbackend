@@ -28,7 +28,7 @@ exports.calculateTeachingMarks = async (req, res) => {
     const { teachingAssignment, facultyName } = req.body;
     const { designation } = req.params;
     console.log(req);
-    console.log(req.user);
+    // console.log(req.user);
     const employeeId = req.user._id;
 
     if (!designation) {
