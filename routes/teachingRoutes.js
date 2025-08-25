@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/uploadMiddleware");
 const { generateTeachingReportPDF } = require('../controllers/pdfController');
+const authenticate = require('../middlewares/authMiddleware');
 
 
 const {
@@ -23,7 +24,7 @@ const {
 } = require("../controllers/teachingController");
 
 router.get('/points/:designation', getPointsByDesignation);
-router.post("/teaching/:designation", upload.any(), calculateTeachingMarks);
+router.post("/teaching/:designation", upload.any(), authenticate, calculateTeachingMarks);
 router.post("/passPercentage/:designation", calculatePassPercentageMarks);
 router.post("/feedback/:designation", calculateStudentFeedbackMarks);
 router.post(

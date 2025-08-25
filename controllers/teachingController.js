@@ -5,6 +5,7 @@ const pointsDistribution = require("../utils/prePoints");
 const fs = require("fs");
 const path = require("path");
 
+
 exports.getPointsByDesignation = (req, res) => {
   const { designation } = req.params;
   console.log(designation)
@@ -27,16 +28,14 @@ exports.calculateTeachingMarks = async (req, res) => {
   try {
     const { teachingAssignment, facultyName } = req.body;
     const { designation } = req.params;
-    console.log(req);
-    // console.log(req.user);
-    const employeeId = req.user._id;
+    const employee = req.user._id;
 
     if (!designation) {
       return res.status(400).json({ message: 'Designation missing in token' });
     }
 
     const Teachingfiles = req.files?.map((file) => file.path) || [];
-    console.log(Teachingfiles);
+    // console.log(Teachingfiles);
     let parsedSubjects;
     try {
       parsedSubjects = Array.isArray(teachingAssignment)
@@ -72,11 +71,12 @@ exports.calculateTeachingMarks = async (req, res) => {
 
     let record = await teaching.findOne({ facultyName, designation });
     if (!record) {
-      record = new teaching({ facultyName, designation, employeeId });
+      record = new teaching({ facultyName, designation, employee });
+      // record = new teaching({ facultyName, designation});
     }
 
     record.teachingAssignment = {
-      value: parsedSubjects,
+      subjects : parsedSubjects,
       marks: finalMarks,
       teachingFiles: uniqueFiles
     };
@@ -151,7 +151,8 @@ exports.calculateStudentFeedbackMarks = async (req, res) => {
     
     let record = await teaching.findOne({ facultyName, designation });
     if (!record) {
-      record = new teaching({ facultyName, designation, employeeId });
+      // record = new teaching({ facultyName, designation, employeeId });
+      record = new teaching({ facultyName, designation});
     }
 
     record.feedback = {
