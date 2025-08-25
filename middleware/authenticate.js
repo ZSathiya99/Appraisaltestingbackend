@@ -10,10 +10,10 @@ const authenticate = (req, res, next) => {
     return res.status(401).json({ message: 'Token missing' });
   }
 
-  jwt.verify(token, JWT_SECRET, (err, user) => {
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) return res.status(403).json({ message: 'Invalid token' });
     console.error("JWT Error:", err.message);
-    req.user = user;  
+    req.user = decoded;  
     next();
   });
 };
