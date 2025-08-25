@@ -113,7 +113,7 @@ exports.calculatePassPercentageMarks = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.teaching?.passPercentage ?? 0;
     const finalMarks = Math.min(marks, maxPass);
 
-    const employee = req.user.id;
+    const employee = req.employeeId;
 
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
