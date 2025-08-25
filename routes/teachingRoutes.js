@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/uploadMiddleware");
 const { generateTeachingReportPDF } = require('../controllers/pdfController');
-const authenticate = require('../middlewares/authMiddleware');
+const authenticate = require('../middleware/authenticate');
 
 
 const {
