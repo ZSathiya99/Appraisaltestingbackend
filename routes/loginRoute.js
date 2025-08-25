@@ -34,7 +34,7 @@ router.post("/employee-login", async (req, res) => {
     const token = jwt.sign({ id: employee._id, email: employee.email, designation: employee.designation, department: employee.department,
       facultyName : employee.fullName
      }, JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "1d",
     });
 
 res.status(200).json({

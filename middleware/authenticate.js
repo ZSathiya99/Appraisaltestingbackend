@@ -4,8 +4,6 @@ const JWT_SECRET = process.env.JWT_SECRET || "appraisal_backend";
 const authenticate = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
-  console.log("TOKEN", token);
-  console.log("JWT_SECRET", JWT_SECRET);
   if (!token) {
     return res.status(401).json({ message: 'Token missing' });
   }
