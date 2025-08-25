@@ -43,9 +43,11 @@ exports.calculateActivitiesMarks = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.service?.activities ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
 
-    let record = await teaching.findOne({ facultyName, designation });
+    const employee = req.user.id;
+        
+    let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
-      record = new teaching({ facultyName, designation });
+      record = new teaching({ facultyName, designation, employee });
     }
 
     record.activities = {
@@ -88,10 +90,11 @@ exports.calculateBrandingMarks = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.service?.Branding ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    let record = await teaching.findOne({ facultyName, designation });
-
+    const employee = req.user.id;
+        
+    let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
-      record = new teaching({ facultyName, designation });
+      record = new teaching({ facultyName, designation, employee });
     }
 
     record.branding = {
@@ -130,10 +133,11 @@ exports.calculateMembershipMarks = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.service?.Membership ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    let record = await teaching.findOne({ facultyName, designation });
-
+    const employee = req.user.id;
+        
+    let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
-      record = new teaching({ facultyName, designation });
+      record = new teaching({ facultyName, designation, employee });
     }
 
     record.membership = {
@@ -178,9 +182,11 @@ exports.calculateCocurricularMarks = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.service?.External ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
 
-    let record = await teaching.findOne({ facultyName, designation });
+    const employee = req.user.id;
+        
+    let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
-      record = new teaching({ facultyName, designation });
+      record = new teaching({ facultyName, designation, employee });
     }
 
     record.external = {
@@ -220,10 +226,11 @@ exports.calculateAssistanceMarks = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.service?.Administration ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    let record = await teaching.findOne({ facultyName, designation });
-
+    const employee = req.user.id;
+        
+    let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
-      record = new teaching({ facultyName, designation });
+      record = new teaching({ facultyName, designation, employee });
     }
 
     record.administration = {
@@ -265,9 +272,11 @@ exports.calculateTrainingMarks = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.service?.Training ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    let record = await teaching.findOne({ facultyName, designation });
+    const employee = req.user.id;
+        
+    let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
-      record = new teaching({ facultyName, designation });
+      record = new teaching({ facultyName, designation, employee });
     }
 
     record.training = {
