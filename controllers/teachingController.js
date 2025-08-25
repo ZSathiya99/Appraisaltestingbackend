@@ -28,8 +28,11 @@ exports.calculateTeachingMarks = async (req, res) => {
   try {
     const { teachingAssignment, facultyName } = req.body;
     const { designation } = req.params;
-    const employee = req.user.id;
+    console.log(req.user);
+    console.log(req.user.id);
 
+    const employee = req.user.id;
+    
     if (!designation) {
       return res.status(400).json({ message: 'Designation missing in token' });
     }
