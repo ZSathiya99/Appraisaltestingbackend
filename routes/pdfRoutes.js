@@ -9,9 +9,9 @@ const {
 
 const authenticate = require("../middleware/authenticate");
 
-router.post("/pdf/teaching",authenticate, generateTeachingReportPDF);
-router.post("/pdf/research", generateResearchReportPDF);
-router.post("/pdf/service", generateServiceReportPDF);
-router.post("/pdf/consolidated", generateConsolidatedReportPDF);
+router.get("/pdf/teaching",authenticate, generateTeachingReportPDF);
+router.get("/pdf/research", authenticate,generateResearchReportPDF);
+router.get("/pdf/service", authenticate,generateServiceReportPDF);
+router.get("/pdf/consolidated",authenticate, generateConsolidatedReportPDF);
 
 module.exports = router;
