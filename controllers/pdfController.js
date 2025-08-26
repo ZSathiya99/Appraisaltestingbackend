@@ -59,7 +59,7 @@ exports.generateTeachingReportPDF = async (req, res) => {
     const sections = mapToSections(teachingFields);
     const fileKeys = ["studentProject", "innovationProject", "fdp", "fdpFunding", "visitingFaculty", "fdpFunding"];
 
-    const pdfBuffer = await mergeFormPDFs(record, "Teaching Record Submission", sections, fileKeys);
+    const pdfBuffer = await mergeFormPDFs(record, "Faculty Members Performance Appraisal Form", sections, fileKeys);
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="teaching-report-${employeeId}.pdf"`);
     res.end(pdfBuffer);
@@ -78,7 +78,7 @@ exports.generateResearchReportPDF = async (req, res) => {
     const sections = mapToSections(researchFields);
     const fileKeys = ["sciePaper", "scopusPaper", "aictePaper", "scopusBook", "indexBook", "patent", "fundedProject"];
 
-    const pdfBuffer = await mergeFormPDFs(record, "Research Record Submission", sections, fileKeys);
+    const pdfBuffer = await mergeFormPDFs(record, "Faculty Members Performance Appraisal Form", sections, fileKeys);
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="research-report-${employeeId}.pdf"`);
     res.end(pdfBuffer);
@@ -97,7 +97,7 @@ exports.generateServiceReportPDF = async (req, res) => {
     const sections = mapToSections(serviceFields);
     const fileKeys = ["activities", "branding", "membership", "external", "administration", "training"];
 
-    const pdfBuffer = await mergeFormPDFs(record, "Service Record Submission", sections, fileKeys);
+    const pdfBuffer = await mergeFormPDFs(record, "Faculty Members Performance Appraisal Form", sections, fileKeys);
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="service-report-${employeeId}.pdf"`);
     res.end(pdfBuffer);

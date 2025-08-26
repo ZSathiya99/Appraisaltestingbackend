@@ -18,7 +18,7 @@ async function createStyledFormPDFBuffer(record, formTitle, sections, includeFil
     try {
       /** === HEADER LOGO (Center) === **/
       if (fs.existsSync(logoPath)) {
-        doc.image(logoPath, doc.page.width / 2 - 50, 50, { width: 100 });
+        doc.image(logoPath, doc.page.width / 2 - 100, 30, { width: 200, align:"center" });
       }
       doc.moveDown(3);
 
@@ -26,8 +26,8 @@ async function createStyledFormPDFBuffer(record, formTitle, sections, includeFil
       doc.font("Helvetica-Bold").fontSize(18).fillColor(themeBlue).text(formTitle, { align: "center" });
       doc.moveDown(0.5);
       doc.font("Helvetica-Oblique").fontSize(8).fillColor("black")
-        .text("(Assessment period details are considered for this report)", { align: "center" });
-      doc.moveDown(2);
+        .text("(All Parameters in the Appraisal form are considered during Assessment Period Only)", { align: "center" });
+      doc.moveDown(3);
 
       /** === FACULTY / EMPLOYEE INFO === **/
       const details = [
@@ -53,6 +53,7 @@ async function createStyledFormPDFBuffer(record, formTitle, sections, includeFil
       const rowHeight = 30;
       let totalMarks = 0;
 
+      
       // Table Header
       doc.font("Helvetica-Bold").fillColor("white");
       doc.rect(tableX, startY, tableWidth, rowHeight).fill(themeBlue);
@@ -70,7 +71,7 @@ async function createStyledFormPDFBuffer(record, formTitle, sections, includeFil
           .fill(isEven ? "#f9f9f9" : "#ffffff")
           .stroke();
 
-        doc.font("Helvetica-Bold").fillColor("black").text(section.label, tableX + 10, startY + 7);
+        doc.font("Helvetica").fillColor("black").text(section.label, tableX + 10, startY + 7);
         doc.font("Helvetica").fillColor("#333333")
           .text(data?.marks ?? "0", tableX + 400, startY + 7);
 
@@ -79,7 +80,7 @@ async function createStyledFormPDFBuffer(record, formTitle, sections, includeFil
       });
 
       // Total Row
-      doc.font("Helvetica-Bold").fillColor("white");
+      doc.font("Helvetica").fillColor("white");
       doc.rect(tableX, startY, tableWidth, rowHeight).fill(themeBlue);
       doc.fillColor("white").text("Total Marks", tableX + 10, startY + 7);
       doc.text(totalMarks.toString(), tableX + 400, startY + 7);
