@@ -9,6 +9,8 @@ const subjectRoutes = require("./routes/subjectRoutes");
 const researchRoutes = require("./routes/researchRoutes");
 const serviceRoutes = require("./routes/serviceRoutes");
 const dashboadRoutes = require("./routes/dashboadRoutes")
+const pdfRoutes = require("./routes/pdfRoutes");
+
 
 dotenv.config();
 require('dotenv').config();
@@ -29,6 +31,7 @@ app.use('/api', subjectRoutes);
 app.use('/api', researchRoutes);
 app.use('/api', serviceRoutes);
 app.use('/api', dashboadRoutes);
+app.use("/api", pdfRoutes);
 
 
 mongoose.connect(process.env.MONGO_URI, {

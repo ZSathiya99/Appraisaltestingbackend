@@ -1,106 +1,141 @@
-const PDFDocument = require('pdfkit');
-const TeachingRecord = require('../models/TeachingRecord');
-const Employee = require('../models/Employee');
+const { mergeFormPDFs } = require("../utils/pdfUtils");
+const TeachingRecord = require("../models/TeachingRecord");
 
+const PDFMerger = require("pdf-merger-js").default;
+
+// === Full Fields by Category ===
+const teachingFields = [
+  "teachingAssignment",
+  "passPercentage",
+  "feedback",
+  "innovativeApproach",
+  "visitingFaculty",
+  "studentProject",
+  "fdpFunding",
+  "innovationProject",
+  "fdp",
+  "industry",
+  "tutorMeeting",
+  "academicPosition",
+];
+
+const researchFields = [
+  "sciePaper",
+  "scopusPaper",
+  "aictePaper",
+  "scopusBook",
+  "indexBook",
+  "hIndex",
+  "iIndex",
+  "citation",
+  "consultancy",
+  "collabrative",
+  "seedFund",
+  "patent",
+  "fundedProject",
+  "researchScholars",
+];
+
+const serviceFields = [
+  "activities",
+  "branding",
+  "membership",
+  "external",
+  "administration",
+  "training",
+];
+
+// Helper to map fields to section objects
+const mapToSections = (fields) => fields.map((f) => ({ key: f, label: f }));
+
+// === Teaching Form ===
 exports.generateTeachingReportPDF = async (req, res) => {
   try {
-    const { facultyName, designation } = req.body;
+    const employeeId = req.userId;
+    console.log(employeeId);
+    const record = await TeachingRecord.findOne({ employee: employeeId }).populate("employee");
+    if (!record) return res.status(404).json({ message: "Teaching record not found" });
 
-    // Validate input
-    if (!facultyName || !designation) {
-      return res.status(400).json({ message: 'facultyName and designation are required' });
+    const sections = mapToSections(teachingFields);
+    const fileKeys = ["studentProject", "innovationProject", "fdp", "fdpFunding", "visitingFaculty", "fdpFunding"];
+
+    const pdfBuffer = await mergeFormPDFs(record, "Teaching Record Submission", sections, fileKeys);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="teaching-report-${employeeId}.pdf"`);
+    res.end(pdfBuffer);
+  } catch (err) {
+    res.status(500).json({ message: "Error generating Teaching PDF", error: err.message });
+  }
+};
+
+// === Research Form ===
+exports.generateResearchReportPDF = async (req, res) => {
+  try {
+    const employeeId = req.userId;
+    const record = await TeachingRecord.findOne({ employee: employeeId }).populate("employee");
+    if (!record) return res.status(404).json({ message: "Research record not found" });
+
+    const sections = mapToSections(researchFields);
+    const fileKeys = ["sciePaper", "scopusPaper", "aictePaper", "scopusBook", "indexBook", "patent", "fundedProject"];
+
+    const pdfBuffer = await mergeFormPDFs(record, "Research Record Submission", sections, fileKeys);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="research-report-${employeeId}.pdf"`);
+    res.end(pdfBuffer);
+  } catch (err) {
+    res.status(500).json({ message: "Error generating Research PDF", error: err.message });
+  }
+};
+
+// === Service Form ===
+exports.generateServiceReportPDF = async (req, res) => {
+  try {
+    const employeeId = req.userId;
+    const record = await TeachingRecord.findOne({ employee: employeeId }).populate("employee");
+    if (!record) return res.status(404).json({ message: "Service record not found" });
+
+    const sections = mapToSections(serviceFields);
+    const fileKeys = ["activities", "branding", "membership", "external", "administration", "training"];
+
+    const pdfBuffer = await mergeFormPDFs(record, "Service Record Submission", sections, fileKeys);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="service-report-${employeeId}.pdf"`);
+    res.end(pdfBuffer);
+  } catch (err) {
+    res.status(500).json({ message: "Error generating Service PDF", error: err.message });
+  }
+};
+
+// === Consolidated Form ===
+exports.generateConsolidatedReportPDF = async (req, res) => {
+  try {
+    const employeeId = req.userId;
+    const merger = new PDFMerger();
+
+    const teachingRecord = await TeachingRecord.findOne({ employee: employeeId }).populate("employee");
+    const researchRecord = await TeachingRecord.findOne({ employee: employeeId }).populate("employee");
+    const serviceRecord = await TeachingRecord.findOne({ employee: employeeId }).populate("employee");
+
+    if (teachingRecord) {
+      const pdfBuffer = await mergeFormPDFs(teachingRecord, "Teaching Record", mapToSections(teachingFields), ["studentProject", "innovationProject", "fdp", "fdpFunding", "visitingFaculty"]);
+      await merger.add(Uint8Array.from(pdfBuffer));
     }
 
-    // Fetch the teaching record
-    const record = await TeachingRecord.findOne({ facultyName, designation }).populate('employee');
-    if (!record) return res.status(404).json({ message: 'No record found for this faculty' });
+    if (researchRecord) {
+      const pdfBuffer = await mergeFormPDFs(researchRecord, "Research Record", mapToSections(researchFields), ["sciePaper", "scopusPaper", "aictePaper", "scopusBook", "indexBook", "patent", "fundedProject"]);
+      await merger.add(Uint8Array.from(pdfBuffer));
+    }
 
-   
+    if (serviceRecord) {
+      const pdfBuffer = await mergeFormPDFs(serviceRecord, "Service Record", mapToSections(serviceFields), ["activities", "branding", "membership", "external", "administration", "training"]);
+      await merger.add(Uint8Array.from(pdfBuffer));
+    }
 
-    // Create a new PDF document
-    const doc = new PDFDocument({ margin: 50, size: 'A4' });
-
-    // Set headers to download PDF
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${facultyName}-teaching-report.pdf"`);
-
-    doc.pipe(res);
-
-    // ===== PDF CONTENT =====
-    // Title
-    doc.font('Helvetica-Bold').fontSize(20).text('Teaching Record Submission', { align: 'center' });
-    doc.moveDown(1);
-
-    // Employee & Form Info
-    doc.font('Helvetica').fontSize(12);
-    doc.text(`Faculty Name: ${facultyName}`);
-    doc.text(`Designation: ${designation}`);
-    doc.text(`Department: ${record.employee?.department || 'N/A'}`);
-    doc.text(`Email: ${record.employee?.email || 'N/A'}`);
-    doc.text(`Form Status: ${record.isSubmitted ? 'Submitted' : 'Pending'}`);
-    doc.text(`Submission Date: ${new Date().toLocaleDateString()}`);
-    doc.moveDown(1);
-
-    // Table-like Section Marks
-    const sections = [
-      { key: 'teachingAssignment', label: 'Teaching Assignment' },
-      { key: 'passPercentage', label: 'Pass Percentage' },
-      { key: 'feedback', label: 'Student Feedback' },
-      { key: 'innovativeApproach', label: 'Innovative Approach' },
-      { key: 'visitingFaculty', label: 'Guest Lectures' },
-      { key: 'fdpFunding', label: 'FDP Funding' },
-      { key: 'innovationProject', label: 'Innovation Project' },
-      { key: 'fdp', label: 'FDP Programme' },
-      { key: 'industry', label: 'Industry Involvement' },
-      { key: 'tutorMeeting', label: 'Tutor-Ward Meeting' },
-      { key: 'academicPosition', label: 'Academic Roles' }
-    ];
-
-    let startY = doc.y;
-    const tableX = 50;
-    const tableWidth = 500;
-    const rowHeight = 25;
-
-    // Table Header
-    doc.font('Helvetica-Bold').fillColor('white');
-    doc.rect(tableX, startY, tableWidth, rowHeight).fill('#4a90e2');
-    doc.fillColor('white').text('Section', tableX + 10, startY + 7);
-    doc.text('Marks', tableX + 400, startY + 7);
-    startY += rowHeight;
-
-    doc.font('Helvetica').fillColor('black');
-
-    let totalMarks = 0;
-    sections.forEach((section, index) => {
-      const data = record[section.key];
-      const isEven = index % 2 === 0;
-      // Row background
-      doc.rect(tableX, startY, tableWidth, rowHeight).fill(isEven ? '#f2f2f2' : '#ffffff').fillColor('black');
-      // Row text
-      doc.text(section.label, tableX + 10, startY + 7);
-      doc.text(data && data.marks !== undefined ? data.marks : '0', tableX + 400, startY + 7);
-      startY += rowHeight;
-      if (data && data.marks !== undefined) totalMarks += Number(data.marks);
-    });
-
-    // Total Marks Row
-    doc.font('Helvetica-Bold').fillColor('white');
-    doc.rect(tableX, startY, tableWidth, rowHeight).fill('#4a90e2');
-    doc.fillColor('white').text('Total Marks', tableX + 10, startY + 7);
-    doc.text(totalMarks, tableX + 400, startY + 7);
-    startY += rowHeight;
-
-    // Footer
-    doc.moveDown(2);
-    doc.font('Helvetica-Oblique').fontSize(10).fillColor('black').text(
-      'Generated by the Teaching Management System',
-      { align: 'center' }
-    );
-
-    // Finalize PDF
-    doc.end();
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    res.status(500).json({ message: 'Server error while generating PDF' });
+    const consolidatedBuffer = await merger.saveAsBuffer();
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="consolidated-report-${employeeId}.pdf"`);
+    res.end(consolidatedBuffer);
+  } catch (err) {
+    res.status(500).json({ message: "Error generating consolidated PDF", error: err.message });
   }
 };
