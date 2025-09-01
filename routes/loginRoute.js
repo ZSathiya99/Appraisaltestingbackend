@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Employee = require("../models/Employee");
+const authMiddleware = require("../middleware/authenticate");
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "appraisal_backend";
@@ -40,20 +41,20 @@ router.post("/employee-login", async (req, res) => {
 res.status(200).json({
   message: "Login successful",
   token,
-  employee: {
-    id: employee._id,
-    email: employee.email,
-    fullName: employee.fullName,
-    department: employee.department,
-    designation: employee.designation,
-    phone: employee.phone,
-    address: employee.address,
-    joiningDate: employee.joiningDate,
-    salary: employee.salary,
-    managerEmail: employee.managerEmail,
-    createdAt: employee.createdAt,
-    updatedAt: employee.updatedAt,
-  },
+  // employee: {
+  //   id: employee._id,
+  //   email: employee.email,
+  //   fullName: employee.fullName,
+  //   department: employee.department,
+  //   designation: employee.designation,
+  //   phone: employee.phone,
+  //   address: employee.address,
+  //   joiningDate: employee.joiningDate,
+  //   salary: employee.salary,
+  //   managerEmail: employee.managerEmail,
+  //   createdAt: employee.createdAt,
+  //   updatedAt: employee.updatedAt,
+  // },
 });
 
   } catch (err) {
@@ -62,21 +63,39 @@ res.status(200).json({
   }
 });
 
+const formatDate = (date) => {
+  if (!date) return null;
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0"); // months are 0-based
+  const year = d.getFullYear();
+  return `${day}-${month}-${year}`;
+};
+
+
 //Fetch employee details
 router.get("/employee/:id", async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id, '-password'); 
+    const employee = await Employee.findById(req.params.id); 
 
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
     }
+    const employeeData = employee.toObject();
+    
+    if (employeeData.joiningDate) {
+      employeeData.joiningDate = formatDate(employeeData.joiningDate);
+    }
 
-    res.status(200).json(employee);
+    res.status(200).json(employeeData);
   } catch (err) {
     console.error("Fetch employee by ID error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
+
 
 
 module.exports = router;

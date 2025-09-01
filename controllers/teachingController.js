@@ -428,11 +428,14 @@ exports.calculateIndustryInvolvementMarks = async (req, res) => {
 
     
     const IndustryFiles = req.files?.map((file) => file.path) || [];
+
+    const maxmark =
+      pointsDistribution[designation]?.teaching?.industryInvolvement ?? 0;
+
     const isYes = input?.toLowerCase() === 'yes';
-    const marks = isYes ? 2 : 0;
+    const marks = isYes ? maxmark : 0;
     const uniqueFiles = [...new Set(IndustryFiles)];
 
-    const maxmark = pointsDistribution[designation]?.teaching?.industryInvolvement ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
     const employee = req.userId;
@@ -505,12 +508,21 @@ exports.calculateTutorWardMarks = async (req, res) => {
 //Q11: Roles in Academic
 exports.calculateRoleMarks = async  (req, res) => {
   try {
-    const roles = req.body.roles; 
+    let roles = req.body.roles; 
     const { designation } = req.params;
     const {facultyName} = req.body;
 
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+
+    if (typeof roles === "string") {
+      try {
+        roles = JSON.parse(roles);
+      } catch {
+        roles = roles.split(",").map(r => r.trim());
+      }
+    }
+    if (!Array.isArray(roles)) roles = [];
 
     const files = req.files?.map((file) => file.path) || [];
 
@@ -526,16 +538,14 @@ exports.calculateRoleMarks = async  (req, res) => {
     let marks = 0;
     let countedAcademic = false;
 
-    if (Array.isArray(roles)) {
-      roles.forEach(role => {
-        if (!countedAcademic && academicRoles.includes(role)) {
-          marks += 2;
-          countedAcademic = true; 
-        } else if (otherRoles.includes(role)) {
-          marks += 1;
-        }
-      });
-    }
+    roles.forEach((role) => {
+      if (!countedAcademic && academicRoles.includes(role)) {
+        marks += 2;
+        countedAcademic = true;
+      } else if (otherRoles.includes(role)) {
+        marks += 1;
+      }
+    });
 
     const uniqueFiles = [...new Set(files)];
 

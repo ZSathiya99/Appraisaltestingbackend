@@ -57,7 +57,18 @@ exports.generateTeachingReportPDF = async (req, res) => {
     if (!record) return res.status(404).json({ message: "Teaching record not found" });
 
     const sections = mapToSections(teachingFields);
-    const fileKeys = ["studentProject", "innovationProject", "fdp", "fdpFunding", "visitingFaculty", "fdpFunding"];
+    const fileKeys = ["teachingAssignment",
+      "passPercentage",
+      "feedback",
+      "innovativeApproach",
+      "visitingFaculty",
+      "studentProject",
+      "fdpFunding",
+      "innovationProject",
+      "fdp",
+      "industry",
+      "tutorMeeting",
+      "academicPosition"];
 
     const pdfBuffer = await mergeFormPDFs(record, "Faculty Members Performance Appraisal Form", sections, fileKeys);
     res.setHeader("Content-Type", "application/pdf");
@@ -76,7 +87,20 @@ exports.generateResearchReportPDF = async (req, res) => {
     if (!record) return res.status(404).json({ message: "Research record not found" });
 
     const sections = mapToSections(researchFields);
-    const fileKeys = ["sciePaper", "scopusPaper", "aictePaper", "scopusBook", "indexBook", "patent", "fundedProject"];
+    const fileKeys = ["sciePaper",
+      "scopusPaper",
+      "aictePaper",
+      "scopusBook",
+      "indexBook",
+      "hIndex",
+      "iIndex",
+      "citation",
+      "consultancy",
+      "collabrative",
+      "seedFund",
+      "patent",
+      "fundedProject",
+      "researchScholars"];
 
     const pdfBuffer = await mergeFormPDFs(record, "Faculty Members Performance Appraisal Form", sections, fileKeys);
     res.setHeader("Content-Type", "application/pdf");
@@ -95,9 +119,15 @@ exports.generateServiceReportPDF = async (req, res) => {
     if (!record) return res.status(404).json({ message: "Service record not found" });
 
     const sections = mapToSections(serviceFields);
-    const fileKeys = ["activities", "branding", "membership", "external", "administration", "training"];
+    const fileKeys = ["activities",
+      "branding",
+      "membership",
+      "external",
+      "administration",
+      "training"];
 
     const pdfBuffer = await mergeFormPDFs(record, "Faculty Members Performance Appraisal Form", sections, fileKeys);
+    
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="service-report-${employeeId}.pdf"`);
     res.end(pdfBuffer);
@@ -117,17 +147,46 @@ exports.generateConsolidatedReportPDF = async (req, res) => {
     const serviceRecord = await TeachingRecord.findOne({ employee: employeeId }).populate("employee");
 
     if (teachingRecord) {
-      const pdfBuffer = await mergeFormPDFs(teachingRecord, "Teaching Record", mapToSections(teachingFields), ["studentProject", "innovationProject", "fdp", "fdpFunding", "visitingFaculty"]);
+      const pdfBuffer = await mergeFormPDFs(teachingRecord, "Teaching Record", mapToSections(teachingFields), ["teachingAssignment",
+        "passPercentage",
+        "feedback",
+        "innovativeApproach",
+        "visitingFaculty",
+        "studentProject",
+        "fdpFunding",
+        "innovationProject",
+        "fdp",
+        "industry",
+        "tutorMeeting",
+        "academicPosition"]);
       await merger.add(Uint8Array.from(pdfBuffer));
     }
 
     if (researchRecord) {
-      const pdfBuffer = await mergeFormPDFs(researchRecord, "Research Record", mapToSections(researchFields), ["sciePaper", "scopusPaper", "aictePaper", "scopusBook", "indexBook", "patent", "fundedProject"]);
+      const pdfBuffer = await mergeFormPDFs(researchRecord, "Research Record", mapToSections(researchFields), ["sciePaper",
+        "scopusPaper",
+        "aictePaper",
+        "scopusBook",
+        "indexBook",
+        "hIndex",
+        "iIndex",
+        "citation",
+        "consultancy",
+        "collabrative",
+        "seedFund",
+        "patent",
+        "fundedProject",
+        "researchScholars"]);
       await merger.add(Uint8Array.from(pdfBuffer));
     }
 
     if (serviceRecord) {
-      const pdfBuffer = await mergeFormPDFs(serviceRecord, "Service Record", mapToSections(serviceFields), ["activities", "branding", "membership", "external", "administration", "training"]);
+      const pdfBuffer = await mergeFormPDFs(serviceRecord, "Service Record", mapToSections(serviceFields), ["activities",
+        "branding",
+        "membership",
+        "external",
+        "administration",
+        "training"]);
       await merger.add(Uint8Array.from(pdfBuffer));
     }
 

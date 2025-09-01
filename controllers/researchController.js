@@ -91,9 +91,9 @@ exports.calculateScopusPaper = async (req, res) => {
 
     let totalMarks = 0;
     scopus.forEach(paper => {
-      if (paper.typeOfAuthor === "Firstauthor") totalMarks += 4;
-      else if (paper.typeOfAuthor === "secondauthor") totalMarks += 2;
-      else if (paper.typeOfAuthor === "thirdauthor") totalMarks += 1;
+      if (paper.typeOfAuthor === "Firstauthor") totalMarks += 3;
+      else if (paper.typeOfAuthor === "secondauthor") totalMarks += 1.5;
+      else if (paper.typeOfAuthor === "thirdauthor") totalMarks += 0.75;
     });
     
     
@@ -150,9 +150,9 @@ exports.calculateAictePaper = async (req, res) => {
 
     let totalMarks = 0;
     aicte.forEach(paper => {
-      if (paper.typeOfAuthor === "Firstauthor") totalMarks += 4;
-      else if (paper.typeOfAuthor === "secondauthor") totalMarks += 2;
-      else if (paper.typeOfAuthor === "thirdauthor") totalMarks += 1;
+      if (paper.typeOfAuthor === "Firstauthor") totalMarks += 1;
+      else if (paper.typeOfAuthor === "secondauthor") totalMarks += 0.5;
+      else if (paper.typeOfAuthor === "thirdauthor") totalMarks += 0.75;
     });
     
     
@@ -318,18 +318,28 @@ exports.calculatePatentMarks = async (req, res) => {
 
 // Q7: hindex
 exports.calculatehIndex = async (req, res) => {
+  console.log(req.body)
   try {
-    const { facultyName, hindex } = req.body;
+    let { facultyName, hindex } = req.body;
     const { designation } = req.params;
+
 
     if (!designation) {
       return res.status(400).json({ message: 'Designation missing in token' });
     }
 
     let hMarks = 0;
-    if (hindex === "5 and above") hMarks = 3;
-    else if (hindex === 3) hMarks = 2;
-    else if (hindex === 2) hMarks = 1;
+    if (typeof hindex === "string") {
+      if (hindex.toLowerCase().includes("5")) hMarks = 3;   
+      else if (hindex.includes("3")) hMarks = 2;            
+      else if (hindex.includes("2")) hMarks = 1;           
+    } else {
+      // If frontend sends number instead of string
+      const num = Number(hindex) || 0;
+      if (num >= 5) hMarks = 3;
+      else if (num === 3) hMarks = 2;
+      else if (num === 2) hMarks = 1;
+    }
 
     const hindexFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(hindexFiles)];
@@ -363,6 +373,7 @@ exports.calculatehIndex = async (req, res) => {
 
 // Q8: 10index
 exports.calculateIIndex = async (req, res) => {
+  
   try {
     const { facultyName, Iindex } = req.body;
     const { designation } = req.params;
@@ -408,6 +419,7 @@ exports.calculateIIndex = async (req, res) => {
 
 // Q9: Citation
 exports.calculateCitation = async (req, res) => {
+  
   try {
     const { facultyName, citation } = req.body;
     const { designation } = req.params;
@@ -420,9 +432,9 @@ exports.calculateCitation = async (req, res) => {
     const uniqueFiles = [...new Set(citationFiles)];
 
     let marks = 0;
-    if (citation === "100 and above") marks = 3;
-    else if (citation === 50) marks = 2;
-    else if (citation === 25) marks = 1;
+    if (citation === "100 and above" || citation === 100) marks = 3;
+    else if (citation === "50" || citation === 50) marks = 2;
+    else if (citation === "25" || citation === 25) marks = 1;
 
     const maxPass = pointsDistribution[designation]?.research?.citation ?? 0;
     const finalMarks = Math.min(marks, maxPass);
@@ -587,6 +599,7 @@ exports.calculateSeedFund = async (req, res) => {
 
 // Q13: Funded
 exports.calculateFundedProjectMarks = async (req, res) => {
+  
   try {
     const { facultyName } = req.body; 
     const { designation } = req.params;
@@ -598,8 +611,19 @@ exports.calculateFundedProjectMarks = async (req, res) => {
     const FundFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(FundFiles)];
 
-    const piCount = Number(req.body.PI) || 0;
-    const copiCount = Number(req.body.CoPI) || 0;
+    let fieldData = req.body.field_name;
+
+    if (typeof fieldData === "string") {
+      try {
+        fieldData = JSON.parse(fieldData);
+      } catch (err) {
+        console.error("Invalid JSON in field_name:", fieldData);
+        fieldData = {};
+      }
+    }
+
+    const piCount = Number(fieldData.PI) || 0;
+    const copiCount = Number(fieldData.CoPI) || 0;
 
     const piMarks = 5;    
     const copiMarks = 2;  

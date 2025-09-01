@@ -1,5 +1,6 @@
 const teaching = require('../models/TeachingRecord');
 const pointsDistribution = require("../utils/prePoints");
+const cleanBody = require("../utils/cleanBody");
 
 // Q1: Accreditation Activities
 exports.calculateActivitiesMarks = async (req, res) => {
@@ -53,7 +54,7 @@ exports.calculateActivitiesMarks = async (req, res) => {
     record.activities = {
       value: "activities",
       marks: finalMarks,
-      accreditationFiles: uniqueFiles,
+      activitiesFiles: uniqueFiles,
     };
 
     await record.save();
@@ -73,17 +74,17 @@ exports.calculateActivitiesMarks = async (req, res) => {
 
 // Q2: Branding
 exports.calculateBrandingMarks = async (req, res) => {
+  console.log(req.body)
   try {
-
-    const input = req.body.branding;
+    const body = cleanBody(req.body);
     const { designation } = req.params;
-    const {facultyName} = req.body;
+    const { facultyName, branding } = body;
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
     
     const BrandingFiles = req.files?.map((file) => file.path) || [];
-    const isYes = input?.toLowerCase() === 'yes';
+    const isYes = branding?.toLowerCase() === 'yes';
     const marks = isYes ? 5 : 0;
     const uniqueFiles = [...new Set(BrandingFiles)];
 
@@ -98,7 +99,7 @@ exports.calculateBrandingMarks = async (req, res) => {
     }
 
     record.branding = {
-      value: input,
+      value: branding,
       marks: finalMarks,
       brandingFiles: uniqueFiles,
     };
@@ -118,15 +119,15 @@ exports.calculateBrandingMarks = async (req, res) => {
 exports.calculateMembershipMarks = async (req, res) => {
   try {
 
-    const input = req.body.membership;
+    const body = cleanBody(req.body);
     const { designation } = req.params;
-    const {facultyName} = req.body;
+    const { facultyName, membership } = body;
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
     
     const MembershipFiles = req.files?.map((file) => file.path) || [];
-    const isYes = input?.toLowerCase() === 'yes';
+    const isYes = membership?.toLowerCase() === 'yes';
     const marks = isYes ? 4 : 1;
     const uniqueFiles = [...new Set(MembershipFiles)];
 
@@ -141,7 +142,7 @@ exports.calculateMembershipMarks = async (req, res) => {
     }
 
     record.membership = {
-      value: input,
+      value: membership,
       marks: finalMarks,
       membershipFiles: uniqueFiles,
     };
@@ -160,10 +161,20 @@ exports.calculateMembershipMarks = async (req, res) => {
 
 // Q4: Co-curricular
 exports.calculateCocurricularMarks = async (req, res) => {
+  console.log(req.body)
   try {
-    const { facultyName, role, count } = req.body; 
-    const { designation } = req.params;
+    let { facultyName, cocurricular } = req.body;
 
+    if (!cocurricular && req.body["cocurricular "]) {
+      cocurricular = req.body["cocurricular "];
+    }
+
+    if (typeof cocurricular === "string") {
+      cocurricular = JSON.parse(cocurricular);
+    }
+
+    const { role, count } = cocurricular || {};
+    const { designation } = req.params;
     if (!designation) {
       return res.status(400).json({ message: 'Designation missing in token' });
     }
@@ -211,15 +222,16 @@ exports.calculateCocurricularMarks = async (req, res) => {
 exports.calculateAssistanceMarks = async (req, res) => {
   try {
 
-    const input = req.body.assistance;
+    const body = cleanBody(req.body);
     const { designation } = req.params;
-    const {facultyName} = req.body;
+    const { facultyName, assistance } = body;
+
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
     
     const AssistanceFiles = req.files?.map((file) => file.path) || [];
-    const isYes = input?.toLowerCase() === 'yes';
+    const isYes = assistance?.toLowerCase() === 'yes';
     const marks = isYes ? 5 : 0;
     const uniqueFiles = [...new Set(AssistanceFiles)];
 
@@ -253,10 +265,16 @@ exports.calculateAssistanceMarks = async (req, res) => {
 
 //Q6: Training
 exports.calculateTrainingMarks = async (req, res) => {
+  console.log(req.body)
   try {
+    const data = cleanBody(req.body);
 
     const { designation } = req.params;
-    const {facultyName, training } = req.body;
+
+    const facultyName = data.facultyName;
+    const training = data.training;
+
+    console.log("facultyName:", facultyName, "training:", training);
 
     if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
 
