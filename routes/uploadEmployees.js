@@ -32,16 +32,14 @@ router.post("/upload-employees", upload.single("file"), async (req, res) => {
         const hashedPassword = await bcrypt.hash(emp.password, 10);
 
         await Employee.create({
+          employee_id : emp.employee_id,
           email: emp.email.trim(),
           password: hashedPassword,
           fullName: emp.fullName || emp.name,
           department: emp.department,
           designation: emp.designation,
-          phone: emp.phone,
-          address: emp.address,
-          joiningDate: emp.joiningDate ? new Date(emp.joiningDate) : null,
-          salary: emp.salary,
-          managerEmail: emp.managerEmail,
+          joiningDate: emp.joiningDate ,
+          phone_number: emp.phoneNumber,
         });
 
         created++;
