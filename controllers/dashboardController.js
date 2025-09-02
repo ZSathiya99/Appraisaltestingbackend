@@ -47,7 +47,30 @@ exports.getEmployees = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;  
     const skip = (page - 1) * limit;
 
-    const employees = await Employee.find()
+    const employee = req.userId;
+    const userEmail = req.user.email;
+    
+    console.log(employee, userEmail);
+
+    const loggedInEmployee = await Employee.findOne({ email: userEmail });
+
+    if (!loggedInEmployee) {
+      return res.status(404).json({ message: "User not found in Employee records" });
+    }
+
+    // Validate if user is HOD or Dean
+    const designation = loggedInEmployee.designation;
+    let filter = { designation: { $ne: "HOD" } };
+
+    if (designation === "HOD") {
+      filter.department = loggedInEmployee.department; // Only employees in HOD's department
+    } else if (designation === "Dean") {
+      // Dean can see all employees - no filter
+    } else {
+      return res.status(403).json({ message: "Access denied. Only HOD or Dean can view this data." });
+    }
+
+    const employees = await Employee.find(filter)
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });  
