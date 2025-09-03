@@ -1,5 +1,6 @@
 const  Employee = require("../models/Employee");
 const TeachingRecord = require("../models/TeachingRecord")
+const maxPointsMap = require('../utils/prePoints');
 
 exports.getEmployeeStats = async (req, res) => {
   try {
@@ -113,3 +114,41 @@ exports.markFormSubmitted = async (req, res) => {
     res.status(500).json({ message: "Error marking form as submitted" });
   }
 };
+
+// all forms
+exports.getAllTeachingRecords = async (req, res) => {
+  try {
+    const records = await TeachingRecord.find();
+
+    const updatedRecords = records.map(record => {
+      const r = record.toObject();
+
+      let earnedTotal = 0;
+      let maxTotal = 0;
+
+      for (const key in maxPointsMap) {
+        if (r[key] && typeof r[key] === 'object' && r[key] !== null) {
+          r[key].maxMarks = maxPointsMap[key];
+
+          if (typeof r[key].marks === 'number') {
+            earnedTotal += r[key].marks;
+          }
+          maxTotal += maxPointsMap[key]; 
+        }
+      }
+
+      r.totalMarks = {
+        earned: earnedTotal,
+        outOf: maxTotal
+      };
+
+      return r;
+    });
+
+    res.status(200).json(updatedRecords);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error fetching teaching records', error: err.message });
+  }
+};
+
