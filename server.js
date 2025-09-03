@@ -10,6 +10,7 @@ const researchRoutes = require("./routes/researchRoutes");
 const serviceRoutes = require("./routes/serviceRoutes");
 const dashboadRoutes = require("./routes/dashboadRoutes")
 const pdfRoutes = require("./routes/pdfRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 
 dotenv.config();
@@ -32,7 +33,7 @@ app.use('/api', researchRoutes);
 app.use('/api', serviceRoutes);
 app.use('/api', dashboadRoutes);
 app.use("/api", pdfRoutes);
-
+app.use("/api", adminRoutes);
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
