@@ -646,7 +646,7 @@ exports.getTeachingRecord = async (req, res) => {
           total += Number(recordObj[field].marks) || 0;
         }
       }
-      return total;
+      return total;                                                                            
     };
 
     const teachingMarks = sumMarks(teachingFields);

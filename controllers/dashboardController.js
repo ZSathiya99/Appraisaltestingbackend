@@ -59,14 +59,13 @@ exports.getEmployees = async (req, res) => {
       return res.status(404).json({ message: "User not found in Employee records" });
     }
 
-    // Validate if user is HOD or Dean
     const designation = loggedInEmployee.designation;
     let filter = { designation: { $ne: "HOD" } };
 
     if (designation === "HOD") {
-      filter.department = loggedInEmployee.department; // Only employees in HOD's department
+      filter.department = loggedInEmployee.department; 
     } else if (designation === "Dean") {
-      // Dean can see all employees - no filter
+
     } else {
       return res.status(403).json({ message: "Access denied. Only HOD or Dean can view this data." });
     }
@@ -115,40 +114,44 @@ exports.markFormSubmitted = async (req, res) => {
   }
 };
 
-// all forms
-exports.getAllTeachingRecords = async (req, res) => {
+// get the form based on the login
+exports.getFilteredTeachingRecords = async (req, res) => {
   try {
-    const records = await TeachingRecord.find();
 
-    const updatedRecords = records.map(record => {
-      const r = record.toObject();
+    const loggedInEmployee = await Employee.findById(req.userId);
+    if (!loggedInEmployee) {
+      return res.status(404).json({ message: "User not found in Employee records" });
+    }
 
-      let earnedTotal = 0;
-      let maxTotal = 0;
+    const designation = loggedInEmployee.designation;
+    let filter = { designation: { $ne: "HOD" } };
 
-      for (const key in maxPointsMap) {
-        if (r[key] && typeof r[key] === 'object' && r[key] !== null) {
-          r[key].maxMarks = maxPointsMap[key];
+    if (designation === "HOD") {
+      filter.department = loggedInEmployee.department;
+    } else if (designation === "Dean") {
+      filter = {}; 
+    } else {
+      return res.status(403).json({ message: "Access denied. Only HOD or Dean can view this data." });
+    }
 
-          if (typeof r[key].marks === 'number') {
-            earnedTotal += r[key].marks;
-          }
-          maxTotal += maxPointsMap[key]; 
-        }
-      }
+    const filteredEmployees = await Employee.find(filter).select("_id");
+    const employeeIds = filteredEmployees.map(e => e._id);
 
-      r.totalMarks = {
-        earned: earnedTotal,
-        outOf: maxTotal
-      };
+    const records = await TeachingRecord.find({ employee: { $in: employeeIds } })
+      .populate("employee")
+      .sort({ createdAt: -1 })
+      .lean();
 
-      return r;
+    const verified = records.filter(r => r.approvalStatus === "approved");
+    const notVerified = records.filter(r => r.approvalStatus !== "approved"); // or === "pending"
+
+    res.status(200).json({
+      verified,
+      notVerified
     });
-
-    res.status(200).json(updatedRecords);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Error fetching teaching records', error: err.message });
+    console.error("Error fetching filtered teaching records:", err);
+    res.status(500).json({ message: "Error fetching filtered teaching records", error: err.message });
   }
 };
 

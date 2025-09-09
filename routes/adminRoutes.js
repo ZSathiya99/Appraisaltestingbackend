@@ -1,10 +1,11 @@
 
 const express = require("express");
 const router = express.Router();
-const {postQuestions } = require("../controllers/admin");
+const {postQuestions, getAnswers } = require("../controllers/adminController");
 const authenticate = require("../middleware/authenticate");
 
-router.get("/question",postQuestions);
+router.post("/question",postQuestions);
+router.get("/joinAnswer/:recordId",getAnswers);
 
 
 
