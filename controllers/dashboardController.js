@@ -142,8 +142,8 @@ exports.getFilteredTeachingRecords = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    const verified = records.filter(r => r.approvalStatus === "approved");
-    const notVerified = records.filter(r => r.approvalStatus !== "approved"); // or === "pending"
+    const verified = records.filter(r => r.approvalStatus === "Approved");
+    const notVerified = records.filter(r => r.approvalStatus !== "Approved"); // or === "pending"
 
     res.status(200).json({
       verified,

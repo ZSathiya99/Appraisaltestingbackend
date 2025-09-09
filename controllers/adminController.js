@@ -37,7 +37,7 @@ const FIELD_MAP = {
   teachingAssignment: "teachingAssignment"
 };
 
-// GET /admin/review/:recordId
+// GET Q and A
 exports.getAnswers =  async (req, res) => {
   try {
     const record = await TeachingRecord.findById(req.params.recordId).populate("employee");
