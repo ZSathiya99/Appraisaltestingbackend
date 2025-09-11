@@ -142,7 +142,7 @@ exports.calculateStudentFeedbackMarks = async (req, res) => {
     // Decide designation
     let designation;
     if (paramDesignation === "HOD" || paramDesignation === "Dean") {
-      designation = bodyDesignation;   // HOD/Dean editing, so designation comes from body
+      designation = bodyDesignation;  
       if (!employeeId) {
         return res.status(400).json({ message: "employeeId is required for HoD/Dean" });
       }
@@ -166,6 +166,7 @@ exports.calculateStudentFeedbackMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
+    console.log(employee);
     // Find record
     let record = await teaching.findOne({ facultyName, employee });
     if (!record) {
