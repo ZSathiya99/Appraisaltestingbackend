@@ -5,24 +5,38 @@ const cleanBody = require("../utils/cleanBody");
 // Q1: Accreditation Activities
 exports.calculateActivitiesMarks = async (req, res) => {
   try {
-    const { facultyName } = req.body; 
-    let { roles } = req.body;
-    const { designation } = req.params;
+    const { facultyName, roles, employeeId, designation: bodyDesignation } = req.body;
+    const { designation: paramDesignation } = req.params;
+
+    let designation;
+    if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+      designation = bodyDesignation;
+      if (!employeeId) {
+        return res.status(400).json({ message: "employeeId is required for HOD/Dean" });
+      }
+    } else {
+      designation = paramDesignation;
+    }
 
     if (!designation) {
-      return res.status(400).json({ message: "Designation missing in token" });
+      return res.status(400).json({ message: "Designation missing" });
     }
 
+    let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
+      ? employeeId
+      : req.userId;
+
+    let rolesArray = roles;
     if (typeof roles === "string") {
       try {
-        roles = JSON.parse(roles); 
+        rolesArray = JSON.parse(roles);
       } catch {
-        roles = roles.includes(",")
-          ? roles.split(",").map(r => r.trim()) 
-          : [roles]; 
+        rolesArray = roles.includes(",")
+          ? roles.split(",").map(r => r.trim())
+          : [roles];
       }
     }
-    if (!Array.isArray(roles)) roles = [];
+    if (!Array.isArray(rolesArray)) rolesArray = [];
 
     const accFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(accFiles)];
@@ -34,25 +48,27 @@ exports.calculateActivitiesMarks = async (req, res) => {
     };
 
     let totalMarks = 0;
-    roles.forEach((role) => {
+    rolesArray.forEach((role) => {
       if (pointsMap[role]) {
         totalMarks += pointsMap[role];
       }
     });
 
-
     const maxPass = pointsDistribution[designation]?.service?.activities ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
 
-    const employee = req.userId;
-        
-    let record = await teaching.findOne({ facultyName, designation});
+    let record = await teaching.findOne({ facultyName, employee });
     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
       record = new teaching({ facultyName, designation, employee });
     }
 
     record.activities = {
-      value: "activities",
+      value: rolesArray,
       marks: finalMarks,
       activitiesFiles: uniqueFiles,
     };
@@ -60,10 +76,14 @@ exports.calculateActivitiesMarks = async (req, res) => {
     await record.save();
 
     return res.status(200).json({
-      section: "AccreditationActivities",
-      roles,
+      section: "Accreditation / Activities",
+      roles: rolesArray,
       finalMarks,
+      files: uniqueFiles,
+      employee,
+      designation
     });
+
   } catch (error) {
     console.error("Error calculating accreditation activities marks:", error);
     return res.status(500).json({ message: "Server error", error: error.message });
@@ -74,27 +94,43 @@ exports.calculateActivitiesMarks = async (req, res) => {
 
 // Q2: Branding
 exports.calculateBrandingMarks = async (req, res) => {
-  console.log(req.body)
   try {
-    const body = cleanBody(req.body);
-    const { designation } = req.params;
-    const { facultyName, branding } = body;
+    const { facultyName, branding, employeeId, designation: bodyDesignation } = req.body;
+    const { designation: paramDesignation } = req.params;
 
-    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+    let designation;
+    if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+      designation = bodyDesignation;
+      if (!employeeId) {
+        return res.status(400).json({ message: "employeeId is required for HOD/Dean" });
+      }
+    } else {
+      designation = paramDesignation;
+    }
 
-    
+    if (!designation) {
+      return res.status(400).json({ message: "Designation missing" });
+    }
+
+    let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
+      ? employeeId
+      : req.userId;
+
     const BrandingFiles = req.files?.map((file) => file.path) || [];
-    const isYes = branding?.toLowerCase() === 'yes';
-    const marks = isYes ? 5 : 0;
     const uniqueFiles = [...new Set(BrandingFiles)];
 
+    const isYes = branding?.toLowerCase() === "yes";
+    const marks = isYes ? 5 : 0;
     const maxmark = pointsDistribution[designation]?.service?.Branding ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    const employee = req.userId;
-        
-    let record = await teaching.findOne({ facultyName, designation});
+    let record = await teaching.findOne({ facultyName, employee });
     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
       record = new teaching({ facultyName, designation, employee });
     }
 
@@ -107,10 +143,15 @@ exports.calculateBrandingMarks = async (req, res) => {
     await record.save();
 
     return res.status(200).json({
+      section: "Branding",
       finalMarks,
-      files: uniqueFiles
+      files: uniqueFiles,
+      employee,
+      designation
     });
+
   } catch (err) {
+    console.error("Error calculating branding marks:", err);
     return res.status(500).json({ error: err.message });
   }
 };
@@ -118,26 +159,42 @@ exports.calculateBrandingMarks = async (req, res) => {
 // Q3: Memebership
 exports.calculateMembershipMarks = async (req, res) => {
   try {
+    const { facultyName, membership, employeeId, designation: bodyDesignation } = req.body;
+    const { designation: paramDesignation } = req.params;
 
-    const body = cleanBody(req.body);
-    const { designation } = req.params;
-    const { facultyName, membership } = body;
+    let designation;
+    if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+      designation = bodyDesignation;
+      if (!employeeId) {
+        return res.status(400).json({ message: "employeeId is required for HOD/Dean" });
+      }
+    } else {
+      designation = paramDesignation;
+    }
 
-    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+    if (!designation) {
+      return res.status(400).json({ message: "Designation missing" });
+    }
 
-    
+    let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
+      ? employeeId
+      : req.userId;
+
     const MembershipFiles = req.files?.map((file) => file.path) || [];
-    const isYes = membership?.toLowerCase() === 'yes';
-    const marks = isYes ? 4 : 1;
     const uniqueFiles = [...new Set(MembershipFiles)];
 
+    const isYes = membership?.toLowerCase() === "yes";
+    const marks = isYes ? 4 : 1;
     const maxmark = pointsDistribution[designation]?.service?.Membership ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    const employee = req.userId;
-        
-    let record = await teaching.findOne({ facultyName, designation});
+    let record = await teaching.findOne({ facultyName, employee });
     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
       record = new teaching({ facultyName, designation, employee });
     }
 
@@ -150,10 +207,15 @@ exports.calculateMembershipMarks = async (req, res) => {
     await record.save();
 
     return res.status(200).json({
+      section: "Membership",
       finalMarks,
-      files: uniqueFiles
+      files: uniqueFiles,
+      employee,
+      designation
     });
+
   } catch (err) {
+    console.error("Error calculating membership marks:", err);
     return res.status(500).json({ error: err.message });
   }
 };
@@ -161,42 +223,61 @@ exports.calculateMembershipMarks = async (req, res) => {
 
 // Q4: Co-curricular
 exports.calculateCocurricularMarks = async (req, res) => {
-  console.log(req.body)
   try {
-    let { facultyName, cocurricular } = req.body;
+    const { facultyName, cocurricular, employeeId, designation: bodyDesignation } = req.body;
+    const { designation: paramDesignation } = req.params;
 
-    if (!cocurricular && req.body["cocurricular "]) {
-      cocurricular = req.body["cocurricular "];
+    let designation;
+    if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+      designation = bodyDesignation;
+      if (!employeeId) {
+        return res.status(400).json({ message: "employeeId is required for HOD/Dean" });
+      }
+    } else {
+      designation = paramDesignation;
     }
 
-    if (typeof cocurricular === "string") {
-      cocurricular = JSON.parse(cocurricular);
-    }
-
-    const { role, count } = cocurricular || {};
-    const { designation } = req.params;
     if (!designation) {
-      return res.status(400).json({ message: 'Designation missing in token' });
+      return res.status(400).json({ message: "Designation missing" });
     }
 
+    let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
+      ? employeeId
+      : req.userId;
+
+    let cocurricularData = cocurricular;
+    if (!cocurricularData && req.body["cocurricular "]) {
+      cocurricularData = req.body["cocurricular "];
+    }
+    if (typeof cocurricularData === "string") {
+      try {
+        cocurricularData = JSON.parse(cocurricularData);
+      } catch {
+        cocurricularData = {};
+      }
+    }
+
+    const { role, count } = cocurricularData || {};
     const projectCount = Number(count) || 0;
 
     const FundFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(FundFiles)];
-    
+
     let marksPerProject = 0;
     if (role === "ResourcePerson") marksPerProject = 2;
     else if (role === "Events") marksPerProject = 1;
 
     const totalMarks = projectCount * marksPerProject;
-
     const maxPass = pointsDistribution[designation]?.service?.External ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
 
-    const employee = req.userId;
-        
-    let record = await teaching.findOne({ facultyName, designation});
+    let record = await teaching.findOne({ facultyName, employee });
     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
       record = new teaching({ facultyName, designation, employee });
     }
 
@@ -211,104 +292,148 @@ exports.calculateCocurricularMarks = async (req, res) => {
     return res.status(200).json({
       section: "Co-curricular",
       finalMarks,
+      files: uniqueFiles,
+      employee,
+      designation
     });
 
   } catch (err) {
+    console.error("Error calculating co-curricular marks:", err);
     return res.status(500).json({ error: err.message });
   }
 };
 
+
 //Q5: Assistance
 exports.calculateAssistanceMarks = async (req, res) => {
   try {
+    const { facultyName, assistance, employeeId, designation: bodyDesignation } = cleanBody(req.body);
+    const { designation: paramDesignation } = req.params;
 
-    const body = cleanBody(req.body);
-    const { designation } = req.params;
-    const { facultyName, assistance } = body;
+    let designation;
+    if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+      designation = bodyDesignation;
+      if (!employeeId) {
+        return res.status(400).json({ message: "employeeId is required for HOD/Dean" });
+      }
+    } else {
+      designation = paramDesignation;
+    }
 
+    if (!designation) {
+      return res.status(400).json({ message: "Designation missing" });
+    }
 
-    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+    let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
+      ? employeeId
+      : req.userId;
 
-    
     const AssistanceFiles = req.files?.map((file) => file.path) || [];
-    const isYes = assistance?.toLowerCase() === 'yes';
-    const marks = isYes ? 5 : 0;
     const uniqueFiles = [...new Set(AssistanceFiles)];
 
+    const isYes = assistance?.toLowerCase() === "yes";
+    const marks = isYes ? 5 : 0;
     const maxmark = pointsDistribution[designation]?.service?.Administration ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    const employee = req.userId;
-        
-    let record = await teaching.findOne({ facultyName, designation});
+    let record = await teaching.findOne({ facultyName, employee });
     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
       record = new teaching({ facultyName, designation, employee });
     }
 
     record.administration = {
       value: "Assistance",
       marks: finalMarks,
-      administrationFiles: uniqueFiles,
+      administrationFiles: uniqueFiles
     };
 
     await record.save();
 
     return res.status(200).json({
+      section: "Administration/Assistance",
       finalMarks,
-      files: uniqueFiles
+      files: uniqueFiles,
+      employee,
+      designation
     });
+
   } catch (err) {
+    console.error("Error calculating assistance marks:", err);
     return res.status(500).json({ error: err.message });
   }
 };
 
 
+
 //Q6: Training
 exports.calculateTrainingMarks = async (req, res) => {
-  console.log(req.body)
   try {
-    const data = cleanBody(req.body);
+    const { facultyName, training, employeeId, designation: bodyDesignation } = cleanBody(req.body);
+    const { designation: paramDesignation } = req.params;
 
-    const { designation } = req.params;
+    let designation;
+    if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+      designation = bodyDesignation;
+      if (!employeeId) {
+        return res.status(400).json({ message: "employeeId is required for HOD/Dean" });
+      }
+    } else {
+      designation = paramDesignation;
+    }
 
-    const facultyName = data.facultyName;
-    const training = data.training;
+    if (!designation) {
+      return res.status(400).json({ message: "Designation missing" });
+    }
 
-    console.log("facultyName:", facultyName, "training:", training);
-
-    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+    let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
+      ? employeeId
+      : req.userId;
 
     const trainingFiles = req.files?.map((file) => file.path) || [];
+    const uniqueFiles = [...new Set(trainingFiles)];
 
     let marks = 0;
     if (training === "3 days & above") marks = 5;
     else if (training === "2 days") marks = 3;
     else if (training === "1 day") marks = 1;
 
-    const uniqueFiles = [...new Set(trainingFiles)];
-
     const maxmark = pointsDistribution[designation]?.service?.Training ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    const employee = req.userId;
-        
-    let record = await teaching.findOne({ facultyName, designation});
+    let record = await teaching.findOne({ facultyName, employee });
     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
       record = new teaching({ facultyName, designation, employee });
     }
 
     record.training = {
-      value: "training",
+      value: training,
       marks: finalMarks,
-      trainingFiles : uniqueFiles
+      trainingFiles: uniqueFiles
     };
+
     await record.save();
+
     return res.status(200).json({
-      section: "training",
+      section: "Training / Workshop",
       finalMarks,
-      file : uniqueFiles
+      files: uniqueFiles,
+      employee,
+      designation
     });
+
   } catch (err) {
+    console.error("Error calculating training marks:", err);
     return res.status(500).json({ error: err.message });
   }
 };
+
