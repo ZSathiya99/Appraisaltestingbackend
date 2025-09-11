@@ -136,7 +136,7 @@ exports.calculatePassPercentageMarks = async (req, res) => {
 //Q3: STUDENT FEEDBACK
 exports.calculateStudentFeedbackMarks = async (req, res) => {
   try {
-    const { feedback , facultyName} = req.body;
+    const { feedback , facultyName, employeeId } = req.body;
     const { designation } = req.params;
 
     
@@ -150,7 +150,15 @@ exports.calculateStudentFeedbackMarks = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.teaching?.studentFeedback ?? 0;
     const finalMarks = Math.min(marks, maxmark);
     
-    const employee = req.userId;
+    let employee;
+    if (designation === "HOD" || designation === "Dean") {
+      if (!employeeId) {
+        return res.status(400).json({ message: "employeeId is required for HoD/Dean" });
+      }
+      employee = employeeId; 
+    } else {
+      employee = req.userId; 
+    }
 
     let record = await teaching.findOne({ facultyName, designation});
     if (!record) {
