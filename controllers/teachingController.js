@@ -136,38 +136,52 @@ exports.calculatePassPercentageMarks = async (req, res) => {
 //Q3: STUDENT FEEDBACK
 exports.calculateStudentFeedbackMarks = async (req, res) => {
   try {
-    const { feedback , facultyName, employeeId } = req.body;
+    const { feedback, facultyName, employeeId } = req.body;
     const { designation } = req.params;
 
-    
-    if (!designation) return res.status(400).json({ message: 'Designation missing in token' });
+    if (!designation) {
+      return res.status(400).json({ message: "Designation missing in request" });
+    }
 
+    // Step 1: calculate marks
     let marks = 0;
     if (feedback === "100 to 91") marks = 3;
     else if (feedback === "90 to 81") marks = 2;
     else if (feedback === "Less than or equal to 80") marks = 1;
-    
+
     const maxmark = pointsDistribution[designation]?.teaching?.studentFeedback ?? 0;
     const finalMarks = Math.min(marks, maxmark);
-    
+
+    // Step 2: decide whose record to update
     let employee;
+    let record;
+
     if (designation === "HOD" || designation === "Dean") {
+      // HoD/Dean must provide faculty employeeId
       if (!employeeId) {
         return res.status(400).json({ message: "employeeId is required for HoD/Dean" });
       }
-      employee = employeeId; 
+      employee = employeeId;
+      record = await teaching.findOne({ facultyName, employee: employeeId });
     } else {
-      employee = req.userId; 
+      // Faculty updates their own record
+      employee = req.userId;
+      record = await teaching.findOne({ facultyName, employee });
     }
 
-    let record = await teaching.findOne({ facultyName, designation});
+    // Step 3: create record if not exists
     if (!record) {
-      record = new teaching({ facultyName, designation, employee });
+      record = new teaching({
+        facultyName,
+        designation: "Faculty", // Always store as Faculty record
+        employee,
+      });
     }
 
+    // Step 4: update feedback
     record.feedback = {
       value: feedback,
-      marks: finalMarks
+      marks: finalMarks,
     };
 
     await record.save();
@@ -175,11 +189,14 @@ exports.calculateStudentFeedbackMarks = async (req, res) => {
     return res.status(200).json({
       section: "Student Feedback",
       finalMarks,
+      employee,
+      facultyName,
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
+
 
 //Q4: Innovative Approach
 exports.calculateInnovativeApporachMarks = async (req, res) => {
