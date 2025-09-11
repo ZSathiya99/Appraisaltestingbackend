@@ -136,14 +136,23 @@ exports.calculatePassPercentageMarks = async (req, res) => {
 //Q3: STUDENT FEEDBACK
 exports.calculateStudentFeedbackMarks = async (req, res) => {
   try {
-    const { feedback, facultyName, employeeId } = req.body;
-    const { designation } = req.params;
+    const { feedback, facultyName, employeeId, designation: bodyDesignation } = req.body;
+    const { designation: paramDesignation } = req.params;
 
-    if (!designation) {
-      return res.status(400).json({ message: "Designation missing in request" });
+    // Decide designation
+    let designation;
+    if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+      designation = bodyDesignation;   // HOD/Dean editing, so designation comes from body
+      if (!employeeId) {
+        return res.status(400).json({ message: "employeeId is required for HoD/Dean" });
+      }
+    } else {
+      designation = paramDesignation; // Faculty case
     }
 
-    // Step 1: calculate marks
+    if (!designation) return res.status(400).json({ message: 'Designation missing' });
+
+    // Calculate marks
     let marks = 0;
     if (feedback === "100 to 91") marks = 3;
     else if (feedback === "90 to 81") marks = 2;
@@ -152,36 +161,23 @@ exports.calculateStudentFeedbackMarks = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.teaching?.studentFeedback ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    // Step 2: decide whose record to update
-    let employee;
-    let record;
+    // Decide employee
+    let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
+      ? employeeId
+      : req.userId;
 
-    if (designation === "HOD" || designation === "Dean") {
-      // HoD/Dean must provide faculty employeeId
-      if (!employeeId) {
-        return res.status(400).json({ message: "employeeId is required for HoD/Dean" });
-      }
-      employee = employeeId;
-      record = await teaching.findOne({ facultyName, employee: employeeId });
-    } else {
-      // Faculty updates their own record
-      employee = req.userId;
-      record = await teaching.findOne({ facultyName, employee });
-    }
-
-    // Step 3: create record if not exists
+    // Find record
+    let record = await teaching.findOne({ facultyName, employee });
     if (!record) {
-      record = new teaching({
-        facultyName,
-        designation: "Faculty", // Always store as Faculty record
-        employee,
-      });
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({ message: "Faculty record not found. HOD/Dean can only edit existing records." });
+      }
+      record = new teaching({ facultyName, designation, employee });
     }
 
-    // Step 4: update feedback
     record.feedback = {
       value: feedback,
-      marks: finalMarks,
+      marks: finalMarks
     };
 
     await record.save();
@@ -190,12 +186,13 @@ exports.calculateStudentFeedbackMarks = async (req, res) => {
       section: "Student Feedback",
       finalMarks,
       employee,
-      facultyName,
+      designation
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
+
 
 
 //Q4: Innovative Approach
