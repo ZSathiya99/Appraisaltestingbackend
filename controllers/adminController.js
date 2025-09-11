@@ -54,20 +54,16 @@ exports.getAnswers =  async (req, res) => {
 
         if (!fieldData) return null;
 
+        // Collect only file arrays (keys ending with 'Files')
+        const files = Object.keys(fieldData)
+          .filter(k => k.toLowerCase().endsWith("files") && Array.isArray(fieldData[k]))
+          .reduce((acc, k) => acc.concat(fieldData[k]), []);
+
         return {
           key: param.key,
-          label: param.label,
-          description: param.description,
-          functionalArea: param.functionalArea,
-          inputType: param.inputType,
-          options: param.options,
-          maxPoints: param.maxPoints,
-          isMandatory: param.isMandatory,
           userValue: fieldData.value ?? fieldData.subjects ?? null,
           marks: fieldData.marks ?? 0,
-          files: Object.keys(fieldData)
-            .filter(k => Array.isArray(fieldData[k]))
-            .reduce((acc, k) => acc.concat(fieldData[k]), [])
+          files
         };
       })
       .filter(Boolean); // skip nulls
@@ -139,3 +135,15 @@ exports.postQuestions = async (req, res) => {
 };
 
 
+exports.getTeachingRecordById = async (req, res) => {
+  try {
+    const record = await TeachingRecord.findById(req.params.recordId).populate("employee");
+    if (!record) {
+      return res.status(404).json({ message: "Teaching record not found" });
+    }
+    res.json(record);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching teaching record", error: err.message });
+  }
+};
