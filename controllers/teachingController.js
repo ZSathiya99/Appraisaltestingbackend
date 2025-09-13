@@ -316,7 +316,7 @@ exports.calculateGuestlectureMarks = async (req, res) => {
     let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
       ? employeeId
       : req.userId;
-
+    console.log(designation);
     const GuestLectureFiles = req.files?.map((file) => file.path) || [];
     const uniqueFiles = [...new Set(GuestLectureFiles)];
 
@@ -326,7 +326,7 @@ exports.calculateGuestlectureMarks = async (req, res) => {
 
     const maxmark = pointsDistribution[designation]?.teaching?.guest ?? 0;
     const finalMarks = Math.min(marks, maxmark);
-
+    console.log(maxmark,finalMarks,marks)
     let record = await teaching.findOne({ facultyName, employee });
     if (!record) {
       if (paramDesignation === "HOD" || paramDesignation === "Dean") {
