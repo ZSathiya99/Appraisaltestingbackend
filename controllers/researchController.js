@@ -455,7 +455,7 @@ exports.calculatePatentMarks = async (req, res) => {
 
 
 // Q7: hindex
-exports.calculateHIndex = async (req, res) => {
+exports.calculatehIndex = async (req, res) => {
   try {
     const { facultyName, hindex, employeeId, designation: bodyDesignation } = req.body;
     const { designation: paramDesignation } = req.params;
