@@ -779,7 +779,10 @@ exports.calculateRoleMarks = async (req, res) => {
     }
 
     record.academicPosition = {
-      value: roles,
+      value: {
+        roles: roles,
+        status: roles.length > 0 ? "Yes" : "No"
+      },
       marks: finalMarks,
       academicPositionFiles: uniqueFiles,
     };
