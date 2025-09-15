@@ -21,25 +21,57 @@ exports.getEmployeeStats = async (req, res) => {
       status: "Active"
     });
 
-     const submittedForms = await TeachingRecord.countDocuments({
+    const submittedForms = await TeachingRecord.countDocuments({
       isFormSubmitted: true
     });
 
     const formSubmissionPercentage =
       totalEmployees > 0 ? ((submittedForms / totalEmployees) * 100).toFixed(2) : 0;
 
+    const loggedInEmployee = await Employee.findById(req.userId);
+    let filter = { status: "Active", designation: { $ne: "HOD" } };
+
+    if (loggedInEmployee.designation === "HOD") {
+      filter.department = loggedInEmployee.department;
+    } else if (loggedInEmployee.designation === "Dean") {
+      filter = { status: "Active" };
+    } else {
+      filter = null; 
+    }
+
+    let filteredStats = {};
+    if (filter) {
+      const filteredEmployees = await Employee.find(filter).select("_id designation");
+      const employeeIds = filteredEmployees.map(e => e._id);
+
+      const teachingRecords = await TeachingRecord.find({ employee: { $in: employeeIds } });
+
+      const verifiedCount = teachingRecords.filter(r => r.approvalStatus === "Approved").length;
+      const notVerifiedCount = teachingRecords.length - verifiedCount;
+
+      filteredStats = {
+        totalEmployees: filteredEmployees.length,
+        verifiedCount,
+        notVerifiedCount
+      };
+    }
+
     res.json({
-      totalEmployees,
-      professorCount,
-      associateProfessorCount,
-      assistantProfessorCount,
-      formSubmissionPercentage: `${formSubmissionPercentage}%`
+      overall: {
+        totalEmployees,
+        professorCount,
+        associateProfessorCount,
+        assistantProfessorCount,
+        formSubmissionPercentage: `${formSubmissionPercentage}%`
+      },
     });
+
   } catch (error) {
     console.error("Error fetching employee stats:", error);
     res.status(500).json({ message: "Error fetching employee statistics" });
   }
 };
+
 
 
 exports.getEmployees = async (req, res) => {
