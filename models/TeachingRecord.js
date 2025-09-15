@@ -68,7 +68,10 @@ const TechingSchema = new mongoose.Schema({
     industryFiles: [String],
   },
   tutorMeeting : {
-    value: String,   
+    value: {
+    tutorWardMeetings: { type: String },
+    valueAdditionInStudentLife: { type: String }
+    },
     marks: Number,
     tutorMeetingFiles: [String],
   },
