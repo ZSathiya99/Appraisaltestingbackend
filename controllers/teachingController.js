@@ -75,11 +75,14 @@ exports.calculateTeachingMarks = async (req, res) => {
       }
     }
 
-    const uniqueFiles = [...new Set(Teachingfiles)];
+  
     const maxTeaching = pointsDistribution[designation]?.teaching?.teachingAssignment ?? 0;
     const finalMarks = Math.min(teachingMarks, maxTeaching);
 
-    let record = await teaching.findOne({ facultyName, employee });
+    let query = { facultyName, employee, designation };
+    let record = await teaching.findOne(query);
+
+    // let record = await teaching.findOne({ facultyName, employee });
     if (!record) {
       if (paramDesignation === "HOD" || paramDesignation === "Dean") {
         return res.status(404).json({ message: "Faculty record not found. HOD/Dean can only edit existing records." });
@@ -87,10 +90,12 @@ exports.calculateTeachingMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
+    const uniqueFiles = [...new Set([...(record.teachingAssignment?.teachingFiles || []), ...Teachingfiles])];
+
     record.teachingAssignment = {
       subjects: parsedSubjects,
       marks: finalMarks,
-      teachingFiles: uniqueFiles
+      teachingFiles: uniqueFiles.length > 0 ? uniqueFiles : null
     };
 
     await record.save();
