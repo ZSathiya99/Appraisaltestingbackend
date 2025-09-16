@@ -152,7 +152,7 @@ exports.calculatePassPercentageMarks = async (req, res) => {
     }
 
     record.passPercentage = {
-      value: passPercentage,
+      value: passPercentage ?? null,
       marks: finalMarks
     };
 
@@ -210,7 +210,7 @@ exports.calculateStudentFeedbackMarks = async (req, res) => {
     }
 
     record.feedback = {
-      value: feedback,
+      value: feedback?? null,
       marks: finalMarks
     };
 
@@ -273,7 +273,7 @@ exports.calculateInnovativeApporachMarks = async (req, res) => {
     }
 
     record.innovativeApproach = {
-      value: InnovativeApproach,
+      value: InnovativeApproach?? null,
       marks: finalMarks,
       innovativeApproachFiles: uniqueFiles,
     };
@@ -336,7 +336,7 @@ exports.calculateGuestlectureMarks = async (req, res) => {
     }
 
     record.visitingFaculty = {
-      value: GuestLecture,
+      value: GuestLecture?? null,
       marks: finalMarks,
       visitingFacultyFiles: uniqueFiles,
     };
@@ -402,7 +402,7 @@ exports.calculateFdpfundingMarks = async (req, res) => {
     }
 
     record.fdpFunding = {
-      value: FdpFunding,
+      value: FdpFunding?? null,
       marks: finalMarks,
       fdpFundingFiles: uniqueFiles,
     };
@@ -469,7 +469,7 @@ exports.calculateHighlevelCompetionMarks = async (req, res) => {
     }
 
     record.innovationProject = {
-      value: highlevelCompetition,
+      value: highlevelCompetition?? null,
       marks: finalMarks,
       innovationProjectFiles: uniqueFiles,
     };
@@ -553,7 +553,7 @@ exports.calculateFdpProgramMarks = async (req, res) => {
     }
 
     record.fdp = {
-      value: JSON.stringify(semesterDataRaw),
+      value: JSON.stringify(semesterDataRaw)?? null,
       marks: finalMarks,
       fdpFiles: uniqueFiles,
     };
@@ -616,7 +616,7 @@ exports.calculateIndustryInvolvementMarks = async (req, res) => {
     }
 
     record.industry = {
-      value: industryInvolvement,
+      value: industryInvolvement?? null,
       marks: finalMarks,
       industryFiles: uniqueFiles,
     };
@@ -685,7 +685,7 @@ exports.calculateTutorWardMarks = async (req, res) => {
       value: {
         tutorWardMeetings,
         valueAdditionInStudentLife
-      },
+      }?? null,
       marks: finalMarks,
       tutorMeetingFiles: uniqueFiles,
     };
@@ -782,7 +782,7 @@ exports.calculateRoleMarks = async (req, res) => {
       value: {
         roles: roles,
         status: roles.length > 0 ? "Yes" : "No"
-      },
+      }?? null,
       marks: finalMarks,
       academicPositionFiles: uniqueFiles,
     };
@@ -977,7 +977,7 @@ exports.calculateStudentProjectMarks = async (req, res) => {
     }
 
     record.studentProjectsAndPublications = {
-      value: { projectCount: studentCount, publications: publicationCount },
+      value: { projectCount: studentCount, publications: publicationCount }?? null,
       marks: finalMarks,
       studentProjectFiles: uniqueFiles
     };

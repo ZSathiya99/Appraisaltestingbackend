@@ -132,7 +132,6 @@ const TechingSchema = new mongoose.Schema({
     marks: Number,
     collabrativeFiles: [String],
   },
-
   seedFund :{
     value: String,   
     marks: Number,
