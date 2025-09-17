@@ -789,7 +789,7 @@ exports.calculateRoleMarks = async (req, res) => {
         status: roles.length > 0 ? "Yes" : "No"
       }?? null,
       marks: finalMarks,
-      academicPositionFiles: uniqueFiles,
+      academicPositionFiles: roleFiles,
     };
 
     await record.save();
@@ -903,36 +903,68 @@ exports.getTeachingRecord = async (req, res) => {
 
 
 
-exports.deleteImage = async (req, res) => {
+// exports.deleteImage = async (req, res) => {
 
-  console.log("req.params.filename:", req.params.filename);
+//   console.log("req.params.filename:", req.params.filename);
 
-  let filename = req.params.filename;
-  if (!filename) {
-    console.error("Filename is missing in params.");
-    return res.status(400).json({ message: "Filename is required in URL" });
-  }
-  filename = decodeURIComponent(filename);
+//   let filename = req.params.filename;
+//   if (!filename) {
+//     console.error("Filename is missing in params.");
+//     return res.status(400).json({ message: "Filename is required in URL" });
+//   }
+//   filename = decodeURIComponent(filename);
 
-  filename = filename.replace(/^uploads[\\/]/, "");
+//   filename = filename.replace(/^uploads[\\/]/, "");
   
-  const filePath = path.join(__dirname, "../uploads", filename);
+//   const filePath = path.join(__dirname, "../uploads", filename);
 
-  console.log("Resolved filePath:", filePath);
+//   console.log("Resolved filePath:", filePath);
 
-  if (fs.existsSync(filePath)) {
-    fs.unlink(filePath, (err) => {
-      if (err) {
-        console.error("Error deleting file:", err);
-        return res.status(500).json({ message: "Failed to delete file" });
-      }
-      return res.status(200).json({ message: "File deleted successfully" });
+//   if (fs.existsSync(filePath)) {
+//     fs.unlink(filePath, (err) => {
+//       if (err) {
+//         console.error("Error deleting file:", err);
+//         return res.status(500).json({ message: "Failed to delete file" });
+//       }
+//       return res.status(200).json({ message: "File deleted successfully" });
+//     });
+//   } else {
+//     return res.status(404).json({ message: "File not found" });
+//   }
+// };
+
+exports.deleteImage = async (req, res) => {
+  try {
+    const { keyword } = req.body; // frontend sends { keyword: "teaching" }
+    if (!keyword) {
+      return res.status(400).json({ message: "Keyword is required" });
+    }
+
+    const uploadDir = path.join(__dirname, "../uploads");
+
+    // Read all files in uploads folder
+    const files = fs.readdirSync(uploadDir);
+
+    // Find matching files
+    const matched = files.filter(f => f.toLowerCase().includes(keyword.toLowerCase()));
+
+    if (matched.length === 0) {
+      return res.status(404).json({ message: "No files found with keyword" });
+    }
+
+    // Delete them
+    matched.forEach(f => {
+      fs.unlinkSync(path.join(uploadDir, f));
     });
-  } else {
-    return res.status(404).json({ message: "File not found" });
+
+    return res.status(200).json({
+      message: "Files deleted successfully",
+      deleted: matched
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 };
-
 
 // Q12: Student Projects & Publications
 exports.calculateStudentProjectMarks = async (req, res) => {

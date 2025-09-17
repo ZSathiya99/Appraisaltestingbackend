@@ -82,22 +82,22 @@ const TechingSchema = new mongoose.Schema({
   },
   
   sciePaper :{
-    value: String,   
+    value: { type: Object },    
     marks: Number,
     sciePaperFiles: [String],
   },
   scopusPaper :{
-    value: String,   
+    value: { type: Object },    
     marks: Number,
     scopusPaperFiles: [String],
   },
   aictePaper :{
-    value: String,   
+    value: { type: Object },    
     marks: Number,
     aictePaperFiles: [String],
   },
   scopusBook :{
-    value: String,   
+    value: String,    
     marks: Number,
     scopusBookFiles: [String],
   },

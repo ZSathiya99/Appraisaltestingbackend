@@ -61,13 +61,20 @@ exports.calculateSciePaper = async (req, res) => {
       }
       record = new teaching({ facultyName, designation, employee });
     }
+    let parsedValue;
+    try {
+      parsedValue = Array.isArray(req.body.scie)
+        ? req.body.scie
+        : JSON.parse(req.body.scie);   
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid JSON in value field" });
+    }
 
     record.sciePaper = {
-      value: "SCIE",
+      value: parsedValue ?? null,
       marks: finalMarks,
       sciePaperFiles: uniqueFiles
     };
-
     await record.save();
 
     return res.status(200).json({
@@ -144,9 +151,10 @@ exports.calculateScopusPaper = async (req, res) => {
       }
       record = new teaching({ facultyName, designation, employee });
     }
+    
 
     record.scopusPaper = {
-      value: "Scopus",
+      value: scopus ?? null,
       marks: finalMarks,
       scopusPaperFiles: uniqueFiles
     };
@@ -228,7 +236,7 @@ exports.calculateAictePaper = async (req, res) => {
     }
 
     record.aictePaper = {
-      value: "Aicte",
+      value: aicte ?? null,
       marks: finalMarks,
       aictePaperFiles: uniqueFiles
     };
@@ -294,7 +302,7 @@ exports.calculateScopusBook = async (req, res) => {
     }
 
     record.scopusBook = {
-      value: "ScopusBook",
+      value: numBook ?? null,
       marks: finalMarks,
       scopusBookFiles: uniqueFiles
     };
@@ -361,7 +369,7 @@ exports.calculateIndexedBook = async (req, res) => {
     }
 
     record.indexBook = {
-      value: "IndexBook",
+      value:numPaper,
       marks: finalMarks,
       indexBookFiles: uniqueFiles
     };
