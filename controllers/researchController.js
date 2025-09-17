@@ -260,9 +260,10 @@ exports.calculateAictePaper = async (req, res) => {
 // Q4: BookScopus
 exports.calculateScopusBook = async (req, res) => {
   try {
-    const { facultyName, numBook, employeeId, designation: bodyDesignation } = req.body;
+    const { facultyName, numBook, employeeId, designation: bodyDesignation, scopusBookFiles: bodyFiles } = req.body;
     const { designation: paramDesignation } = req.params;
 
+    // Determine designation
     let designation;
     if (paramDesignation === "HOD" || paramDesignation === "Dean") {
       designation = bodyDesignation;
@@ -277,20 +278,12 @@ exports.calculateScopusBook = async (req, res) => {
       return res.status(400).json({ message: "Designation missing" });
     }
 
-    let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
-      ? employeeId
+    // Determine employee
+    const employee = (paramDesignation === "HOD" || paramDesignation === "Dean") 
+      ? employeeId 
       : req.userId;
 
-    const ScopusFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(ScopusFiles)];
-
-    const bookCount = Number(numBook) || 0;
-    const marksPerBook = 2;
-    const totalMarks = bookCount * marksPerBook;
-
-    const maxmark = pointsDistribution[designation]?.research?.book_scopus ?? 0;
-    const finalMarks = Math.min(totalMarks, maxmark);
-
+    // Fetch or create record
     let record = await teaching.findOne({ facultyName, employee });
     if (!record) {
       if (paramDesignation === "HOD" || paramDesignation === "Dean") {
@@ -298,30 +291,64 @@ exports.calculateScopusBook = async (req, res) => {
           message: "Faculty record not found. HOD/Dean can only edit existing records."
         });
       }
-      record = new teaching({ facultyName, designation, employee });
+      // Initialize scopusBookFiles as empty array
+      record = new teaching({ facultyName, designation, employee, scopusBook: { scopusBookFiles: [] } });
     }
 
+    // 1️⃣ Start with existing files from DB
+    let currentFiles = record.scopusBook?.scopusBookFiles || [];
+    console.log("Existing files:", currentFiles);
+
+    // 2️⃣ Merge files sent in request body (editing scenario)
+    if (bodyFiles) {
+      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
+      bodyFilesArray.forEach(file => {
+        if (!currentFiles.includes(file)) currentFiles.push(file);
+      });
+    }
+
+    // 3️⃣ Add newly uploaded files (for normal faculty only)
+    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
+      req.files.forEach(file => {
+        const normalizedPath = file.path.replace(/\\/g, "/");
+        console.log("New uploaded file:", normalizedPath);
+        if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
+      });
+    }
+
+    console.log("Final files to save:", currentFiles);
+
+    // Calculate marks
+    const bookCount = Number(numBook) || 0;
+    const marksPerBook = 2;
+    const totalMarks = bookCount * marksPerBook;
+    const maxMark = pointsDistribution[designation]?.research?.book_scopus ?? 0;
+    const finalMarks = Math.min(totalMarks, maxMark);
+
+    // Update record
     record.scopusBook = {
       value: numBook ?? null,
       marks: finalMarks,
-      scopusBookFiles: uniqueFiles
+      scopusBookFiles: currentFiles,
     };
 
+    // Save record
     await record.save();
 
+    // Return response with all current files
     return res.status(200).json({
       section: "ScopusBook",
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
       designation
     });
 
   } catch (err) {
+    console.error("Error in calculateScopusBook:", err);
     return res.status(500).json({ error: err.message });
   }
 };
-
 
 
 // Q5: IndexedBook
