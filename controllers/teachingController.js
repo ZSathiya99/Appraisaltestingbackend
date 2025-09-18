@@ -46,7 +46,6 @@ exports.calculateTeachingMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const Teachingfiles = req.files?.map((file) => file.path) || [];
 
     let parsedSubjects;
     try {
@@ -90,7 +89,7 @@ exports.calculateTeachingMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = record.scopusBook?.scopusBookFiles || [];
+    let currentFiles = record.teachingAssignment?.teachingAssignment || [];
     if (bodyFiles) {
       const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
       bodyFilesArray.forEach(file => {
@@ -101,20 +100,14 @@ exports.calculateTeachingMarks = async (req, res) => {
     if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
       req.files.forEach(file => {
         const normalizedPath = file.path.replace(/\\/g, "/");
-        console.log("New uploaded file:", normalizedPath);
         if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
       });
     }
-
-
-    const existingFiles = record.teachingAssignment?.teachingFiles || [];
-    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
-    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
     
     record.teachingAssignment = {
       subjects: parsedSubjects,
       marks: finalMarks,
-      teachingFiles: uniqueFiles.length > 0 ? uniqueFiles : null
+      teachingFiles: currentFiles
     };
 
     await record.save();
@@ -122,7 +115,7 @@ exports.calculateTeachingMarks = async (req, res) => {
     return res.status(200).json({
       message: "Teaching marks calculated successfully",
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
       designation
     });
@@ -256,7 +249,7 @@ exports.calculateStudentFeedbackMarks = async (req, res) => {
 //Q4: Innovative Approach
 exports.calculateInnovativeApporachMarks = async (req, res) => {
   try {
-    const { InnovativeApproach, facultyName, employeeId, designation: bodyDesignation } = req.body;
+    const { InnovativeApproach, facultyName, employeeId, designation: bodyDesignation , Innovativefiles: bodyFiles} = req.body;
     const { designation: paramDesignation } = req.params;
 
     let designation;
@@ -277,9 +270,6 @@ exports.calculateInnovativeApporachMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const existingFiles = record.innovativeApproach?.innovativeApproachFiles || [];
-    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
-    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
     
     let marks = 0;
@@ -298,10 +288,25 @@ exports.calculateInnovativeApporachMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
+    let currentFiles = record.innovativeApproach?.innovativeApproachFiles || [];
+    if (bodyFiles) {
+      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
+      bodyFilesArray.forEach(file => {
+        if (!currentFiles.includes(file)) currentFiles.push(file);
+      });
+    }
+
+    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
+      req.files.forEach(file => {
+        const normalizedPath = file.path.replace(/\\/g, "/");
+        if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
+      });
+    }
+
     record.innovativeApproach = {
       value: InnovativeApproach?? null,
       marks: finalMarks,
-      innovativeApproachFiles: uniqueFiles,
+      innovativeApproachFiles: currentFiles,
     };
 
     await record.save();
@@ -309,7 +314,7 @@ exports.calculateInnovativeApporachMarks = async (req, res) => {
     return res.status(200).json({
       section: "Innovative Approach",
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
       designation
     });
@@ -322,7 +327,7 @@ exports.calculateInnovativeApporachMarks = async (req, res) => {
 //Q5: Guest lecture
 exports.calculateGuestlectureMarks = async (req, res) => {
   try {
-    const { GuestLecture, facultyName, employeeId, designation: bodyDesignation } = req.body;
+    const { GuestLecture, facultyName, employeeId, designation: bodyDesignation ,GuestLectureFiles: bodyFiles} = req.body;
     const { designation: paramDesignation } = req.params;
 
     let designation;
@@ -343,10 +348,6 @@ exports.calculateGuestlectureMarks = async (req, res) => {
       ? employeeId
       : req.userId;
     
-    const existingFiles = record.visitingFaculty?.visitingFacultyFiles || [];
-    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
-    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
-
 
     let marks = 0;
     if (GuestLecture === "National Experts") marks = 1;
@@ -354,7 +355,7 @@ exports.calculateGuestlectureMarks = async (req, res) => {
 
     const maxmark = pointsDistribution[designation]?.teaching?.guest ?? 0;
     const finalMarks = Math.min(marks, maxmark);
-    console.log(maxmark,finalMarks,marks)
+
     let record = await teaching.findOne({ facultyName, employee });
     if (!record) {
       if (paramDesignation === "HOD" || paramDesignation === "Dean") {
@@ -362,11 +363,25 @@ exports.calculateGuestlectureMarks = async (req, res) => {
       }
       record = new teaching({ facultyName, designation, employee });
     }
+    
+    let currentFiles = record.visitingFaculty?.visitingFacultyFiles || [];
+    if (bodyFiles) {
+      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
+      bodyFilesArray.forEach(file => {
+        if (!currentFiles.includes(file)) currentFiles.push(file);
+      });
+    }
+    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
+          req.files.forEach(file => {
+            const normalizedPath = file.path.replace(/\\/g, "/");
+            if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
+          });
+        }
 
     record.visitingFaculty = {
       value: GuestLecture?? null,
       marks: finalMarks,
-      visitingFacultyFiles: uniqueFiles,
+      visitingFacultyFiles: currentFiles,
     };
 
     await record.save();
@@ -374,7 +389,7 @@ exports.calculateGuestlectureMarks = async (req, res) => {
     return res.status(200).json({
       section: "Guest Lectures",
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
       designation
     });
@@ -387,7 +402,7 @@ exports.calculateGuestlectureMarks = async (req, res) => {
 //Q6: FDP Funding
 exports.calculateFdpfundingMarks = async (req, res) => {
   try {
-    const { FdpFunding, facultyName, employeeId, designation: bodyDesignation } = req.body;
+    const { FdpFunding, facultyName, employeeId, designation: bodyDesignation,FdpFunding: bodyFiles } = req.body;
     const { designation: paramDesignation } = req.params;
 
     let designation;
@@ -406,12 +421,7 @@ exports.calculateFdpfundingMarks = async (req, res) => {
 
     let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
       ? employeeId
-      : req.userId;
-
-    const existingFiles = record.fdpFunding?.fdpFundingFiles || [];
-    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
-    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
-    
+      : req.userId;    
 
     let marks = 0;
     if (FdpFunding === "less than 1 lakh") marks = 1;
@@ -431,10 +441,24 @@ exports.calculateFdpfundingMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
+    let currentFiles = record.fdpFunding?.fdpFundingFiles || [];
+    if (bodyFiles) {
+      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
+      bodyFilesArray.forEach(file => {
+        if (!currentFiles.includes(file)) currentFiles.push(file);
+      });
+    }
+    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
+          req.files.forEach(file => {
+            const normalizedPath = file.path.replace(/\\/g, "/");
+            if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
+          });
+        }
+
     record.fdpFunding = {
       value: FdpFunding?? null,
       marks: finalMarks,
-      fdpFundingFiles: uniqueFiles,
+      fdpFundingFiles: currentFiles,
     };
 
     await record.save();
@@ -442,7 +466,7 @@ exports.calculateFdpfundingMarks = async (req, res) => {
     return res.status(200).json({
       section: "FDP Funding",
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
       designation,
     });
@@ -455,7 +479,8 @@ exports.calculateFdpfundingMarks = async (req, res) => {
 //Q7: Highlevel Competion
 exports.calculateHighlevelCompetionMarks = async (req, res) => {
   try {
-    const { highlevelCompetition, facultyName, employeeId, designation: bodyDesignation } = req.body;
+    const { highlevelCompetition, facultyName, employeeId, designation: bodyDesignation,HighlevelCompetitionFiles: bodyFiles
+ } = req.body;
     const { designation: paramDesignation } = req.params;
 
     let designation;
@@ -476,9 +501,6 @@ exports.calculateHighlevelCompetionMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const existingFiles = record.innovationProject?.innovationProjectFiles || [];
-    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
-    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
 
     let marks = 0;
@@ -500,10 +522,23 @@ exports.calculateHighlevelCompetionMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
+    let currentFiles = record.innovationProject?.innovationProjectFiles || [];
+    if (bodyFiles) {
+      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
+      bodyFilesArray.forEach(file => {
+        if (!currentFiles.includes(file)) currentFiles.push(file);
+      });
+    }
+    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
+          req.files.forEach(file => {
+            const normalizedPath = file.path.replace(/\\/g, "/");
+            if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
+          });
+        }
     record.innovationProject = {
       value: highlevelCompetition?? null,
       marks: finalMarks,
-      innovationProjectFiles: uniqueFiles,
+      innovationProjectFiles: currentFiles,
     };
 
     await record.save();
@@ -511,7 +546,7 @@ exports.calculateHighlevelCompetionMarks = async (req, res) => {
     return res.status(200).json({
       section: "HighLevel Competition",
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
       designation,
     });
@@ -524,7 +559,7 @@ exports.calculateHighlevelCompetionMarks = async (req, res) => {
 //Q8: FdpProgram
 exports.calculateFdpProgramMarks = async (req, res) => {
   try {
-    const { facultyName, employeeId, designation: bodyDesignation } = req.body;
+    const { facultyName, employeeId, designation: bodyDesignation, FdpprogramFiles: bodyFiles } = req.body;
     const { designation: paramDesignation } = req.params;
 
     let designation;
@@ -544,10 +579,6 @@ exports.calculateFdpProgramMarks = async (req, res) => {
     let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
       ? employeeId
       : req.userId;
-
-    const existingFiles = record.fdp?.fdpFiles || [];
-    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
-    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
     let semesterDataRaw;
     try {
@@ -583,12 +614,26 @@ exports.calculateFdpProgramMarks = async (req, res) => {
         });
       }
       record = new teaching({ facultyName, designation, employee });
+    } 
+
+    let currentFiles = record.fdp?.fdpFiles || [];
+    if (bodyFiles) {
+      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
+      bodyFilesArray.forEach(file => {
+        if (!currentFiles.includes(file)) currentFiles.push(file);
+      });
+    }
+    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
+          req.files.forEach(file => {
+            const normalizedPath = file.path.replace(/\\/g, "/");
+            if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
+          });
     }
 
     record.fdp = {
       value: JSON.stringify(semesterDataRaw)?? null,
       marks: finalMarks,
-      fdpFiles: uniqueFiles,
+      fdpFiles: currentFiles,
     };
 
     await record.save();
@@ -596,7 +641,7 @@ exports.calculateFdpProgramMarks = async (req, res) => {
     return res.status(200).json({
       section: "FDP Programme",
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
       designation,
       semesterWiseMarks,
@@ -609,7 +654,7 @@ exports.calculateFdpProgramMarks = async (req, res) => {
 //Q9: Industry Involvement
 exports.calculateIndustryInvolvementMarks = async (req, res) => {
   try {
-    const { industryInvolvement, facultyName, employeeId, designation: bodyDesignation } = req.body;
+    const { industryInvolvement, facultyName, employeeId, designation: bodyDesignation ,IndustryFiles: bodyFiles} = req.body;
     const { designation: paramDesignation } = req.params;
 
     let designation;
@@ -630,9 +675,6 @@ exports.calculateIndustryInvolvementMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const existingFiles = record.industry?.industryFiles || [];
-    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
-    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
     const maxmark = pointsDistribution[designation]?.teaching?.industryInvolvement ?? 0;
     const isYes = industryInvolvement?.toLowerCase() === "yes";
@@ -649,10 +691,23 @@ exports.calculateIndustryInvolvementMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
+    let currentFiles = record.industry?.industryFiles || [];
+    if (bodyFiles) {
+      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
+      bodyFilesArray.forEach(file => {
+        if (!currentFiles.includes(file)) currentFiles.push(file);
+      });
+    }
+    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
+          req.files.forEach(file => {
+            const normalizedPath = file.path.replace(/\\/g, "/");
+            if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
+          });
+        }
     record.industry = {
       value: industryInvolvement?? null,
       marks: finalMarks,
-      industryFiles: uniqueFiles,
+      industryFiles: currentFiles,
     };
 
     await record.save();
@@ -661,7 +716,7 @@ exports.calculateIndustryInvolvementMarks = async (req, res) => {
       section: "Industry Involvement",
       finalMarks,
       message: isYes ? "Eligible for full marks" : "No marks awarded",
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
       designation
     });
@@ -674,7 +729,7 @@ exports.calculateIndustryInvolvementMarks = async (req, res) => {
 //Q10: TutorWard Meeting
 exports.calculateTutorWardMarks = async (req, res) => {
   try {
-    const { tutorWardMeetings, valueAdditionInStudentLife, facultyName, employeeId, designation: bodyDesignation } = req.body;
+    const { tutorWardMeetings, valueAdditionInStudentLife, facultyName, employeeId, designation: bodyDesignation, valueAdditionInStudentLife :  bodyFiles } = req.body;
     const { designation: paramDesignation } = req.params;
 
     let designation;
@@ -699,12 +754,6 @@ exports.calculateTutorWardMarks = async (req, res) => {
     const valueAdd = valueAdditionInStudentLife?.toLowerCase() === "yes" ? 2 : 0;
     const totalMarks = meetings + valueAdd;
 
-    const existingFiles = record.tutorMeeting?.tutorMeetingFiles || [];
-    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
-    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
-
-
-
     const maxmark = pointsDistribution[designation]?.teaching?.tutorMeeting ?? 0;
     const finalMarks = Math.min(totalMarks, maxmark);
 
@@ -718,13 +767,27 @@ exports.calculateTutorWardMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
+    let currentFiles = record.tutorMeeting?.tutorMeetingFiles || [];
+    if (bodyFiles) {
+      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
+      bodyFilesArray.forEach(file => {
+        if (!currentFiles.includes(file)) currentFiles.push(file);
+      });
+    }
+    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
+          req.files.forEach(file => {
+            const normalizedPath = file.path.replace(/\\/g, "/");
+            if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
+          });
+        }
+
     record.tutorMeeting = {
       value: {
         tutorWardMeetings,
         valueAdditionInStudentLife
       }?? null,
       marks: finalMarks,
-      tutorMeetingFiles: uniqueFiles,
+      tutorMeetingFiles: currentFiles,
     };
 
     await record.save();
@@ -732,7 +795,7 @@ exports.calculateTutorWardMarks = async (req, res) => {
     return res.status(200).json({
       section: "Tutor Ward",
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
       designation
     });
@@ -745,7 +808,7 @@ exports.calculateTutorWardMarks = async (req, res) => {
 // Q11: Roles in Academic
 exports.calculateRoleMarks = async (req, res) => {
   try {
-    let { roles, facultyName, employeeId, designation: bodyDesignation } = req.body;
+    let { roles, facultyName, employeeId, designation: bodyDesignation ,files: bodyFiles} = req.body;
     const { designation: paramDesignation } = req.params;
 
     let designation;
@@ -776,10 +839,6 @@ exports.calculateRoleMarks = async (req, res) => {
     }
     if (!Array.isArray(roles)) roles = [];
 
-    const existingFiles = record.academicPosition?.academicPositionFiles || [];
-    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
-    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
-    
 
    
     const academicRoles = ["Academic Coordinator", "Class Advisor"];
@@ -816,13 +875,27 @@ exports.calculateRoleMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
+    let currentFiles = record.academicPosition?.academicPositionFiles || [];
+    if (bodyFiles) {
+      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
+      bodyFilesArray.forEach(file => {
+        if (!currentFiles.includes(file)) currentFiles.push(file);
+      });
+    }
+    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
+          req.files.forEach(file => {
+            const normalizedPath = file.path.replace(/\\/g, "/");
+            if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
+          });
+        }
+      
     record.academicPosition = {
       value: {
         roles: roles,
         status: roles.length > 0 ? "Yes" : "No"
       }?? null,
       marks: finalMarks,
-      academicPositionFiles: roleFiles,
+      academicPositionFiles: currentFiles,
     };
 
     await record.save();
@@ -830,7 +903,7 @@ exports.calculateRoleMarks = async (req, res) => {
     return res.status(200).json({
       section: "Academic Roles",
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
       designation,
     });
@@ -1002,7 +1075,7 @@ exports.deleteImage = async (req, res) => {
 // Q12: Student Projects & Publications
 exports.calculateStudentProjectMarks = async (req, res) => {
   try {
-    const { facultyName, projectCount, publications, employeeId, designation: bodyDesignation } = req.body;
+    const { facultyName, projectCount, publications, employeeId, designation: bodyDesignation , studentProjectFiles: bodyFiles} = req.body;
     const { designation: paramDesignation } = req.params;
 
     let designation;
@@ -1026,11 +1099,6 @@ exports.calculateStudentProjectMarks = async (req, res) => {
     const studentCount = Number(projectCount) || 0;
     const publicationCount = Number(publications) || 0;
 
-
-    const existingFiles = record.studentProjectsAndPublications?.studentProjectFiles || [];
-    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
-    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
-
     const projectGuidanceMarks = Math.min(studentCount, 2) * 1;
     const publicationMarks = publicationCount * 2;
     const totalMarks = projectGuidanceMarks + publicationMarks;
@@ -1048,10 +1116,24 @@ exports.calculateStudentProjectMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
+    let currentFiles = record.studentProjectsAndPublications?.studentProjectFiles || [];
+    if (bodyFiles) {
+      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
+      bodyFilesArray.forEach(file => {
+        if (!currentFiles.includes(file)) currentFiles.push(file);
+      });
+    }
+    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
+          req.files.forEach(file => {
+            const normalizedPath = file.path.replace(/\\/g, "/");
+            if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
+          });
+        }
+
     record.studentProjectsAndPublications = {
       value: { projectCount: studentCount, publications: publicationCount }?? null,
       marks: finalMarks,
-      studentProjectFiles: uniqueFiles
+      studentProjectFiles: currentFiles
     };
 
     await record.save();
@@ -1059,7 +1141,7 @@ exports.calculateStudentProjectMarks = async (req, res) => {
     return res.status(200).json({
       section: "Student Projects & Publications",
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
       designation
     });
