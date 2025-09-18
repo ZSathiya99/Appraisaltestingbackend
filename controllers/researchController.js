@@ -72,8 +72,25 @@ exports.calculateSciePaper = async (req, res) => {
       return res.status(400).json({ message: "Invalid JSON in value field" });
     }
 
+    let valueObj = null;
+    if (Array.isArray(parsedValue) && parsedValue.length > 0) {
+      valueObj = {
+        status: "yes",
+        data: parsedValue
+      };
+    } else if (Array.isArray(parsedValue) && parsedValue.length === 0) {
+      valueObj = {
+        status: "no",
+        data: []
+      };
+    } else {
+      valueObj = {
+        status: null,
+        data: null
+      };
+    }
     record.sciePaper = {
-      value: (Array.isArray(parsedValue) && parsedValue.length > 0) ? "Yes" : "No",
+      value: valueObj,
       marks: finalMarks,
       sciePaperFiles: currentFiles
     };
@@ -152,9 +169,26 @@ exports.calculateScopusPaper = async (req, res) => {
     }
     let currentFiles = handleFiles(record, "scopusPaper","scopusPaperFiles", paramDesignation, bodyFiles, req.files);
 
+    let valueObj = null;
+    if (Array.isArray(papers) && papers.length > 0) {
+      valueObj = {
+        status: "yes",
+        data: papers
+      };
+    } else if (Array.isArray(papers) && papers.length === 0) {
+      valueObj = {
+        status: "no",
+        data: []
+      };
+    } else {
+      valueObj = {
+        status: null,
+        data: null
+      };
+    }
 
     record.scopusPaper = {
-      value: (Array.isArray(scopus) && scopus.length > 0) ? "Yes" : "No",
+      value: valueObj,
       marks: finalMarks,
       scopusPaperFiles: currentFiles
     };
@@ -235,8 +269,26 @@ exports.calculateAictePaper = async (req, res) => {
     
     let currentFiles = handleFiles(record, "aictePaper", "aictePaperFiles",paramDesignation, bodyFiles, req.files);
 
+    let valueObj = null;
+    if (Array.isArray(papers) && papers.length > 0) {
+      valueObj = {
+        status: "yes",
+        data: papers
+      };
+    } else if (Array.isArray(papers) && papers.length === 0) {
+      valueObj = {
+        status: "no",
+        data: []
+      };
+    } else {
+      valueObj = {
+        status: null,
+        data: null
+      };
+    }
+
     record.aictePaper = {
-      value: (Array.isArray(aicte) && aicte.length > 0) ? "Yes" : "No",
+      value: valueObj,
       marks: finalMarks,
       aictePaperFiles: currentFiles
     };
