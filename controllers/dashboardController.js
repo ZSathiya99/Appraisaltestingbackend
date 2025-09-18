@@ -1,6 +1,7 @@
 const  Employee = require("../models/Employee");
 const TeachingRecord = require("../models/TeachingRecord")
 const maxPointsMap = require('../utils/prePoints');
+const path = require('path');
 
 exports.getEmployeeStats = async (req, res) => {
   try {
@@ -153,3 +154,14 @@ exports.getFilteredTeachingRecords = async (req, res) => {
   }
 };
 
+exports.getFile = async (req, res) => {
+  const filename = req.params.filename;
+  const uploadFolder = path.join(__dirname, '..', 'uploads'); // assuming uploads folder is one level above controllers
+  const filePath = path.join(uploadFolder, filename);
+
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      return res.status(404).send('File not found');
+    }
+  });
+};

@@ -29,50 +29,50 @@ router.post("/passPercentage/:designation",authenticate, calculatePassPercentage
 router.post("/feedback/:designation",authenticate, calculateStudentFeedbackMarks);
 router.post(
   "/innovativeApproach/:designation",
-  upload.any(),authenticate,
+  upload.array("Innovativefiles", 5),authenticate,
   calculateInnovativeApporachMarks
 );
 router.post(
   "/guestLecture/:designation",
-  upload.any(),authenticate,
+   upload.array("GuestLectureFiles", 1),authenticate,
   calculateGuestlectureMarks
 );
 router.post(
   "/fdpFunding/:designation",
-  upload.any(),authenticate,
+   upload.array("FdpFunding", 1),authenticate,
   calculateFdpfundingMarks
 );
 router.post(
   "/highlevelCompetition/:designation",
-  upload.any(),authenticate,
+   upload.array("HighlevelCompetitionFiles", 1),authenticate,
   calculateHighlevelCompetionMarks
 );
 router.post(
   "/fdpPrograms/:designation",
-  upload.any(),authenticate,
+   upload.array("FdpprogramFiles", 1),authenticate,
   calculateFdpProgramMarks
 );
 
 router.post(
   "/industryInvolvement/:designation",
-  upload.any(),authenticate,
+   upload.array("IndustryFiles", 1),authenticate,
   calculateIndustryInvolvementMarks
 );
 router.post(
   "/tutorwardMeeting/:designation",
-  upload.any(),authenticate,
+   upload.array("valueAdditionFiles", 1),authenticate,
   calculateTutorWardMarks
 );
 
 router.post(
   "/academicRoles/:designation",
-  upload.any(),authenticate,
+   upload.array("files", 1),authenticate,
   calculateRoleMarks
 );
 
 router.post(
   "/project/:designation",
-  upload.any(),authenticate,
+   upload.array("uploadedFiles", 1),authenticate,
   calculateStudentProjectMarks
 );
 
@@ -83,7 +83,7 @@ router.post(
 
 
 router.delete(
-  "/deleteImage/:filename",
+  "/deleteImage",
   deleteImage
 );
 

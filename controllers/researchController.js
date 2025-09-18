@@ -25,9 +25,20 @@ exports.calculateSciePaper = async (req, res) => {
     let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
       ? employeeId
       : req.userId;
+    
+    let record = await teaching.findOne({ facultyName, employee });
+     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
+      record = new teaching({ facultyName, designation, employee });
+    }
 
-    const sciePaperFiles = req.files?.map(file => file.path) || [];
-    const uniqueFiles = [...new Set(sciePaperFiles)];
+    const existingFiles = record.sciePaper?.sciePaperFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
     let papers = scie;
     if (typeof scie === "string") {
@@ -52,22 +63,22 @@ exports.calculateSciePaper = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.research?.scie ?? 0;
     const finalMarks = Math.min(totalMarks, maxmark);
 
-    let record = await teaching.findOne({ facultyName, employee });
-    if (!record) {
-      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
-        return res.status(404).json({
-          message: "Faculty record not found. HOD/Dean can only edit existing records."
-        });
-      }
-      record = new teaching({ facultyName, designation, employee });
+    
+   
+    let parsedValue;
+    try {
+      parsedValue = Array.isArray(req.body.scie)
+        ? req.body.scie
+        : JSON.parse(req.body.scie);   
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid JSON in value field" });
     }
 
     record.sciePaper = {
-      value: "SCIE",
+      value: parsedValue ?? null,
       marks: finalMarks,
       sciePaperFiles: uniqueFiles
     };
-
     await record.save();
 
     return res.status(200).json({
@@ -109,8 +120,20 @@ exports.calculateScopusPaper = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const scopusPaperFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(scopusPaperFiles)];
+      let record = await teaching.findOne({ facultyName, employee });
+     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
+      record = new teaching({ facultyName, designation, employee });
+    }
+
+    const existingFiles = record.scopusPaper?.scopusPaperFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
+
 
     let papers = scopus;
     if (typeof scopus === "string") {
@@ -135,18 +158,10 @@ exports.calculateScopusPaper = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.research?.scopus ?? 0;
     const finalMarks = Math.min(totalMarks, maxmark);
 
-    let record = await teaching.findOne({ facultyName, employee });
-    if (!record) {
-      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
-        return res.status(404).json({
-          message: "Faculty record not found. HOD/Dean can only edit existing records."
-        });
-      }
-      record = new teaching({ facultyName, designation, employee });
-    }
+   
 
     record.scopusPaper = {
-      value: "Scopus",
+      value: scopus ?? null,
       marks: finalMarks,
       scopusPaperFiles: uniqueFiles
     };
@@ -191,8 +206,19 @@ exports.calculateAictePaper = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const AicteFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(AicteFiles)];
+      let record = await teaching.findOne({ facultyName, employee });
+     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
+      record = new teaching({ facultyName, designation, employee });
+    }
+
+    const existingFiles = record.aictePaper?.aictePaperFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
     let papers = aicte;
     if (typeof aicte === "string") {
@@ -217,18 +243,9 @@ exports.calculateAictePaper = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.research?.aicte ?? 0;
     const finalMarks = Math.min(totalMarks, maxmark);
 
-    let record = await teaching.findOne({ facultyName, employee });
-    if (!record) {
-      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
-        return res.status(404).json({
-          message: "Faculty record not found. HOD/Dean can only edit existing records."
-        });
-      }
-      record = new teaching({ facultyName, designation, employee });
-    }
 
     record.aictePaper = {
-      value: "Aicte",
+      value: aicte ?? null,
       marks: finalMarks,
       aictePaperFiles: uniqueFiles
     };
@@ -252,9 +269,10 @@ exports.calculateAictePaper = async (req, res) => {
 // Q4: BookScopus
 exports.calculateScopusBook = async (req, res) => {
   try {
-    const { facultyName, numBook, employeeId, designation: bodyDesignation } = req.body;
+    const { facultyName, numBook, employeeId, designation: bodyDesignation, scopusBookFiles: bodyFiles } = req.body;
     const { designation: paramDesignation } = req.params;
 
+    // Determine designation
     let designation;
     if (paramDesignation === "HOD" || paramDesignation === "Dean") {
       designation = bodyDesignation;
@@ -269,20 +287,12 @@ exports.calculateScopusBook = async (req, res) => {
       return res.status(400).json({ message: "Designation missing" });
     }
 
-    let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
-      ? employeeId
+    // Determine employee
+    const employee = (paramDesignation === "HOD" || paramDesignation === "Dean") 
+      ? employeeId 
       : req.userId;
 
-    const ScopusFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(ScopusFiles)];
-
-    const bookCount = Number(numBook) || 0;
-    const marksPerBook = 2;
-    const totalMarks = bookCount * marksPerBook;
-
-    const maxmark = pointsDistribution[designation]?.research?.book_scopus ?? 0;
-    const finalMarks = Math.min(totalMarks, maxmark);
-
+    // Fetch or create record
     let record = await teaching.findOne({ facultyName, employee });
     if (!record) {
       if (paramDesignation === "HOD" || paramDesignation === "Dean") {
@@ -290,29 +300,66 @@ exports.calculateScopusBook = async (req, res) => {
           message: "Faculty record not found. HOD/Dean can only edit existing records."
         });
       }
-      record = new teaching({ facultyName, designation, employee });
+      // Initialize scopusBookFiles as empty array
+      record = new teaching({ facultyName, designation, employee, scopusBook: { scopusBookFiles: [] } });
     }
 
+    // 1️⃣ Start with existing files from DB
+    let currentFiles = record.scopusBook?.scopusBookFiles || [];
+    console.log("Existing files:", currentFiles);
+
+    // 2️⃣ Merge files sent in request body (editing scenario)
+    if (bodyFiles) {
+      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
+      bodyFilesArray.forEach(file => {
+        if (!currentFiles.includes(file)) currentFiles.push(file);
+      });
+    }
+
+    // 3️⃣ Add newly uploaded files (for normal faculty only)
+    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
+      req.files.forEach(file => {
+        const normalizedPath = file.path.replace(/\\/g, "/");
+        console.log("New uploaded file:", normalizedPath);
+        if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
+      });
+    }
+
+    console.log("Final files to save:", currentFiles);
+
+    // Calculate marks
+    const bookCount = Number(numBook) || 0;
+    const marksPerBook = 2;
+    const totalMarks = bookCount * marksPerBook;
+    const maxMark = pointsDistribution[designation]?.research?.book_scopus ?? 0;
+    const finalMarks = Math.min(totalMarks, maxMark);
+
+    // Update record
     record.scopusBook = {
-      value: "ScopusBook",
+      value: numBook ?? null,
       marks: finalMarks,
-      scopusBookFiles: uniqueFiles
+      scopusBookFiles: currentFiles,
     };
 
+    // Save record
     await record.save();
 
+    // Return response with all current files
     return res.status(200).json({
       section: "ScopusBook",
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
       designation
     });
 
   } catch (err) {
+    console.error("Error in calculateScopusBook:", err);
     return res.status(500).json({ error: err.message });
   }
 };
+
+
 
 
 
@@ -340,18 +387,8 @@ exports.calculateIndexedBook = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const IndexFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(IndexFiles)];
-
-    const paperCount = Number(numPaper) || 0;
-    const marksPerPaper = 1;
-    const totalMarks = paperCount * marksPerPaper;
-
-    const maxmark = pointsDistribution[designation]?.research?.indexbook ?? 0;
-    const finalMarks = Math.min(totalMarks, maxmark);
-
-    let record = await teaching.findOne({ facultyName, employee });
-    if (!record) {
+      let record = await teaching.findOne({ facultyName, employee });
+     if (!record) {
       if (paramDesignation === "HOD" || paramDesignation === "Dean") {
         return res.status(404).json({
           message: "Faculty record not found. HOD/Dean can only edit existing records."
@@ -360,8 +397,20 @@ exports.calculateIndexedBook = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
+    const existingFiles = record.indexBook?.indexBookFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
+
+    const paperCount = Number(numPaper) || 0;
+    const marksPerPaper = 1;
+    const totalMarks = paperCount * marksPerPaper;
+
+    const maxmark = pointsDistribution[designation]?.research?.indexbook ?? 0;
+    const finalMarks = Math.min(totalMarks, maxmark);
+
+
     record.indexBook = {
-      value: "IndexBook",
+      value:numPaper,
       marks: finalMarks,
       indexBookFiles: uniqueFiles
     };
@@ -406,8 +455,19 @@ exports.calculatePatentMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const PatentFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(PatentFiles)];
+      let record = await teaching.findOne({ facultyName, employee });
+     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
+      record = new teaching({ facultyName, designation, employee });
+    }
+
+    const existingFiles = record.patent?.patentFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
     const patentCount = Number(numPatent) || 0;
     let marksPerPatent = 0;
@@ -420,15 +480,6 @@ exports.calculatePatentMarks = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.research?.patent ?? 0;
     const finalMarks = Math.min(totalMarks, maxmark);
 
-    let record = await teaching.findOne({ facultyName, employee });
-    if (!record) {
-      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
-        return res.status(404).json({
-          message: "Faculty record not found. HOD/Dean can only edit existing records."
-        });
-      }
-      record = new teaching({ facultyName, designation, employee });
-    }
 
     record.patent = {
       value: patentType,
@@ -478,8 +529,20 @@ exports.calculatehIndex = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const hindexFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(hindexFiles)];
+      let record = await teaching.findOne({ facultyName, employee });
+     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
+      record = new teaching({ facultyName, designation, employee });
+    }
+
+    const existingFiles = record.hIndex?.hIndexFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
+
 
     let marks = 0;
     const num = Number(hindex);
@@ -489,16 +552,6 @@ exports.calculatehIndex = async (req, res) => {
 
     const maxmark = pointsDistribution[designation]?.research?.hindex ?? 0;
     const finalMarks = Math.min(marks, maxmark);
-
-    let record = await teaching.findOne({ facultyName, employee });
-    if (!record) {
-      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
-        return res.status(404).json({
-          message: "Faculty record not found. HOD/Dean can only edit existing records."
-        });
-      }
-      record = new teaching({ facultyName, designation, employee });
-    }
 
     record.hIndex = {
       value: hindex,
@@ -546,8 +599,19 @@ exports.calculateIIndex = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const IindexFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(IindexFiles)];
+      let record = await teaching.findOne({ facultyName, employee });
+     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
+      record = new teaching({ facultyName, designation, employee });
+    }
+
+    const existingFiles = record.iIndex?.iIndexFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
     let marks = 0;
     if (Iindex === "2 and above" || Number(Iindex) >= 2) marks = 2;
@@ -556,15 +620,6 @@ exports.calculateIIndex = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.research?.i10index ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    let record = await teaching.findOne({ facultyName, employee });
-    if (!record) {
-      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
-        return res.status(404).json({
-          message: "Faculty record not found. HOD/Dean can only edit existing records."
-        });
-      }
-      record = new teaching({ facultyName, designation, employee });
-    }
 
     record.iIndex = {
       value: Iindex,
@@ -614,8 +669,19 @@ exports.calculateCitation = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const citationFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(citationFiles)];
+      let record = await teaching.findOne({ facultyName, employee });
+     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
+      record = new teaching({ facultyName, designation, employee });
+    }
+
+    const existingFiles = record.citation?.citationFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
     let marks = 0;
     if (citation === "100 and above" || Number(citation) >= 100) marks = 3;
@@ -625,15 +691,6 @@ exports.calculateCitation = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.research?.citation ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    let record = await teaching.findOne({ facultyName, employee });
-    if (!record) {
-      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
-        return res.status(404).json({
-          message: "Faculty record not found. HOD/Dean can only edit existing records."
-        });
-      }
-      record = new teaching({ facultyName, designation, employee });
-    }
 
     record.citation = {
       value: citation,
@@ -683,8 +740,19 @@ exports.calculateConsultancy = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const consultancyFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(consultancyFiles)];
+      let record = await teaching.findOne({ facultyName, employee });
+     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
+      record = new teaching({ facultyName, designation, employee });
+    }
+
+    const existingFiles = record.consultancy?.consultancyFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
     let marks = 0;
     if (consultancy === "upto one lakh") marks = 2;
@@ -694,15 +762,6 @@ exports.calculateConsultancy = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.research?.consultancy ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
-    let record = await teaching.findOne({ facultyName, employee });
-    if (!record) {
-      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
-        return res.status(404).json({
-          message: "Faculty record not found. HOD/Dean can only edit existing records."
-        });
-      }
-      record = new teaching({ facultyName, designation, employee });
-    }
 
     record.consultancy = {
       value: consultancy,
@@ -750,16 +809,8 @@ exports.calculateForeignMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const foreignFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(foreignFiles)];
-
-    const isYes = foreignWork?.toLowerCase() === 'yes';
-    const marks = isYes ? 2 : 0;
-    const maxmark = pointsDistribution[designation]?.research?.collabrative ?? 0;
-    const finalMarks = Math.min(marks, maxmark);
-
-    let record = await teaching.findOne({ facultyName, employee });
-    if (!record) {
+      let record = await teaching.findOne({ facultyName, employee });
+     if (!record) {
       if (paramDesignation === "HOD" || paramDesignation === "Dean") {
         return res.status(404).json({
           message: "Faculty record not found. HOD/Dean can only edit existing records."
@@ -767,6 +818,16 @@ exports.calculateForeignMarks = async (req, res) => {
       }
       record = new teaching({ facultyName, designation, employee });
     }
+
+    const existingFiles = record.collabrative?.collabrativeFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
+
+    const isYes = foreignWork?.toLowerCase() === 'yes';
+    const marks = isYes ? 2 : 0;
+    const maxmark = pointsDistribution[designation]?.research?.collabrative ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
+
 
     record.collabrative = {
       value: foreignWork,
@@ -814,8 +875,19 @@ exports.calculateSeedFund = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const seedFundFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(seedFundFiles)];
+      let record = await teaching.findOne({ facultyName, employee });
+     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
+      record = new teaching({ facultyName, designation, employee });
+    }
+
+    const existingFiles = record.seedFund?.seedFundFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
     let marks = 0;
     if (seedFund === "upto one lakh") marks = 1;
@@ -825,15 +897,6 @@ exports.calculateSeedFund = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.research?.seedfund ?? 0;
     const finalMarks = Math.min(marks, maxPass);
 
-    let record = await teaching.findOne({ facultyName, employee });
-    if (!record) {
-      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
-        return res.status(404).json({
-          message: "Faculty record not found. HOD/Dean can only edit existing records."
-        });
-      }
-      record = new teaching({ facultyName, designation, employee });
-    }
 
     record.seedFund = {
       value: seedFund,
@@ -882,8 +945,19 @@ exports.calculateFundedProjectMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const FundFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(FundFiles)];
+    let record = await teaching.findOne({ facultyName, employee });
+     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
+      record = new teaching({ facultyName, designation, employee });
+    }
+
+    const existingFiles = record.fundedProject?.fundedProjectFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
     let fieldData = field_name;
     if (typeof fieldData === "string") {
@@ -906,15 +980,6 @@ exports.calculateFundedProjectMarks = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.research?.fund ?? totalMarks;
     const finalMarks = Math.min(totalMarks, maxPass);
 
-    let record = await teaching.findOne({ facultyName, employee });
-    if (!record) {
-      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
-        return res.status(404).json({
-          message: "Faculty record not found. HOD/Dean can only edit existing records."
-        });
-      }
-      record = new teaching({ facultyName, designation, employee });
-    }
 
     record.fundedProject = {
       value: "FundedProject",
@@ -965,8 +1030,18 @@ exports.calculateResearchScholarMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const scholarFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(scholarFiles)];
+      let record = await teaching.findOne({ facultyName, employee });
+     if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
+      record = new teaching({ facultyName, designation, employee });
+    }
+    const existingFiles = record.researchScholars?.researchScholarFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
     let marks = 0;
     if (Number(guidingCount) > 5) marks += 3;
@@ -982,15 +1057,6 @@ exports.calculateResearchScholarMarks = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.research?.researchScholars ?? marks;
     const finalMarks = Math.min(marks, maxPass);
 
-    let record = await teaching.findOne({ facultyName, employee });
-    if (!record) {
-      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
-        return res.status(404).json({
-          message: "Faculty record not found. HOD/Dean can only edit existing records."
-        });
-      }
-      record = new teaching({ facultyName, designation, employee });
-    }
 
     record.researchScholars = {
       value: "ResearchScholars",

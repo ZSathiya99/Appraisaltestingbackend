@@ -90,8 +90,10 @@ exports.calculateTeachingMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    const uniqueFiles = [...new Set([...(record.teachingAssignment?.teachingFiles || []), ...Teachingfiles])];
-
+    const existingFiles = record.teachingAssignment?.teachingFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
+    
     record.teachingAssignment = {
       subjects: parsedSubjects,
       marks: finalMarks,
@@ -258,9 +260,11 @@ exports.calculateInnovativeApporachMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const Innovativefiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(Innovativefiles)];
+    const existingFiles = record.innovativeApproach?.innovativeApproachFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
+    
     let marks = 0;
     if (InnovativeApproach === "Classroom Teaching") marks = 1;
     else if (InnovativeApproach === "Lab") marks = 2;
@@ -321,9 +325,11 @@ exports.calculateGuestlectureMarks = async (req, res) => {
     let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
       ? employeeId
       : req.userId;
-    console.log(designation);
-    const GuestLectureFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(GuestLectureFiles)];
+    
+    const existingFiles = record.visitingFaculty?.visitingFacultyFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
+
 
     let marks = 0;
     if (GuestLecture === "National Experts") marks = 1;
@@ -385,8 +391,10 @@ exports.calculateFdpfundingMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const FdpFundingFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(FdpFundingFiles)];
+    const existingFiles = record.fdpFunding?.fdpFundingFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
+    
 
     let marks = 0;
     if (FdpFunding === "less than 1 lakh") marks = 1;
@@ -451,8 +459,10 @@ exports.calculateHighlevelCompetionMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const HighlevelCompetitionFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(HighlevelCompetitionFiles)];
+    const existingFiles = record.innovationProject?.innovationProjectFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
+
 
     let marks = 0;
     if (highlevelCompetition === "Participation") marks = 2;
@@ -518,8 +528,9 @@ exports.calculateFdpProgramMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const FdpprogramFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(FdpprogramFiles)];
+    const existingFiles = record.fdp?.fdpFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
     let semesterDataRaw;
     try {
@@ -602,8 +613,9 @@ exports.calculateIndustryInvolvementMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const IndustryFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(IndustryFiles)];
+    const existingFiles = record.industry?.industryFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
     const maxmark = pointsDistribution[designation]?.teaching?.industryInvolvement ?? 0;
     const isYes = industryInvolvement?.toLowerCase() === "yes";
@@ -670,8 +682,11 @@ exports.calculateTutorWardMarks = async (req, res) => {
     const valueAdd = valueAdditionInStudentLife?.toLowerCase() === "yes" ? 2 : 0;
     const totalMarks = meetings + valueAdd;
 
-    const TutorFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(TutorFiles)];
+    const existingFiles = record.tutorMeeting?.tutorMeetingFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
+
+
 
     const maxmark = pointsDistribution[designation]?.teaching?.tutorMeeting ?? 0;
     const finalMarks = Math.min(totalMarks, maxmark);
@@ -744,9 +759,10 @@ exports.calculateRoleMarks = async (req, res) => {
     }
     if (!Array.isArray(roles)) roles = [];
 
-  
-    const roleFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(roleFiles)];
+    const existingFiles = record.academicPosition?.academicPositionFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
+    
 
    
     const academicRoles = ["Academic Coordinator", "Class Advisor"];
@@ -789,7 +805,7 @@ exports.calculateRoleMarks = async (req, res) => {
         status: roles.length > 0 ? "Yes" : "No"
       }?? null,
       marks: finalMarks,
-      academicPositionFiles: uniqueFiles,
+      academicPositionFiles: roleFiles,
     };
 
     await record.save();
@@ -903,36 +919,68 @@ exports.getTeachingRecord = async (req, res) => {
 
 
 
-exports.deleteImage = async (req, res) => {
+// exports.deleteImage = async (req, res) => {
 
-  console.log("req.params.filename:", req.params.filename);
+//   console.log("req.params.filename:", req.params.filename);
 
-  let filename = req.params.filename;
-  if (!filename) {
-    console.error("Filename is missing in params.");
-    return res.status(400).json({ message: "Filename is required in URL" });
-  }
-  filename = decodeURIComponent(filename);
+//   let filename = req.params.filename;
+//   if (!filename) {
+//     console.error("Filename is missing in params.");
+//     return res.status(400).json({ message: "Filename is required in URL" });
+//   }
+//   filename = decodeURIComponent(filename);
 
-  filename = filename.replace(/^uploads[\\/]/, "");
+//   filename = filename.replace(/^uploads[\\/]/, "");
   
-  const filePath = path.join(__dirname, "../uploads", filename);
+//   const filePath = path.join(__dirname, "../uploads", filename);
 
-  console.log("Resolved filePath:", filePath);
+//   console.log("Resolved filePath:", filePath);
 
-  if (fs.existsSync(filePath)) {
-    fs.unlink(filePath, (err) => {
-      if (err) {
-        console.error("Error deleting file:", err);
-        return res.status(500).json({ message: "Failed to delete file" });
-      }
-      return res.status(200).json({ message: "File deleted successfully" });
+//   if (fs.existsSync(filePath)) {
+//     fs.unlink(filePath, (err) => {
+//       if (err) {
+//         console.error("Error deleting file:", err);
+//         return res.status(500).json({ message: "Failed to delete file" });
+//       }
+//       return res.status(200).json({ message: "File deleted successfully" });
+//     });
+//   } else {
+//     return res.status(404).json({ message: "File not found" });
+//   }
+// };
+
+exports.deleteImage = async (req, res) => {
+  try {
+    const { keyword } = req.body; // frontend sends { keyword: "teaching" }
+    if (!keyword) {
+      return res.status(400).json({ message: "Keyword is required" });
+    }
+
+    const uploadDir = path.join(__dirname, "../uploads");
+
+    // Read all files in uploads folder
+    const files = fs.readdirSync(uploadDir);
+
+    // Find matching files
+    const matched = files.filter(f => f.toLowerCase().includes(keyword.toLowerCase()));
+
+    if (matched.length === 0) {
+      return res.status(404).json({ message: "No files found with keyword" });
+    }
+
+    // Delete them
+    matched.forEach(f => {
+      fs.unlinkSync(path.join(uploadDir, f));
     });
-  } else {
-    return res.status(404).json({ message: "File not found" });
+
+    return res.status(200).json({
+      message: "Files deleted successfully",
+      deleted: matched
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 };
-
 
 // Q12: Student Projects & Publications
 exports.calculateStudentProjectMarks = async (req, res) => {
@@ -961,8 +1009,10 @@ exports.calculateStudentProjectMarks = async (req, res) => {
     const studentCount = Number(projectCount) || 0;
     const publicationCount = Number(publications) || 0;
 
-    const uploadedFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(uploadedFiles)];
+
+    const existingFiles = record.studentProjectsAndPublications?.studentProjectFiles || [];
+    const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
+    const uniqueFiles = [...new Set([...existingFiles, ...newFiles])];
 
     const projectGuidanceMarks = Math.min(studentCount, 2) * 1;
     const publicationMarks = publicationCount * 2;
