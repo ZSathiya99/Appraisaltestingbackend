@@ -3,6 +3,7 @@ const Subject = require('../models/Subject');
 const pointsDistribution = require("../utils/prePoints");
 const fs = require("fs");
 const path = require("path");
+const handleFiles = require("../utils/fileHandler");
 
 
 exports.getPointsByDesignation = (req, res) => {
@@ -89,20 +90,7 @@ exports.calculateTeachingMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = record.teachingAssignment?.teachingAssignment || [];
-    if (bodyFiles) {
-      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
-      bodyFilesArray.forEach(file => {
-        if (!currentFiles.includes(file)) currentFiles.push(file);
-      });
-    }
-
-    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
-      req.files.forEach(file => {
-        const normalizedPath = file.path.replace(/\\/g, "/");
-        if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
-      });
-    }
+    let currentFiles = handleFiles(record, "teachingAssignment", paramDesignation, bodyFiles, req.files);
     
     record.teachingAssignment = {
       subjects: parsedSubjects,
@@ -288,20 +276,7 @@ exports.calculateInnovativeApporachMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = record.innovativeApproach?.innovativeApproachFiles || [];
-    if (bodyFiles) {
-      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
-      bodyFilesArray.forEach(file => {
-        if (!currentFiles.includes(file)) currentFiles.push(file);
-      });
-    }
-
-    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
-      req.files.forEach(file => {
-        const normalizedPath = file.path.replace(/\\/g, "/");
-        if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
-      });
-    }
+    let currentFiles = handleFiles(record, "innovativeApproach", paramDesignation, bodyFiles, req.files);
 
     record.innovativeApproach = {
       value: InnovativeApproach?? null,
@@ -364,19 +339,7 @@ exports.calculateGuestlectureMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
     
-    let currentFiles = record.visitingFaculty?.visitingFacultyFiles || [];
-    if (bodyFiles) {
-      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
-      bodyFilesArray.forEach(file => {
-        if (!currentFiles.includes(file)) currentFiles.push(file);
-      });
-    }
-    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
-          req.files.forEach(file => {
-            const normalizedPath = file.path.replace(/\\/g, "/");
-            if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
-          });
-        }
+    let currentFiles = handleFiles(record, "visitingFaculty", paramDesignation, bodyFiles, req.files);
 
     record.visitingFaculty = {
       value: GuestLecture?? null,
@@ -441,19 +404,7 @@ exports.calculateFdpfundingMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = record.fdpFunding?.fdpFundingFiles || [];
-    if (bodyFiles) {
-      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
-      bodyFilesArray.forEach(file => {
-        if (!currentFiles.includes(file)) currentFiles.push(file);
-      });
-    }
-    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
-          req.files.forEach(file => {
-            const normalizedPath = file.path.replace(/\\/g, "/");
-            if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
-          });
-        }
+    let currentFiles = handleFiles(record, "fdpFunding", paramDesignation, bodyFiles, req.files);
 
     record.fdpFunding = {
       value: FdpFunding?? null,
@@ -522,19 +473,8 @@ exports.calculateHighlevelCompetionMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = record.innovationProject?.innovationProjectFiles || [];
-    if (bodyFiles) {
-      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
-      bodyFilesArray.forEach(file => {
-        if (!currentFiles.includes(file)) currentFiles.push(file);
-      });
-    }
-    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
-          req.files.forEach(file => {
-            const normalizedPath = file.path.replace(/\\/g, "/");
-            if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
-          });
-        }
+    let currentFiles = handleFiles(record, "innovationProject", paramDesignation, bodyFiles, req.files);
+
     record.innovationProject = {
       value: highlevelCompetition?? null,
       marks: finalMarks,
@@ -616,19 +556,7 @@ exports.calculateFdpProgramMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     } 
 
-    let currentFiles = record.fdp?.fdpFiles || [];
-    if (bodyFiles) {
-      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
-      bodyFilesArray.forEach(file => {
-        if (!currentFiles.includes(file)) currentFiles.push(file);
-      });
-    }
-    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
-          req.files.forEach(file => {
-            const normalizedPath = file.path.replace(/\\/g, "/");
-            if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
-          });
-    }
+    let currentFiles = handleFiles(record, "fdp", paramDesignation, bodyFiles, req.files);
 
     record.fdp = {
       value: JSON.stringify(semesterDataRaw)?? null,
@@ -691,19 +619,8 @@ exports.calculateIndustryInvolvementMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = record.industry?.industryFiles || [];
-    if (bodyFiles) {
-      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
-      bodyFilesArray.forEach(file => {
-        if (!currentFiles.includes(file)) currentFiles.push(file);
-      });
-    }
-    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
-          req.files.forEach(file => {
-            const normalizedPath = file.path.replace(/\\/g, "/");
-            if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
-          });
-        }
+    let currentFiles = handleFiles(record, "industry", paramDesignation, bodyFiles, req.files);
+
     record.industry = {
       value: industryInvolvement?? null,
       marks: finalMarks,
@@ -767,19 +684,7 @@ exports.calculateTutorWardMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = record.tutorMeeting?.tutorMeetingFiles || [];
-    if (bodyFiles) {
-      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
-      bodyFilesArray.forEach(file => {
-        if (!currentFiles.includes(file)) currentFiles.push(file);
-      });
-    }
-    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
-          req.files.forEach(file => {
-            const normalizedPath = file.path.replace(/\\/g, "/");
-            if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
-          });
-        }
+    let currentFiles = handleFiles(record, "tutorMeeting", paramDesignation, bodyFiles, req.files);
 
     record.tutorMeeting = {
       value: {
@@ -875,19 +780,7 @@ exports.calculateRoleMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = record.academicPosition?.academicPositionFiles || [];
-    if (bodyFiles) {
-      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
-      bodyFilesArray.forEach(file => {
-        if (!currentFiles.includes(file)) currentFiles.push(file);
-      });
-    }
-    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
-          req.files.forEach(file => {
-            const normalizedPath = file.path.replace(/\\/g, "/");
-            if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
-          });
-        }
+    let currentFiles = handleFiles(record, "academicPosition", paramDesignation, bodyFiles, req.files);
       
     record.academicPosition = {
       value: {
@@ -1116,19 +1009,7 @@ exports.calculateStudentProjectMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = record.studentProjectsAndPublications?.studentProjectFiles || [];
-    if (bodyFiles) {
-      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
-      bodyFilesArray.forEach(file => {
-        if (!currentFiles.includes(file)) currentFiles.push(file);
-      });
-    }
-    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
-          req.files.forEach(file => {
-            const normalizedPath = file.path.replace(/\\/g, "/");
-            if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
-          });
-        }
+    let currentFiles = handleFiles(record, "studentProjectsAndPublications", paramDesignation, bodyFiles, req.files);
 
     record.studentProjectsAndPublications = {
       value: { projectCount: studentCount, publications: publicationCount }?? null,

@@ -143,7 +143,7 @@ const TechingSchema = new mongoose.Schema({
     patentFiles: [String],
   },
   fundedProject :{
-    value: String,   
+    value: { type: String },   
     marks: Number,
     fundedProjectFiles: [String],
   },
