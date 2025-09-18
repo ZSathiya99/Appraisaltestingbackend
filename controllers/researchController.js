@@ -308,12 +308,10 @@ exports.calculateScopusBook = async (req, res) => {
       return res.status(400).json({ message: "Designation missing" });
     }
 
-    // Determine employee
     const employee = (paramDesignation === "HOD" || paramDesignation === "Dean") 
       ? employeeId 
       : req.userId;
 
-    // Fetch or create record
     let record = await teaching.findOne({ facultyName, employee });
     if (!record) {
       if (paramDesignation === "HOD" || paramDesignation === "Dean") {
@@ -321,15 +319,10 @@ exports.calculateScopusBook = async (req, res) => {
           message: "Faculty record not found. HOD/Dean can only edit existing records."
         });
       }
-      // Initialize scopusBookFiles as empty array
       record = new teaching({ facultyName, designation, employee, scopusBook: { scopusBookFiles: [] } });
     }
 
-    // 1️⃣ Start with existing files from DB
     let currentFiles = record.scopusBook?.scopusBookFiles || [];
-    console.log("Existing files:", currentFiles);
-
-    // 2️⃣ Merge files sent in request body (editing scenario)
     if (bodyFiles) {
       const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
       bodyFilesArray.forEach(file => {
@@ -337,7 +330,6 @@ exports.calculateScopusBook = async (req, res) => {
       });
     }
 
-    // 3️⃣ Add newly uploaded files (for normal faculty only)
     if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
       req.files.forEach(file => {
         const normalizedPath = file.path.replace(/\\/g, "/");
@@ -346,16 +338,12 @@ exports.calculateScopusBook = async (req, res) => {
       });
     }
 
-    console.log("Final files to save:", currentFiles);
-
-    // Calculate marks
     const bookCount = Number(numBook) || 0;
     const marksPerBook = 2;
     const totalMarks = bookCount * marksPerBook;
     const maxMark = pointsDistribution[designation]?.research?.book_scopus ?? 0;
     const finalMarks = Math.min(totalMarks, maxMark);
 
-    // Update record
     record.scopusBook = {
       value: numBook ?? null,
       marks: finalMarks,

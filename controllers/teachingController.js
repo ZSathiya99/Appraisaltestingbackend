@@ -25,7 +25,7 @@ exports.getPointsByDesignation = (req, res) => {
 // Q1: TEACHING ASSIGNMENT
 exports.calculateTeachingMarks = async (req, res) => {
   try {
-    const { teachingAssignment, facultyName, employeeId, designation: bodyDesignation } = req.body;
+    const { teachingAssignment, facultyName, employeeId, designation: bodyDesignation, Teachingfiles: bodyFiles  } = req.body;
     const { designation: paramDesignation } = req.params;
 
     let designation;
@@ -82,13 +82,30 @@ exports.calculateTeachingMarks = async (req, res) => {
     let query = { facultyName, employee, designation };
     let record = await teaching.findOne(query);
 
-    // let record = await teaching.findOne({ facultyName, employee });
+   
     if (!record) {
       if (paramDesignation === "HOD" || paramDesignation === "Dean") {
         return res.status(404).json({ message: "Faculty record not found. HOD/Dean can only edit existing records." });
       }
       record = new teaching({ facultyName, designation, employee });
     }
+
+    let currentFiles = record.scopusBook?.scopusBookFiles || [];
+    if (bodyFiles) {
+      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
+      bodyFilesArray.forEach(file => {
+        if (!currentFiles.includes(file)) currentFiles.push(file);
+      });
+    }
+
+    if (paramDesignation !== "HOD" && paramDesignation !== "Dean" && req.files?.length) {
+      req.files.forEach(file => {
+        const normalizedPath = file.path.replace(/\\/g, "/");
+        console.log("New uploaded file:", normalizedPath);
+        if (!currentFiles.includes(normalizedPath)) currentFiles.push(normalizedPath);
+      });
+    }
+
 
     const existingFiles = record.teachingAssignment?.teachingFiles || [];
     const newFiles = req.files?.map((file) => file.path.replace(/\\/g, "/")) || [];
