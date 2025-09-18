@@ -1,5 +1,5 @@
-function handleFiles(record, section, paramDesignation, bodyFiles, reqFiles) {
-  let currentFiles = record[section]?.[`${section}Files`] || [];
+function handleFiles(record, section, files, paramDesignation, bodyFiles, reqFiles) {
+  let currentFiles = record[section]?.[files] || [];
 
   if (paramDesignation === "HOD" || paramDesignation === "Dean") {
     return currentFiles;

@@ -36,7 +36,7 @@ exports.calculateSciePaper = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = handleFiles(record, "sciePaper", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "sciePaper", "sciePaperFiles",paramDesignation, bodyFiles, req.files);
 
     let papers = scie;
     if (typeof scie === "string") {
@@ -150,7 +150,7 @@ exports.calculateScopusPaper = async (req, res) => {
       }
       record = new teaching({ facultyName, designation, employee });
     }
-    let currentFiles = handleFiles(record, "scopusPaper", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "scopusPaper","scopusPaperFiles", paramDesignation, bodyFiles, req.files);
 
 
     record.scopusPaper = {
@@ -233,7 +233,7 @@ exports.calculateAictePaper = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.research?.aicte ?? 0;
     const finalMarks = Math.min(totalMarks, maxmark);
     
-    let currentFiles = handleFiles(record, "aictePaper", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "aictePaper", "aictePaperFiles",paramDesignation, bodyFiles, req.files);
 
     record.aictePaper = {
       value: aicte ?? null,
@@ -292,7 +292,7 @@ exports.calculateScopusBook = async (req, res) => {
       record = new teaching({ facultyName, designation, employee, scopusBook: { scopusBookFiles: [] } });
     }
 
-    let currentFiles = handleFiles(record, "scopusBook", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "scopusBook", "scopusBookFiles", paramDesignation, bodyFiles, req.files);
 
     const bookCount = Number(numBook) || 0;
     const marksPerBook = 2;
@@ -366,7 +366,7 @@ exports.calculateIndexedBook = async (req, res) => {
     const finalMarks = Math.min(totalMarks, maxmark);
 
 
-    let currentFiles = handleFiles(record, "indexBook", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "indexBook", "indexBookFiles", paramDesignation, bodyFiles, req.files);
 
     record.indexBook = {
       value:numPaper,
@@ -436,7 +436,7 @@ exports.calculatePatentMarks = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.research?.patent ?? 0;
     const finalMarks = Math.min(totalMarks, maxmark);
 
-    let currentFiles = handleFiles(record, "patent", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "patent", "patentFiles", paramDesignation, bodyFiles, req.files);
 
     record.patent = {
       value: patentType,
@@ -496,7 +496,7 @@ exports.calculatehIndex = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = handleFiles(record, "hIndex", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "hIndex", "hIndexFiles", paramDesignation, bodyFiles, req.files);
 
 
     let marks = 0;
@@ -564,7 +564,7 @@ exports.calculateIIndex = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = handleFiles(record, "iIndex", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "iIndex", "iIndexFiles",paramDesignation, bodyFiles, req.files);
 
     let marks = 0;
     if (Iindex === "2 and above" || Number(Iindex) >= 2) marks = 2;
@@ -632,7 +632,7 @@ exports.calculateCitation = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = handleFiles(record, "citation", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "citation", "citationFiles", paramDesignation, bodyFiles, req.files);
 
     let marks = 0;
     if (citation === "100 and above" || Number(citation) >= 100) marks = 3;
@@ -701,7 +701,7 @@ exports.calculateConsultancy = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = handleFiles(record, "consultancy", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "consultancy", "consultancyFiles", paramDesignation, bodyFiles, req.files);
 
     let marks = 0;
     if (consultancy === "upto one lakh") marks = 2;
@@ -768,7 +768,7 @@ exports.calculateForeignMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = handleFiles(record, "collabrative", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "collabrative", "collabrativeFiles", paramDesignation, bodyFiles, req.files);
 
     const isYes = foreignWork?.toLowerCase() === 'yes';
     const marks = isYes ? 2 : 0;
@@ -832,7 +832,7 @@ exports.calculateSeedFund = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = handleFiles(record, "seedFund", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "seedFund", "seedFundFiles", paramDesignation, bodyFiles, req.files);
 
     let marks = 0;
     if (seedFund === "upto one lakh") marks = 1;
@@ -900,7 +900,7 @@ exports.calculateFundedProjectMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = handleFiles(record, "fundedProject", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "fundedProject", "fundedProjectFiles", paramDesignation, bodyFiles, req.files);
 
     let fieldData = field_name;
     if (typeof fieldData === "string") {
@@ -996,7 +996,7 @@ exports.calculateResearchScholarMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
     
-    let currentFiles = handleFiles(record, "researchScholars", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "researchScholars", "researchScholarsFiles", paramDesignation, bodyFiles, req.files);
 
     let marks = 0;
     if (Number(guidingCount) > 5) marks += 3;
