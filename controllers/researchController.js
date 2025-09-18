@@ -73,7 +73,7 @@ exports.calculateSciePaper = async (req, res) => {
     }
 
     record.sciePaper = {
-      value: parsedValue ?? null,
+      value: (Array.isArray(parsedValue) && parsedValue.length > 0) ? "Yes" : "No",
       marks: finalMarks,
       sciePaperFiles: currentFiles
     };
@@ -154,7 +154,7 @@ exports.calculateScopusPaper = async (req, res) => {
 
 
     record.scopusPaper = {
-      value: scopus ?? null,
+      value: (Array.isArray(scopus) && scopus.length > 0) ? "Yes" : "No",
       marks: finalMarks,
       scopusPaperFiles: currentFiles
     };
@@ -236,7 +236,7 @@ exports.calculateAictePaper = async (req, res) => {
     let currentFiles = handleFiles(record, "aictePaper", "aictePaperFiles",paramDesignation, bodyFiles, req.files);
 
     record.aictePaper = {
-      value: aicte ?? null,
+      value: (Array.isArray(aicte) && aicte.length > 0) ? "Yes" : "No",
       marks: finalMarks,
       aictePaperFiles: currentFiles
     };
