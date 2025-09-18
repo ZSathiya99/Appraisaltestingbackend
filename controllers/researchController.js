@@ -1,6 +1,6 @@
 const teaching = require('../models/TeachingRecord');
 const pointsDistribution = require("../utils/prePoints");
-const handleFiles = require("../utils/fileHandler");
+const { handleFiles } = require("../utils/fileHandler");
 
 // Q1: SCIE
 exports.calculateSciePaper = async (req, res) => {

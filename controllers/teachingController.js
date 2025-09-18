@@ -3,7 +3,7 @@ const Subject = require('../models/Subject');
 const pointsDistribution = require("../utils/prePoints");
 const fs = require("fs");
 const path = require("path");
-const handleFiles = require("../utils/fileHandler");
+const { handleFiles } = require("../utils/fileHandler");
 
 
 exports.getPointsByDesignation = (req, res) => {
