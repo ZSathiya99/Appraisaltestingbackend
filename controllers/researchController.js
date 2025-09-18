@@ -73,6 +73,14 @@ exports.calculateSciePaper = async (req, res) => {
     } catch (err) {
       return res.status(400).json({ message: "Invalid JSON in value field" });
     }
+    let parsedValue;
+    try {
+      parsedValue = Array.isArray(req.body.scie)
+        ? req.body.scie
+        : JSON.parse(req.body.scie);   
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid JSON in value field" });
+    }
 
     record.sciePaper = {
       value: parsedValue ?? null,
@@ -158,7 +166,20 @@ exports.calculateScopusPaper = async (req, res) => {
     const maxmark = pointsDistribution[designation]?.research?.scopus ?? 0;
     const finalMarks = Math.min(totalMarks, maxmark);
 
+<<<<<<< HEAD
    
+=======
+    let record = await teaching.findOne({ facultyName, employee });
+    if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message: "Faculty record not found. HOD/Dean can only edit existing records."
+        });
+      }
+      record = new teaching({ facultyName, designation, employee });
+    }
+    
+>>>>>>> d9a592566d0de7d0e51d1e3fc9cfc69f777dd9ba
 
     record.scopusPaper = {
       value: scopus ?? null,
@@ -360,9 +381,12 @@ exports.calculateScopusBook = async (req, res) => {
 };
 
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> d9a592566d0de7d0e51d1e3fc9cfc69f777dd9ba
 // Q5: IndexedBook
 exports.calculateIndexedBook = async (req, res) => {
   try {

@@ -82,22 +82,34 @@ const TechingSchema = new mongoose.Schema({
   },
   
   sciePaper :{
+<<<<<<< HEAD
     value: { type: Object },   
+=======
+    value: { type: Object },    
+>>>>>>> d9a592566d0de7d0e51d1e3fc9cfc69f777dd9ba
     marks: Number,
     sciePaperFiles: [String],
   },
   scopusPaper :{
+<<<<<<< HEAD
     value: { type: Object },   
+=======
+    value: { type: Object },    
+>>>>>>> d9a592566d0de7d0e51d1e3fc9cfc69f777dd9ba
     marks: Number,
     scopusPaperFiles: [String],
   },
   aictePaper :{
+<<<<<<< HEAD
     value: { type: Object },   
+=======
+    value: { type: Object },    
+>>>>>>> d9a592566d0de7d0e51d1e3fc9cfc69f777dd9ba
     marks: Number,
     aictePaperFiles: [String],
   },
   scopusBook :{
-    value: String,   
+    value: String,    
     marks: Number,
     scopusBookFiles: [String],
   },
