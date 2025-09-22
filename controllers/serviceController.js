@@ -53,6 +53,8 @@ exports.calculateActivitiesMarks = async (req, res) => {
       }
     });
 
+    // rolesArray = rolesArray.filter(r => r && r.toLowerCase() !== "none");
+    
     const maxPass = pointsDistribution[designation]?.service?.activities ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
 
@@ -146,8 +148,8 @@ exports.calculateBrandingMarks = async (req, res) => {
     let normalizedValue = null;
     if (typeof branding === "string") {
       const lower = branding.toLowerCase();
-      if (lower === "yes") normalizedValue = "yes";
-      else if (lower === "no") normalizedValue = "no";
+      if (lower === "yes") normalizedValue = "Yes";
+      else if (lower === "no") normalizedValue = "No";
     }
 
     const marks = normalizedValue === "yes" ? 5 : 0;
@@ -234,12 +236,12 @@ exports.calculateMembershipMarks = async (req, res) => {
     let normalizedValue = null;
     if (typeof membership === "string") {
       const lower = membership.toLowerCase();
-      if (lower === "yes") normalizedValue = "yes";
-      else if (lower === "no") normalizedValue = "no";
+      if (lower === "yes") normalizedValue = "Yes";
+      else if (lower === "no") normalizedValue = "No";
     }
 
     // Marks calculation
-    const marks = normalizedValue === "yes" ? 4 : 1;
+    const marks = normalizedValue === "Yes" ? 4 : 1;
     const maxmark = pointsDistribution[designation]?.service?.Membership ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
