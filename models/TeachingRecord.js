@@ -154,7 +154,7 @@ const TechingSchema = new mongoose.Schema({
   },
 
   activities:{
-    value: String,   
+    value: { type: mongoose.Schema.Types.Mixed, default: [] },   
     marks: Number,
     activitiesFiles: [String],
   },
@@ -172,7 +172,7 @@ const TechingSchema = new mongoose.Schema({
   },
   
   external:{
-    value: String,   
+    value: { type: String },   
     marks: Number,
     externalFiles: [String],
   },
@@ -195,8 +195,8 @@ const TechingSchema = new mongoose.Schema({
   
   approvalStatus: {
     type: String,
-    enum: ['Pending', 'Approved', 'Rejected'],
-    default: 'Pending'
+    enum: ["Pending", "Pending with Dean", "Approved", "Rejected"],
+    default: "Pending"
   },
   
   createdAt: {

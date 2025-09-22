@@ -3,7 +3,7 @@ const Subject = require('../models/Subject');
 const pointsDistribution = require("../utils/prePoints");
 const fs = require("fs");
 const path = require("path");
-const { handleFiles } = require("../utils/fileHandler");
+const handleFiles = require("../utils/fileHandler");
 
 
 exports.getPointsByDesignation = (req, res) => {
@@ -90,7 +90,7 @@ exports.calculateTeachingMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = handleFiles(record, "teachingAssignment", "teachingFiles",paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "teachingAssignment", "teachingFiles",paramDesignation,null, req.files);
     
     record.teachingAssignment = {
       subjects: parsedSubjects,
@@ -276,7 +276,7 @@ exports.calculateInnovativeApporachMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = handleFiles(record, "innovativeApproach", "innovativeApproachFiles", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "innovativeApproach", "innovativeApproachFiles", paramDesignation,null, req.files);
 
     record.innovativeApproach = {
       value: InnovativeApproach?? null,
@@ -339,7 +339,7 @@ exports.calculateGuestlectureMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
     
-    let currentFiles = handleFiles(record, "visitingFaculty", "visitingFacultyFiles", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "visitingFaculty", "visitingFacultyFiles", paramDesignation,null, req.files);
 
     record.visitingFaculty = {
       value: GuestLecture?? null,
@@ -404,7 +404,7 @@ exports.calculateFdpfundingMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = handleFiles(record, "fdpFunding", "fdpFundingFiles", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "fdpFunding", "fdpFundingFiles", paramDesignation,null, req.files);
 
     record.fdpFunding = {
       value: FdpFunding?? null,
@@ -473,7 +473,7 @@ exports.calculateHighlevelCompetionMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = handleFiles(record, "innovationProject", "innovationProjectFiles", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "innovationProject", "innovationProjectFiles", paramDesignation,null, req.files);
 
     record.innovationProject = {
       value: highlevelCompetition?? null,
@@ -556,7 +556,7 @@ exports.calculateFdpProgramMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     } 
 
-    let currentFiles = handleFiles(record, "fdp", "fdpFiles", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "fdp", "fdpFiles", paramDesignation,null, req.files);
 
     record.fdp = {
       value: JSON.stringify(semesterDataRaw)?? null,
@@ -619,7 +619,7 @@ exports.calculateIndustryInvolvementMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = handleFiles(record, "industry","industryFiles", paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "industry","industryFiles", paramDesignation,null, req.files);
 
     record.industry = {
       value: industryInvolvement?? null,
@@ -684,7 +684,7 @@ exports.calculateTutorWardMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = handleFiles(record, "tutorMeeting", "tutorMeetingFiles",paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "tutorMeeting", "tutorMeetingFiles",paramDesignation,null, req.files);
 
     record.tutorMeeting = {
       value: {
@@ -780,7 +780,7 @@ exports.calculateRoleMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = handleFiles(record, "academicPosition", "academicPositionFiles",paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "academicPosition", "academicPositionFiles",paramDesignation,null, req.files);
       
     record.academicPosition = {
       value: {
@@ -1009,7 +1009,7 @@ exports.calculateStudentProjectMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
-    let currentFiles = handleFiles(record, "studentProjectsAndPublications", "studentProjectFiles",paramDesignation, bodyFiles, req.files);
+    let currentFiles = handleFiles(record, "studentProjectsAndPublications", "studentProjectFiles",paramDesignation,null, req.files);
 
     record.studentProjectsAndPublications = {
       value: { projectCount: studentCount, publications: publicationCount }?? null,

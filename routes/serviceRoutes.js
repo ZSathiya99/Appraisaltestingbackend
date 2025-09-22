@@ -13,11 +13,11 @@ const {
 
 } = require("../controllers/serviceController");
 
-router.post("/activities/:designation", upload.any(),authenticate, calculateActivitiesMarks);
-router.post("/branding/:designation", upload.any(), authenticate,calculateBrandingMarks);
-router.post("/membership/:designation", upload.any(),authenticate, calculateMembershipMarks);
-router.post("/cocurricular/:designation", upload.any(),authenticate, calculateCocurricularMarks);
-router.post("/assistance/:designation", upload.any(),authenticate, calculateAssistanceMarks);
-router.post("/training/:designation", upload.any(),authenticate, calculateTrainingMarks);
+router.post("/activities/:designation", upload.array("activitiesFiles", 1),authenticate, calculateActivitiesMarks);
+router.post("/branding/:designation", upload.array("brandingFiles", 1), authenticate,calculateBrandingMarks);
+router.post("/membership/:designation", upload.array("membershipFiles", 1),authenticate, calculateMembershipMarks);
+router.post("/cocurricular/:designation", upload.array("externalFiles", 1),authenticate, calculateCocurricularMarks);
+router.post("/assistance/:designation", upload.array("administrationFiles", 1),authenticate, calculateAssistanceMarks);
+router.post("/training/:designation", upload.array("trainingFiles", 1),authenticate, calculateTrainingMarks);
 
 module.exports = router;

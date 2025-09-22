@@ -1,11 +1,13 @@
 const teaching = require('../models/TeachingRecord');
 const pointsDistribution = require("../utils/prePoints");
 const cleanBody = require("../utils/cleanBody");
+const handleFiles = require("../utils/fileHandler");
+
 
 // Q1: Accreditation Activities
 exports.calculateActivitiesMarks = async (req, res) => {
   try {
-    const { facultyName, roles, employeeId, designation: bodyDesignation } = req.body;
+    const { facultyName, roles, employeeId, designation: bodyDesignation, activitiesFiles: bodyFiles } = req.body;
     const { designation: paramDesignation } = req.params;
 
     let designation;
@@ -26,20 +28,17 @@ exports.calculateActivitiesMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    let rolesArray = roles;
-    if (typeof roles === "string") {
+    let rolesArray = [];
+    if (Array.isArray(roles)) rolesArray = roles;
+    else if (typeof roles === "string") {
       try {
         rolesArray = JSON.parse(roles);
       } catch {
-        rolesArray = roles.includes(",")
-          ? roles.split(",").map(r => r.trim())
-          : [roles];
+        rolesArray = roles.includes(",") ? roles.split(",").map(r => r.trim()) : [roles];
       }
     }
-    if (!Array.isArray(rolesArray)) rolesArray = [];
 
-    const accFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(accFiles)];
+
 
     const pointsMap = {
       InstitutionalCoordinator: 5,
@@ -67,10 +66,21 @@ exports.calculateActivitiesMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
+    let currentFiles = handleFiles(
+      record,
+      "activities",
+      "activitiesFiles",
+      paramDesignation,
+      null,
+      req.files
+    );
+
     record.activities = {
-      value: rolesArray,
+       value: {
+        roles: rolesArray         
+      },
       marks: finalMarks,
-      activitiesFiles: uniqueFiles,
+      activitiesFiles: currentFiles,
     };
 
     await record.save();
@@ -79,7 +89,7 @@ exports.calculateActivitiesMarks = async (req, res) => {
       section: "Accreditation / Activities",
       roles: rolesArray,
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
       designation
     });
@@ -95,7 +105,7 @@ exports.calculateActivitiesMarks = async (req, res) => {
 // Q2: Branding
 exports.calculateBrandingMarks = async (req, res) => {
   try {
-    const { facultyName, branding, employeeId, designation: bodyDesignation } = req.body;
+    const { facultyName, branding, employeeId, designation: bodyDesignation, brandingFiles: bodyFiles } = req.body;
     const { designation: paramDesignation } = req.params;
 
     let designation;
@@ -116,14 +126,6 @@ exports.calculateBrandingMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const BrandingFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(BrandingFiles)];
-
-    const isYes = branding?.toLowerCase() === "yes";
-    const marks = isYes ? 5 : 0;
-    const maxmark = pointsDistribution[designation]?.service?.Branding ?? 0;
-    const finalMarks = Math.min(marks, maxmark);
-
     let record = await teaching.findOne({ facultyName, employee });
     if (!record) {
       if (paramDesignation === "HOD" || paramDesignation === "Dean") {
@@ -133,11 +135,29 @@ exports.calculateBrandingMarks = async (req, res) => {
       }
       record = new teaching({ facultyName, designation, employee });
     }
+    let currentFiles = handleFiles(
+      record,
+      "branding",
+      "brandingFiles",
+      paramDesignation,
+      null,
+      req.files
+    );
+    let normalizedValue = null;
+    if (typeof branding === "string") {
+      const lower = branding.toLowerCase();
+      if (lower === "yes") normalizedValue = "yes";
+      else if (lower === "no") normalizedValue = "no";
+    }
+
+    const marks = normalizedValue === "yes" ? 5 : 0;
+    const maxmark = pointsDistribution[designation]?.service?.Branding ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
 
     record.branding = {
-      value: branding,
+      value: normalizedValue,
       marks: finalMarks,
-      brandingFiles: uniqueFiles,
+      brandingFiles: currentFiles,
     };
 
     await record.save();
@@ -145,7 +165,7 @@ exports.calculateBrandingMarks = async (req, res) => {
     return res.status(200).json({
       section: "Branding",
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
       designation
     });
@@ -159,14 +179,22 @@ exports.calculateBrandingMarks = async (req, res) => {
 // Q3: Memebership
 exports.calculateMembershipMarks = async (req, res) => {
   try {
-    const { facultyName, membership, employeeId, designation: bodyDesignation } = req.body;
+    const {
+      facultyName,
+      membership,
+      employeeId,
+      designation: bodyDesignation,
+      membershipFiles: bodyFiles,
+    } = req.body;
     const { designation: paramDesignation } = req.params;
 
     let designation;
     if (paramDesignation === "HOD" || paramDesignation === "Dean") {
       designation = bodyDesignation;
       if (!employeeId) {
-        return res.status(400).json({ message: "employeeId is required for HOD/Dean" });
+        return res
+          .status(400)
+          .json({ message: "employeeId is required for HOD/Dean" });
       }
     } else {
       designation = paramDesignation;
@@ -176,32 +204,49 @@ exports.calculateMembershipMarks = async (req, res) => {
       return res.status(400).json({ message: "Designation missing" });
     }
 
-    let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
-      ? employeeId
-      : req.userId;
-
-    const MembershipFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(MembershipFiles)];
-
-    const isYes = membership?.toLowerCase() === "yes";
-    const marks = isYes ? 4 : 1;
-    const maxmark = pointsDistribution[designation]?.service?.Membership ?? 0;
-    const finalMarks = Math.min(marks, maxmark);
+    let employee =
+      paramDesignation === "HOD" || paramDesignation === "Dean"
+        ? employeeId
+        : req.userId;
 
     let record = await teaching.findOne({ facultyName, employee });
     if (!record) {
       if (paramDesignation === "HOD" || paramDesignation === "Dean") {
         return res.status(404).json({
-          message: "Faculty record not found. HOD/Dean can only edit existing records."
+          message:
+            "Faculty record not found. HOD/Dean can only edit existing records.",
         });
       }
       record = new teaching({ facultyName, designation, employee });
     }
 
+    // 🔹 File handling standardized
+    let currentFiles = handleFiles(
+      record,
+      "membership",
+      "membershipFiles",
+      paramDesignation,
+      null,
+      req.files
+    );
+
+    // 🔹 Normalize membership value
+    let normalizedValue = null;
+    if (typeof membership === "string") {
+      const lower = membership.toLowerCase();
+      if (lower === "yes") normalizedValue = "yes";
+      else if (lower === "no") normalizedValue = "no";
+    }
+
+    // Marks calculation
+    const marks = normalizedValue === "yes" ? 4 : 1;
+    const maxmark = pointsDistribution[designation]?.service?.Membership ?? 0;
+    const finalMarks = Math.min(marks, maxmark);
+
     record.membership = {
-      value: membership,
+      value: normalizedValue,
       marks: finalMarks,
-      membershipFiles: uniqueFiles,
+      membershipFiles: currentFiles,
     };
 
     await record.save();
@@ -209,11 +254,10 @@ exports.calculateMembershipMarks = async (req, res) => {
     return res.status(200).json({
       section: "Membership",
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
-      designation
+      designation,
     });
-
   } catch (err) {
     console.error("Error calculating membership marks:", err);
     return res.status(500).json({ error: err.message });
@@ -221,17 +265,26 @@ exports.calculateMembershipMarks = async (req, res) => {
 };
 
 
+
 // Q4: Co-curricular
 exports.calculateCocurricularMarks = async (req, res) => {
   try {
-    const { facultyName, cocurricular, employeeId, designation: bodyDesignation } = req.body;
+    const {
+      facultyName,
+      cocurricular,
+      employeeId,
+      designation: bodyDesignation,
+      externalFiles: bodyFiles,
+    } = req.body;
     const { designation: paramDesignation } = req.params;
 
     let designation;
     if (paramDesignation === "HOD" || paramDesignation === "Dean") {
       designation = bodyDesignation;
       if (!employeeId) {
-        return res.status(400).json({ message: "employeeId is required for HOD/Dean" });
+        return res
+          .status(400)
+          .json({ message: "employeeId is required for HOD/Dean" });
       }
     } else {
       designation = paramDesignation;
@@ -241,13 +294,34 @@ exports.calculateCocurricularMarks = async (req, res) => {
       return res.status(400).json({ message: "Designation missing" });
     }
 
-    let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
-      ? employeeId
-      : req.userId;
+    let employee =
+      paramDesignation === "HOD" || paramDesignation === "Dean"
+        ? employeeId
+        : req.userId;
+
+    let record = await teaching.findOne({ facultyName, employee });
+    if (!record) {
+      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
+        return res.status(404).json({
+          message:
+            "Faculty record not found. HOD/Dean can only edit existing records.",
+        });
+      }
+      record = new teaching({ facultyName, designation, employee });
+    }
+
+    let currentFiles = handleFiles(
+      record,
+      "external",
+      "externalFiles",
+      paramDesignation,
+      null,
+      req.files
+    );
 
     let cocurricularData = cocurricular;
     if (!cocurricularData && req.body["cocurricular "]) {
-      cocurricularData = req.body["cocurricular "];
+      cocurricularData = req.body["cocurricular "]; 
     }
     if (typeof cocurricularData === "string") {
       try {
@@ -260,9 +334,6 @@ exports.calculateCocurricularMarks = async (req, res) => {
     const { role, count } = cocurricularData || {};
     const projectCount = Number(count) || 0;
 
-    const FundFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(FundFiles)];
-
     let marksPerProject = 0;
     if (role === "ResourcePerson") marksPerProject = 2;
     else if (role === "Events") marksPerProject = 1;
@@ -271,20 +342,10 @@ exports.calculateCocurricularMarks = async (req, res) => {
     const maxPass = pointsDistribution[designation]?.service?.External ?? 0;
     const finalMarks = Math.min(totalMarks, maxPass);
 
-    let record = await teaching.findOne({ facultyName, employee });
-    if (!record) {
-      if (paramDesignation === "HOD" || paramDesignation === "Dean") {
-        return res.status(404).json({
-          message: "Faculty record not found. HOD/Dean can only edit existing records."
-        });
-      }
-      record = new teaching({ facultyName, designation, employee });
-    }
-
     record.external = {
-      value: "Co-curricular",
+      value: JSON.stringify(cocurricularData),
       marks: finalMarks,
-      externalFiles: uniqueFiles
+      externalFiles: currentFiles,
     };
 
     await record.save();
@@ -292,11 +353,10 @@ exports.calculateCocurricularMarks = async (req, res) => {
     return res.status(200).json({
       section: "Co-curricular",
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
-      designation
+      designation,
     });
-
   } catch (err) {
     console.error("Error calculating co-curricular marks:", err);
     return res.status(500).json({ error: err.message });
@@ -304,10 +364,11 @@ exports.calculateCocurricularMarks = async (req, res) => {
 };
 
 
+
 //Q5: Assistance
 exports.calculateAssistanceMarks = async (req, res) => {
   try {
-    const { facultyName, assistance, employeeId, designation: bodyDesignation } = cleanBody(req.body);
+    const { facultyName, assistance, employeeId, designation: bodyDesignation, administrationFiles: bodyFiles } = cleanBody(req.body);
     const { designation: paramDesignation } = req.params;
 
     let designation;
@@ -328,11 +389,10 @@ exports.calculateAssistanceMarks = async (req, res) => {
       ? employeeId
       : req.userId;
 
-    const AssistanceFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(AssistanceFiles)];
 
-    const isYes = assistance?.toLowerCase() === "yes";
+    const isYes = typeof assistance === "string" && assistance.trim().toLowerCase() === "yes";
     const marks = isYes ? 5 : 0;
+
     const maxmark = pointsDistribution[designation]?.service?.Administration ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
@@ -346,10 +406,20 @@ exports.calculateAssistanceMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
+    let currentFiles = handleFiles(
+      record,
+      "administration",
+      "administrationFiles",
+      paramDesignation,
+      null,
+      req.files
+    );
+
+
     record.administration = {
-      value: "Assistance",
+      value: assistance ?? "Not Provided",
       marks: finalMarks,
-      administrationFiles: uniqueFiles
+      administrationFiles: currentFiles
     };
 
     await record.save();
@@ -357,7 +427,7 @@ exports.calculateAssistanceMarks = async (req, res) => {
     return res.status(200).json({
       section: "Administration/Assistance",
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
       designation
     });
@@ -370,10 +440,11 @@ exports.calculateAssistanceMarks = async (req, res) => {
 
 
 
+
 //Q6: Training
 exports.calculateTrainingMarks = async (req, res) => {
   try {
-    const { facultyName, training, employeeId, designation: bodyDesignation } = cleanBody(req.body);
+    const { facultyName, training, employeeId, designation: bodyDesignation, trainingFiles: bodyFiles } = cleanBody(req.body);
     const { designation: paramDesignation } = req.params;
 
     let designation;
@@ -393,9 +464,6 @@ exports.calculateTrainingMarks = async (req, res) => {
     let employee = (paramDesignation === "HOD" || paramDesignation === "Dean")
       ? employeeId
       : req.userId;
-
-    const trainingFiles = req.files?.map((file) => file.path) || [];
-    const uniqueFiles = [...new Set(trainingFiles)];
 
     let marks = 0;
     if (training === "3 days & above") marks = 5;
@@ -415,10 +483,19 @@ exports.calculateTrainingMarks = async (req, res) => {
       record = new teaching({ facultyName, designation, employee });
     }
 
+    let currentFiles = handleFiles(
+      record,
+      "training",          
+      "trainingFiles",     
+      paramDesignation,
+      null,
+      req.files
+    );
+
     record.training = {
       value: training,
       marks: finalMarks,
-      trainingFiles: uniqueFiles
+      trainingFiles: currentFiles
     };
 
     await record.save();
@@ -426,7 +503,7 @@ exports.calculateTrainingMarks = async (req, res) => {
     return res.status(200).json({
       section: "Training / Workshop",
       finalMarks,
-      files: uniqueFiles,
+      files: currentFiles,
       employee,
       designation
     });
@@ -436,4 +513,3 @@ exports.calculateTrainingMarks = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
-

@@ -1,25 +1,18 @@
-function handleFiles(record, section, files, paramDesignation, bodyFiles, reqFiles) {
-  let currentFiles = record[section]?.[files] || [];
+function handleFiles(record, field, fileField, designation, bodyFiles, uploadedFiles) {
+  let currentFiles = record?.[field]?.[fileField] || [];
 
-  if (paramDesignation === "HOD" || paramDesignation === "Dean") {
-    return currentFiles;
-  } else {
-    currentFiles = [];
+  currentFiles = currentFiles.filter(f => typeof f === "string" && f.startsWith("uploads/"));
 
-    if (bodyFiles) {
-      const bodyFilesArray = Array.isArray(bodyFiles) ? bodyFiles : [bodyFiles];
-      currentFiles = [...bodyFilesArray];
-    }
-
-    if (reqFiles?.length) {
-      reqFiles.forEach(file => {
-        const normalizedPath = file.path.replace(/\\/g, "/");
-        currentFiles.push(normalizedPath);
-      });
-    }
-
-    return [...new Set(currentFiles)];
+  if (uploadedFiles && uploadedFiles.length > 0) {
+    const newFiles = uploadedFiles.map(f => f.path);
+    currentFiles = [...currentFiles, ...newFiles];
   }
+
+  if (designation === "HOD" || designation === "Dean") {
+    currentFiles = uploadedFiles ? uploadedFiles.map(f => f.path) : currentFiles;
+  }
+
+  return currentFiles;
 }
 
-module.exports = { handleFiles };
+module.exports = handleFiles;
