@@ -71,8 +71,8 @@ router.post(
 );
 
 router.post(
-  "/project/:designation",
-   upload.array("uploadedFiles", 1),authenticate,
+  "/publications/:designation",
+   upload.array("studentProjectFiles", 1),authenticate,
   calculateStudentProjectMarks
 );
 
@@ -86,6 +86,7 @@ router.delete(
   "/deleteImage",
   deleteImage
 );
+
 
 
 router.post('/report_pdf', generateTeachingReportPDF);

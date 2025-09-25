@@ -117,10 +117,11 @@ exports.markFormSubmitted = async (req, res) => {
       return res.status(404).json({ message: "Employee not found" });
     }
 
-    await TeachingRecord.create({
-      employee: employeeId,
-      approvalStatus: "Pending with HOD",
-    });
+    await TeachingRecord.findOneAndUpdate(
+      { employee: employeeId }, 
+      { approvalStatus: "Pending with HOD" }, 
+      { new: true } 
+    );
 
     res.json({
       message: "Form marked as submitted successfully",
