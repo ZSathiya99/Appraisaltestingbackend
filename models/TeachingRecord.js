@@ -195,7 +195,7 @@ const TechingSchema = new mongoose.Schema({
   
   approvalStatus: {
     type: String,
-    enum: ["Pending", "Pending with Dean", "Approved", "Rejected"],
+    enum: ["Pending", "Pending with HOD", "Pending with Dean", "Approved", "Rejected"],
     default: "Pending"
   },
   

@@ -1113,7 +1113,9 @@ exports.calculateFundedProjectMarks = async (req, res) => {
   try {
     const {
       facultyName,
-      field_name,
+      PI,
+      CoPI,
+      None,
       employeeId,
       designation: bodyDesignation,
       FundFiles: bodyFiles,
@@ -1161,28 +1163,19 @@ exports.calculateFundedProjectMarks = async (req, res) => {
       req.files
     );
 
-    let fieldData = field_name;
-    if (typeof fieldData === "string") {
-      try {
-        fieldData = JSON.parse(fieldData);
-      } catch (err) {
-        console.error("Invalid JSON in field_name:", fieldData);
-        fieldData = {};
-      }
-    }
+    const piCount = Number(PI) || 0;
+    const copiCount = Number(CoPI) || 0;
+
     let selectedRoles = [];
     let counts = {};
-
-    for (const [role, count] of Object.entries(fieldData)) {
-      const numCount = Number(count) || 0;
-      if (numCount > 0) {
-        selectedRoles.push(role); // e.g. "PI", "CoPI"
-        counts[role] = numCount; // e.g. { PI: 2, CoPI: 1 }
-      }
+    if (piCount > 0) {
+      selectedRoles.push("PI");
+      counts["PI"] = piCount;
     }
-
-    const piCount = Number(fieldData.PI) || 0;
-    const copiCount = Number(fieldData.CoPI) || 0;
+    if (copiCount > 0) {
+      selectedRoles.push("CoPI");
+      counts["CoPI"] = copiCount;
+    }
 
     const piMarks = 5;
     const copiMarks = 2;
@@ -1218,6 +1211,7 @@ exports.calculateFundedProjectMarks = async (req, res) => {
       .json({ message: "Internal Server Error", error: error.message });
   }
 };
+
 
 // Q14: Research Scholars
 exports.calculateResearchScholarMarks = async (req, res) => {

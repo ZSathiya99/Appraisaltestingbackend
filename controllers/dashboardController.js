@@ -257,23 +257,21 @@ exports.getEmployeeForms = async (req, res) => {
     let employeeFilter = {};
 
     if (designation === "HOD") {
-      // HOD sees employees in their department
-      employeeFilter = { department: loggedInEmployee.department };
+      employeeFilter = { department: loggedInEmployee.department,
+        designation: { $nin: ["HOD", "Dean"]}
+       };
     } else if (designation === "Dean") {
-      // Dean sees all employees
-      employeeFilter = {};
+      employeeFilter = { designation: { $nin: ["HOD", "Dean"] } };
     } else {
       return res.status(403).json({
         message: "Access denied. Only HOD or Dean can view this data."
       });
     }
 
-    // ✅ Get all employees under HOD/Dean
     const employees = await Employee.find(employeeFilter).select(
       "fullName email department designation formStatus status"
     );
 
-    // ✅ Get all forms for those employees
     const employeeIds = employees.map((emp) => emp._id);
     const forms = await TeachingRecord.find({ employee: { $in: employeeIds } })
       .populate(
@@ -282,7 +280,6 @@ exports.getEmployeeForms = async (req, res) => {
       )
       .sort({ createdAt: -1 });
 
-    // ✅ Combine employee + form data (flattened)
     const response = employees.map((emp) => {
       const form = forms.find(
         (f) => f.employee && f.employee._id.toString() === emp._id.toString()
@@ -297,7 +294,6 @@ exports.getEmployeeForms = async (req, res) => {
         formStatus: emp.formStatus,
         status: emp.status,
 
-        // 🔽 Form details directly here
         formId: form ? form._id : "",
         approvalStatus: form ? form.approvalStatus : null,
         isSubmitted: form ? form.isSubmitted : false,

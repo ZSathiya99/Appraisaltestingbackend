@@ -152,7 +152,7 @@ exports.calculateBrandingMarks = async (req, res) => {
       else if (lower === "no") normalizedValue = "No";
     }
 
-    const marks = normalizedValue === "yes" ? 5 : 0;
+    const marks = normalizedValue === "Yes" ? 5 : 0;
     const maxmark = pointsDistribution[designation]?.service?.Branding ?? 0;
     const finalMarks = Math.min(marks, maxmark);
 
@@ -279,7 +279,6 @@ exports.calculateCocurricularMarks = async (req, res) => {
       externalFiles: bodyFiles,
     } = req.body;
     const { designation: paramDesignation } = req.params;
-
     let designation;
     if (paramDesignation === "HOD" || paramDesignation === "Dean") {
       designation = bodyDesignation;
