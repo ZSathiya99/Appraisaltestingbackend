@@ -1,7 +1,7 @@
 
 const express = require("express");
 const router = express.Router();
-const { getEmployeeStats, getEmployees, markFormSubmitted, getFilteredTeachingRecords , getFile, getEmployeeForms} = require("../controllers/dashboardController");
+const { getEmployeeStats, getEmployees, markFormSubmitted, getFilteredTeachingRecords , getFile, getEmployeeForms,approveByDean,approveByHOD} = require("../controllers/dashboardController");
 const authenticate = require("../middleware/authenticate");
 
 router.get("/total_employees",authenticate, getEmployeeStats);
