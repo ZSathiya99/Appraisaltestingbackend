@@ -103,10 +103,12 @@ exports.getEmployees = async (req, res) => {
   }
 };
 
+// mark form submitted (Employee action)
 exports.markFormSubmitted = async (req, res) => {
   try {
     const { employeeId } = req.params;
 
+    // ✅ Update Employee form status
     const updatedEmployee = await Employee.findByIdAndUpdate(
       employeeId,
       { formStatus: "Submitted" },
@@ -117,10 +119,10 @@ exports.markFormSubmitted = async (req, res) => {
       return res.status(404).json({ message: "Employee not found" });
     }
 
-    await TeachingRecord.findOneAndUpdate(
-      { employee: employeeId }, 
-      { approvalStatus: "Pending with HOD" }, 
-      { new: true } 
+    // ✅ Update all pending TeachingRecords for this employee
+    await TeachingRecord.updateMany(
+      { employee: employeeId, approvalStatus: { $in: ["Pending", null] } },
+      { approvalStatus: "Pending with HOD" }
     );
 
     res.json({
@@ -132,6 +134,57 @@ exports.markFormSubmitted = async (req, res) => {
     res.status(500).json({ message: "Error marking form as submitted" });
   }
 };
+
+// HOD Approval
+exports.approveByHOD = async (req, res) => {
+  try {
+    const { recordId } = req.params;
+
+    const updatedRecord = await TeachingRecord.findByIdAndUpdate(
+      recordId,
+      { approvalStatus: "Pending with Dean" },
+      { new: true }
+    );
+
+    if (!updatedRecord) {
+      return res.status(404).json({ message: "Record not found" });
+    }
+
+    res.json({
+      message: "Form approved by HOD and sent to Dean",
+      record: updatedRecord,
+    });
+  } catch (err) {
+    console.error("Error approving record:", err);
+    res.status(500).json({ message: "Error approving record" });
+  }
+};
+
+// Dean Approval
+exports.approveByDean = async (req, res) => {
+  try {
+    const { recordId } = req.params;
+
+    const updatedRecord = await TeachingRecord.findByIdAndUpdate(
+      recordId,
+      { approvalStatus: "Approved" },
+      { new: true }
+    );
+
+    if (!updatedRecord) {
+      return res.status(404).json({ message: "Record not found" });
+    }
+
+    res.json({
+      message: "Form approved by Dean",
+      record: updatedRecord,
+    });
+  } catch (err) {
+    console.error("Error approving record:", err);
+    res.status(500).json({ message: "Error approving record" });
+  }
+};
+
 
 // get the form based on the login
 exports.getFilteredTeachingRecords = async (req, res) => {
@@ -172,7 +225,7 @@ exports.getFilteredTeachingRecords = async (req, res) => {
       .lean();
 
     const verified = records.filter((r) => r.approvalStatus === "Approved");
-    const notVerified = records.filter((r) => r.approvalStatus !== "Approved"); // or === "pending"
+    const notVerified = records.filter((r) => r.approvalStatus !== "Approved");
 
     res.status(200).json({
       verified,
@@ -191,7 +244,7 @@ exports.getFilteredTeachingRecords = async (req, res) => {
 
 exports.getFile = async (req, res) => {
   const filename = req.params.filename;
-  const uploadFolder = path.join(__dirname, "..", "uploads"); // assuming uploads folder is one level above controllers
+  const uploadFolder = path.join(__dirname, "..", "uploads"); 
   const filePath = path.join(uploadFolder, filename);
 
   res.sendFile(filePath, (err) => {

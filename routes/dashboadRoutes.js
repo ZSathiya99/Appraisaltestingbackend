@@ -10,6 +10,8 @@ router.put("/submit/:employeeId", markFormSubmitted);
 router.get("/getForms", authenticate, getFilteredTeachingRecords);
 router.get('/file/:filename', getFile);
 router.get("/tableData", authenticate, getEmployeeForms);
+router.put("/approvehod/:recordId",authenticate,approveByHOD);
+router.put("/approvedean/:recordId",authenticate,approveByDean);
 
 
 module.exports = router;
