@@ -150,6 +150,14 @@ exports.approveByHOD = async (req, res) => {
       return res.status(404).json({ message: "Record not found" });
     }
 
+    const pdfPath = await generatePdf(updatedRecord, updatedRecord.employee);
+    await sendMailWithPdf(
+      updatedRecord.employee.email,
+      "Your Teaching Record Updated by HOD",
+      "Please find attached the updated PDF of your teaching record (HOD Approval).",
+      pdfPath
+    );
+
     res.json({
       message: "Form approved by HOD and sent to Dean",
       record: updatedRecord,
@@ -174,6 +182,13 @@ exports.approveByDean = async (req, res) => {
     if (!updatedRecord) {
       return res.status(404).json({ message: "Record not found" });
     }
+    const pdfPath = await generatePdf(updatedRecord, updatedRecord.employee);
+    await sendMailWithPdf(
+      updatedRecord.employee.email,
+      "Your Teaching Record Approved by Dean",
+      "Congratulations! Your teaching record has been approved. Please find attached the final PDF.",
+      pdfPath
+    );
 
     res.json({
       message: "Form approved by Dean",
