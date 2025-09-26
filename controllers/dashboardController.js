@@ -314,8 +314,78 @@ exports.approveByDean = async (req, res) => {
   }
 };
 
+// exports.getEmployeeForms = async (req, res) => {
+//   try {
+//     // ✅ Find logged-in employee
+//     const loggedInEmployee = await Employee.findById(req.userId);
+//     if (!loggedInEmployee) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     const designation = loggedInEmployee.designation;
+//     let employeeFilter = {};
+
+//     if (designation === "HOD") {
+//       employeeFilter = { department: loggedInEmployee.department,
+//         designation: { $nin: ["HOD", "Dean"]}
+//        };
+//     } else if (designation === "Dean") {
+//       employeeFilter = { designation: { $nin: ["HOD", "Dean"] } };
+//     } else {
+//       return res.status(403).json({
+//         message: "Access denied. Only HOD or Dean can view this data."
+//       });
+//     }
+
+//     const employees = await Employee.find(employeeFilter).select(
+//       "fullName email department designation formStatus status"
+//     );
+
+//     const employeeIds = employees.map((emp) => emp._id);
+//     const forms = await TeachingRecord.find({ employee: { $in: employeeIds } })
+//       .populate(
+//         "employee",
+//         "fullName email department designation formStatus status"
+//       )
+//       .sort({ createdAt: -1 });
+
+//     const response = employees.map((emp) => {
+//       const form = forms.find(
+//         (f) => f.employee && f.employee._id.toString() === emp._id.toString()
+//       );
+
+//       return {
+//         id: emp._id,
+//         fullName: emp.fullName,
+//         email: emp.email,
+//         department: emp.department,
+//         designation: emp.designation,
+//         formStatus: emp.formStatus,
+//         status: emp.status,
+
+//         formId: form ? form._id : "",
+//         approvalStatus: form ? form.approvalStatus : null,
+//         isSubmitted: form ? form.isSubmitted : false,
+//         createdAt: form ? form.createdAt : null
+//       };
+//     });
+
+//     res.json(response);
+//   } catch (err) {
+//     console.error("Error fetching employee forms:", err);
+//     res.status(500).json({
+//       message: "Error fetching employee forms",
+//       error: err.message
+//     });
+//   }
+// };
+
 exports.getEmployeeForms = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
     // ✅ Find logged-in employee
     const loggedInEmployee = await Employee.findById(req.userId);
     if (!loggedInEmployee) {
@@ -326,22 +396,30 @@ exports.getEmployeeForms = async (req, res) => {
     let employeeFilter = {};
 
     if (designation === "HOD") {
-      employeeFilter = { department: loggedInEmployee.department,
-        designation: { $nin: ["HOD", "Dean"]}
-       };
+      employeeFilter = {
+        department: loggedInEmployee.department,
+        designation: { $nin: ["HOD", "Dean"] },
+      };
     } else if (designation === "Dean") {
       employeeFilter = { designation: { $nin: ["HOD", "Dean"] } };
     } else {
       return res.status(403).json({
-        message: "Access denied. Only HOD or Dean can view this data."
+        message: "Access denied. Only HOD or Dean can view this data.",
       });
     }
 
-    const employees = await Employee.find(employeeFilter).select(
-      "fullName email department designation formStatus status"
-    );
+    // ✅ Get total employees for pagination
+    const totalEmployees = await Employee.countDocuments(employeeFilter);
+
+    // ✅ Fetch employees with pagination
+    const employees = await Employee.find(employeeFilter)
+      .select("fullName email department designation formStatus status")
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
 
     const employeeIds = employees.map((emp) => emp._id);
+
     const forms = await TeachingRecord.find({ employee: { $in: employeeIds } })
       .populate(
         "employee",
@@ -366,16 +444,22 @@ exports.getEmployeeForms = async (req, res) => {
         formId: form ? form._id : "",
         approvalStatus: form ? form.approvalStatus : null,
         isSubmitted: form ? form.isSubmitted : false,
-        createdAt: form ? form.createdAt : null
+        createdAt: form ? form.createdAt : null,
       };
     });
 
-    res.json(response);
+    res.json({
+      totalEmployees,
+      currentPage: page,
+      totalPages: Math.ceil(totalEmployees / limit),
+      pageSize: employees.length,
+      employees: response,
+    });
   } catch (err) {
     console.error("Error fetching employee forms:", err);
     res.status(500).json({
       message: "Error fetching employee forms",
-      error: err.message
+      error: err.message,
     });
   }
 };

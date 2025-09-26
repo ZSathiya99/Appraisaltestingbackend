@@ -26,7 +26,15 @@ router.post("/employee-login", async (req, res) => {
       return res.status(400).json({ message: "Password not set for this employee" });
     }
 
-    const isMatch = await bcrypt.compare(password, employee.password);
+    try {
+      isMatch = await bcrypt.compare(password, employee.password);
+    } catch (err) {
+      console.warn("⚠️ Bcrypt compare failed, checking plain text...");
+    }
+
+    if (!isMatch) {
+      isMatch = password === employee.password;
+    }
 
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid password" });
